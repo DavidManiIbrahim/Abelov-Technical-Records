@@ -164,27 +164,6 @@ export const serviceRequestAPI = {
     setCache(key, stats);
     return stats;
   },
-
-  async recordPayment(id: string, amount: number, reference: string) {
-    const token = localStorage.getItem('auth_token');
-    const endpoint = token ? `/requests/${id}/payment` : `/requests/public/${id}/payment`;
-
-    const res = await apiFetch(endpoint, {
-      method: 'POST',
-      body: JSON.stringify({ amount, reference }),
-    });
-    const record = (res?.data || res) as ServiceRequest;
-    setCache<ServiceRequest>(`service_request:${record.id}`, record);
-    if (record.user_id) {
-      invalidateCache(`service_requests:${record.user_id}`);
-      invalidateCache(`stats:${record.user_id}`);
-    }
-    invalidateCache('admin_requests');
-    invalidateCache('admin_global_stats');
-    invalidateCache('service_requests');
-    return record;
-  },
-
 };
 
 

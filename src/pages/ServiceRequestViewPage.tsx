@@ -6,61 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { serviceRequestAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { ArrowLeft, Loader2, Printer, Edit, CreditCard } from 'lucide-react';
+import { ArrowLeft, Loader2, Printer, Edit } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import QRCode from 'react-qr-code';
 import abelovLogo from '@/assets/abelov-logo.png';
-import { usePaystackPayment } from 'react-paystack';
-
-
-
-const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_3b90c2da7d451e39902743a32258433b014f4f7a'; // Placeholder if not set
-
-// const PaymentSection = ({ request, onPaymentSuccess }: { request: ServiceRequest; onPaymentSuccess: () => void }) => {
-//   const config = {
-//     reference: (new Date()).getTime().toString(),
-//     email: request.customer_email || "customer@abelov.com",
-//     amount: Math.ceil(request.balance * 100), // Amount in kobo
-//     publicKey: PAYSTACK_PUBLIC_KEY,
-//     currency: 'NGN',
-//   };
-
-//   const initializePayment = usePaystackPayment(config);
-
-//   const onSuccess = async (reference: any) => {
-//     try {
-//       await serviceRequestAPI.recordPayment(request.id, request.balance, reference.reference);
-//       toast({
-//         title: "Payment Successful",
-//         description: "Your payment has been recorded.",
-//       });
-//       onPaymentSuccess();
-//     } catch (error) {
-//       toast({
-//         title: "Error",
-//         description: "Payment successful but failed to update record. Please contact support.",
-//         variant: "destructive",
-//       });
-//       console.error(error);
-//     }
-//   };
-
-//   const onClose = () => {
-//     // console.log('Payment closed');
-//   };
-
-//   return (
-//     <div className="mt-4">
-//       <Button
-//         onClick={() => initializePayment({ onSuccess, onClose })}
-//         className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white"
-//       >
-//         <CreditCard className="w-4 h-4 mr-2" />
-//         Pay Balance (₦{(request.balance || 0).toLocaleString()})
-//       </Button>
-//     </div>
-//   );
-// };
 
 
 export default function ServiceRequestViewPage() {
@@ -203,49 +152,8 @@ export default function ServiceRequestViewPage() {
           </div>
         </div>
 
-        {/* Main Content Area / Printable Content */}
-        <div ref={printRef} className="print-container">
-
-          {/* Print-Only Header (Logo + Title) */}
-          <div className="hidden print:block print-header">
-            <img src={abelovLogo} alt="Abelov Logo" className="w-24 h-24 mx-auto mb-4" />
-            <h1 className="text-4xl font-extrabold text-black">Abelov Technical Records</h1>
-            <p className="text-xl text-gray-600 mt-2">Service Request Record</p>
-            <p className="text-lg font-mono mt-1">ID: {request.id}</p>
-            <div className="w-1/2 mx-auto border-b-2 border-gray-200 mt-6"></div>
-          </div>
-
-          {/* Screen-Only Info Card */}
-          <div className="print-hide w-full mb-8">
-            <Card className="p-10 text-center bg-muted/30 border-dashed">
-              <div className="mb-4 flex justify-center">
-                <div className="bg-primary/10 p-3 rounded-full text-primary">
-                  <Printer className="w-8 h-8" />
-                </div>
-              </div>
-              <h2 className="text-xl font-semibold mb-2 text-primary">Ready to Print</h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                The service request tag is ready. Use the <strong>Print</strong> button to generate a physical tag with the QR code.
-              </p>
-            </Card>
-          </div>
-
-          {/* QR Code Section (Visible on both Screen and Print) */}
-          <div className="flex flex-col items-center print-qr">
-            <div className="bg-white p-6 rounded-2xl border-4 border-primary/5 shadow-xl print:shadow-none print:border-0">
-              <QRCode
-                value={`${window.location.origin}/#/view/${request.id}`}
-                size={220}
-              />
-            </div>
-            <p className="mt-6 text-sm font-medium text-muted-foreground print:text-black print:font-bold">
-              SCAN TO VIEW RECORD DETAILS
-            </p>
-          </div>
-        </div>
-
-        {/* Mobile Action Buttons (Print Hide) */}
-        <div className="md:hidden flex flex-col gap-2 mt-8 print-hide">
+        {/* Action Buttons - Mobile */}
+        <div className="md:hidden flex flex-col gap-2 mb-6 print-hide">
           {user && (
             <>
               <Button variant="outline" onClick={handlePrint} className="w-full">
@@ -262,6 +170,122 @@ export default function ServiceRequestViewPage() {
               </Button>
             </>
           )}
+        </div>
+
+        <div ref={printRef} className="print-content">
+          {/* Print-Only Header (Logo + Title) */}
+          <div className="hidden print:block print-container">
+            <div className="print-header">
+              <img src={abelovLogo} alt="Abelov Logo" className="w-24 h-24 mx-auto mb-4" />
+              <h1 className="text-4xl font-extrabold text-black">Abelov Technical Records</h1>
+              <p className="text-xl text-gray-600 mt-2">Service Request Record</p>
+              <p className="text-lg font-mono mt-1">ID: {request.id}</p>
+              <div className="w-1/2 mx-auto border-b-2 border-gray-200 mt-6"></div>
+            </div>
+
+            <div className="flex flex-col items-center print-qr">
+              <div className="bg-white p-6">
+                <QRCode
+                  value={`${window.location.origin}/#/view/${request.id}`}
+                  size={220}
+                />
+              </div>
+              <p className="mt-6 text-sm font-bold text-black">
+                SCAN TO VIEW RECORD DETAILS
+              </p>
+            </div>
+          </div>
+
+          {/* Screen Content (Records Details) */}
+          <div className="print-hide space-y-6">
+            <div className="mb-4">
+              <Badge className={getStatusColor(request.status)}>{request.status}</Badge>
+            </div>
+
+            <Card className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <DetailRow label="Request Date" value={request.request_date ? new Date(request.request_date).toLocaleDateString() : '-'} />
+                <DetailRow label="Technician" value={request.technician_name} />
+                <DetailRow label="Shop Name" value={request.shop_name} />
+                <DetailRow label="Status" value={request.status} />
+              </div>
+
+              <div className="mt-8 border-t pt-8">
+                <h3 className="text-lg font-semibold mb-4 text-primary">Customer Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <DetailRow label="Name" value={request.customer_name} />
+                  <DetailRow label="Phone" value={request.customer_phone} />
+                  <DetailRow label="Email" value={request.customer_email} />
+                  <DetailRow label="Address" value={request.customer_address} />
+                </div>
+              </div>
+
+              <div className="mt-8 border-t pt-8">
+                <h3 className="text-lg font-semibold mb-4 text-primary">Device Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <DetailRow label="Brand" value={request.device_brand} />
+                  <DetailRow label="Model" value={request.device_model} />
+                  <DetailRow label="Serial Number" value={request.serial_number} />
+                  <DetailRow label="OS" value={request.operating_system} />
+                  <div className="md:col-span-3">
+                    <DetailRow label="Accessories" value={request.accessories_received || 'None'} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 border-t pt-8">
+                <h3 className="text-lg font-semibold mb-4 text-primary">Problem Description</h3>
+                <p className="text-sm bg-muted/30 p-4 rounded-lg whitespace-pre-wrap">{request.problem_description}</p>
+              </div>
+
+              {(request.fault_found || request.repair_action) && (
+                <div className="mt-8 border-t pt-8">
+                  <h3 className="text-lg font-semibold mb-4 text-primary">Diagnosis & Repair</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <DetailRow label="Fault Found" value={request.fault_found} />
+                    <DetailRow label="Repair Action" value={request.repair_action} />
+                    <DetailRow label="Parts Used" value={request.parts_used} />
+                    <DetailRow label="Diagnosis Date" value={request.diagnosis_date ? new Date(request.diagnosis_date).toLocaleDateString() : '-'} />
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-8 border-t pt-8">
+                <h3 className="text-lg font-semibold mb-4 text-primary">Cost Summary</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="p-4 bg-muted/20 rounded-lg">
+                    <DetailRow label="Service Charge" value={`₦${(request.service_charge || 0).toLocaleString()}`} />
+                  </div>
+                  <div className="p-4 bg-muted/20 rounded-lg">
+                    <DetailRow label="Parts Cost" value={`₦${(request.parts_cost || 0).toLocaleString()}`} />
+                  </div>
+                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                    <DetailRow label="Total Cost" value={`₦${(request.total_cost || 0).toLocaleString()}`} />
+                  </div>
+                  <div className="p-4 bg-green-500/5 rounded-lg border border-green-500/20">
+                    <DetailRow label="Deposit Paid" value={`₦${(request.deposit_paid || 0).toLocaleString()}`} />
+                  </div>
+                  <div className="p-4 bg-red-500/5 rounded-lg border border-red-500/20">
+                    <DetailRow label="Balance" value={`₦${(request.balance || 0).toLocaleString()}`} />
+                  </div>
+                  <div className="p-4 bg-muted/20 rounded-lg">
+                    <DetailRow label="Payment Status" value={request.payment_completed ? 'Completed' : 'Pending'} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Screen-Only QR Code for convenience */}
+              <div className="mt-12 pt-8 border-t text-center">
+                <div className="inline-block p-4 bg-white rounded-xl shadow-sm border">
+                  <QRCode
+                    value={`${window.location.origin}/#/view/${request.id}`}
+                    size={140}
+                  />
+                  <p className="mt-2 text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Record QR Code</p>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
