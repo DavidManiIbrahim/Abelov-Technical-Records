@@ -6,59 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { serviceRequestAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { ArrowLeft, Loader2, Printer, Edit, CreditCard } from 'lucide-react';
+import { ArrowLeft, Loader2, Printer, Edit } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import QRCode from 'react-qr-code';
 import abelovLogo from '@/assets/abelov-logo.png';
-import { usePaystackPayment } from 'react-paystack';
-
-const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_3b90c2da7d451e39902743a32258433b014f4f7a'; // Placeholder if not set
-
-const PaymentSection = ({ request, onPaymentSuccess }: { request: ServiceRequest; onPaymentSuccess: () => void }) => {
-  const config = {
-    reference: (new Date()).getTime().toString(),
-    email: request.customer_email || "customer@abelov.com",
-    amount: Math.ceil(request.balance * 100), // Amount in kobo
-    publicKey: PAYSTACK_PUBLIC_KEY,
-    currency: 'NGN',
-  };
-
-  const initializePayment = usePaystackPayment(config);
-
-  const onSuccess = async (reference: any) => {
-    try {
-      await serviceRequestAPI.recordPayment(request.id, request.balance, reference.reference);
-      toast({
-        title: "Payment Successful",
-        description: "Your payment has been recorded.",
-      });
-      onPaymentSuccess();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Payment successful but failed to update record. Please contact support.",
-        variant: "destructive",
-      });
-      console.error(error);
-    }
-  };
-
-  const onClose = () => {
-    // console.log('Payment closed');
-  };
-
-  return (
-    <div className="mt-4">
-      <Button
-        onClick={() => initializePayment({ onSuccess, onClose })}
-        className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white"
-      >
-        <CreditCard className="w-4 h-4 mr-2" />
-        Pay Balance (₦{(request.balance || 0).toLocaleString()})
-      </Button>
-    </div>
-  );
-};
 
 
 export default function ServiceRequestViewPage() {
@@ -142,130 +93,57 @@ export default function ServiceRequestViewPage() {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <style>{`
-  @media print {
-    /* 1. LAYOUT RESET - CRITICAL FIX */
-    /* Forces the content to flow naturally from the top, disabling screen centering */
-    html, body, #root, .min-h-screen {
-      width: 100% !important;
-      height: auto !important;
-       margin: 0 !important;
-    padding: 1cm !important;
-      min-height: 0 !important;
-      display: block !important;
-      position: static !important;
-      overflow: visible !important;
-    }
+        @media print {
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            background: white !important;
+          }
+          .print-hide { display: none !important; }
+          .print-show { display: block !important; }
+          .print-container {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 1.5cm !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+          }
+          .print-header {
+             margin-bottom: 2rem !important;
+          }
+          .print-qr {
+             margin-top: 2rem !important;
+          }
+        }
+      `}</style>
 
-    @page {
-      size: auto; /* Let the printer determine size, or use 8.5in 11in */
-      margin: 0mm; /* Remove browser header/footer text */
-    }
-
-    body {
-    display: none !important;
-      margin: 0 !important;
-      padding: 0.5cm !important; /* Add slight padding so text doesn't hit edge */
-      background: white;
-    }
-
-    /* Reset all elements to avoid hidden margins */
-    * {
-        display: block !important;
-    visibility: visible !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      box-sizing: border-box !important;
-    }
-
-    /* 2. TYPOGRAPHY SCALING */
-    /* Adjusted sizes to be more reasonable for paper (36px is very large for print body text) */
-    h1 {
-      font-size: 14pt !important;
-      margin-bottom: 8pt !important;
-      font-weight: 400 !important;
-      color: #000 !important;
-    }
-    h2, h3 {
-      font-size: 9pt !important;
-      margin-top: 12pt !important;
-      margin-bottom: 6pt !important;
-      font-weight: 350 !important;
-      color: #000 !important;
-    }
-    p, .text-sm, .text-xs, span, div {
-      font-size: 5pt !important; /* Standard readable print size */
-      line-height: 1.4 !important;
-      color: #000 !important;
-    }
-    
-    /* 3. VISIBILITY CONTROLS */
-    .print-hide {
-      display: none !important;
-      }
-    .print-show {
-      display: block !important;
-    }
-    
-    /* 4. CARD STYLING REMOVAL */
-    /* Flattens the card look for paper */
-    .print-content {
-      width: 100% !important;
-      max-width: none !important;
-      box-shadow: none !important;
-      border: none !important;
-      margin: 0 !important;
-    }
-    
-    /* Target the Card component specifically if it has a border */
-    .rounded-xl, .border, .shadow-sm {
-      border: none !important;
-      box-shadow: none !important;
-      border-radius: 0 !important;
-    }
-
-    /* 5. GRID & LAYOUT FIXES */
-    .grid {
-      display: grid !important;
-      grid-template-columns: repeat(2, 1fr) !important; /* Force 2 columns for data */
-      gap: 12pt !important;
-    }
-    /* Stack small grids if needed */
-    .md:grid-cols-4 {
-      grid-template-columns: repeat(2, 1fr) !important;
-    }
-      
-
-    /* Avoid breaking elements in half across pages */
-    .print-section-break {
-      page-break-inside: avoid;
-      margin-bottom: 16pt !important;
-    }
-  }
-`}</style>
       <div className="max-w-4xl mx-auto">
-        {/* Header - Hide on Print */}
-        <div className="print-hide mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-4 rounded-full">
+        {/* Screen Top Header (Buttons and ID) */}
+        <div className="print-hide mb-8 flex items-center justify-between bg-card p-6 rounded-xl border shadow-sm">
+          <div className="flex items-center gap-4">
             <img src={abelovLogo} alt="Abelov Logo" className="w-16 h-16" />
             <div>
-              <h1 className="text-4xl font-bold text-primary mb-2">Service Request Details</h1>
-              <p className="text-muted-foreground">Request ID: {request?.id || '-'}</p>
+              <h1 className="text-2xl font-bold text-primary">Service Request</h1>
+              <p className="text-muted-foreground text-sm">ID: {request.id}</p>
             </div>
           </div>
 
-          <div className="flex gap-2 print-hide">
-            {/* Only show action buttons if logged in */}
+          <div className="flex gap-2">
             {user && (
               <>
-                <Button variant="outline" onClick={handlePrint}>
+                <Button variant="outline" size="sm" onClick={handlePrint}>
                   <Printer className="w-4 h-4 mr-2" />
                   Print
                 </Button>
-                <Button onClick={() => navigate(`/edit/${request.id}`)}>
+                <Button size="sm" onClick={() => navigate(`/edit/${request.id}`)}>
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
                 </Button>
-                <Button variant="outline" onClick={() => navigate('/dashboard')}>
+                <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>
@@ -484,7 +362,7 @@ export default function ServiceRequestViewPage() {
 
         {/* Action Buttons - Hide on Print */}
         {/* Action Buttons - Mobile */}
-        <div className="md:hidden flex flex-col gap-2 mt-6 print-hide">
+        <div className="md:hidden flex flex-col gap-2 mb-6 print-hide">
           {user && (
             <>
               <Button variant="outline" onClick={handlePrint} className="w-full">
@@ -501,6 +379,122 @@ export default function ServiceRequestViewPage() {
               </Button>
             </>
           )}
+        </div>
+
+        <div ref={printRef} className="print-content">
+          {/* Print-Only Header (Logo + Title) */}
+          <div className="hidden print:block print-container">
+            <div className="print-header">
+              <img src={abelovLogo} alt="Abelov Logo" className="w-24 h-24 mx-auto mb-4" />
+              <h1 className="text-4xl font-extrabold text-black">Abelov Technical Records</h1>
+              <p className="text-xl text-gray-600 mt-2">Service Request Record</p>
+              <p className="text-lg font-mono mt-1">ID: {request.id}</p>
+              <div className="w-1/2 mx-auto border-b-2 border-gray-200 mt-6"></div>
+            </div>
+
+            <div className="flex flex-col items-center print-qr">
+              <div className="bg-white p-6">
+                <QRCode
+                  value={`${window.location.origin}/#/view/${request.id}`}
+                  size={220}
+                />
+              </div>
+              <p className="mt-6 text-sm font-bold text-black">
+                SCAN TO VIEW RECORD DETAILS
+              </p>
+            </div>
+          </div>
+
+          {/* Screen Content (Records Details) */}
+          <div className="print-hide space-y-6">
+            <div className="mb-4">
+              <Badge className={getStatusColor(request.status)}>{request.status}</Badge>
+            </div>
+
+            <Card className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <DetailRow label="Request Date" value={request.request_date ? new Date(request.request_date).toLocaleDateString() : '-'} />
+                <DetailRow label="Technician" value={request.technician_name} />
+                <DetailRow label="Shop Name" value={request.shop_name} />
+                <DetailRow label="Status" value={request.status} />
+              </div>
+
+              <div className="mt-8 border-t pt-8">
+                <h3 className="text-lg font-semibold mb-4 text-primary">Customer Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <DetailRow label="Name" value={request.customer_name} />
+                  <DetailRow label="Phone" value={request.customer_phone} />
+                  <DetailRow label="Email" value={request.customer_email} />
+                  <DetailRow label="Address" value={request.customer_address} />
+                </div>
+              </div>
+
+              <div className="mt-8 border-t pt-8">
+                <h3 className="text-lg font-semibold mb-4 text-primary">Device Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <DetailRow label="Brand" value={request.device_brand} />
+                  <DetailRow label="Model" value={request.device_model} />
+                  <DetailRow label="Serial Number" value={request.serial_number} />
+                  <DetailRow label="OS" value={request.operating_system} />
+                  <div className="md:col-span-3">
+                    <DetailRow label="Accessories" value={request.accessories_received || 'None'} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 border-t pt-8">
+                <h3 className="text-lg font-semibold mb-4 text-primary">Problem Description</h3>
+                <p className="text-sm bg-muted/30 p-4 rounded-lg whitespace-pre-wrap">{request.problem_description}</p>
+              </div>
+
+              {(request.fault_found || request.repair_action) && (
+                <div className="mt-8 border-t pt-8">
+                  <h3 className="text-lg font-semibold mb-4 text-primary">Diagnosis & Repair</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <DetailRow label="Fault Found" value={request.fault_found} />
+                    <DetailRow label="Repair Action" value={request.repair_action} />
+                    <DetailRow label="Parts Used" value={request.parts_used} />
+                    <DetailRow label="Diagnosis Date" value={request.diagnosis_date ? new Date(request.diagnosis_date).toLocaleDateString() : '-'} />
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-8 border-t pt-8">
+                <h3 className="text-lg font-semibold mb-4 text-primary">Cost Summary</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="p-4 bg-muted/20 rounded-lg">
+                    <DetailRow label="Service Charge" value={`₦${(request.service_charge || 0).toLocaleString()}`} />
+                  </div>
+                  <div className="p-4 bg-muted/20 rounded-lg">
+                    <DetailRow label="Parts Cost" value={`₦${(request.parts_cost || 0).toLocaleString()}`} />
+                  </div>
+                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                    <DetailRow label="Total Cost" value={`₦${(request.total_cost || 0).toLocaleString()}`} />
+                  </div>
+                  <div className="p-4 bg-green-500/5 rounded-lg border border-green-500/20">
+                    <DetailRow label="Deposit Paid" value={`₦${(request.deposit_paid || 0).toLocaleString()}`} />
+                  </div>
+                  <div className="p-4 bg-red-500/5 rounded-lg border border-red-500/20">
+                    <DetailRow label="Balance" value={`₦${(request.balance || 0).toLocaleString()}`} />
+                  </div>
+                  <div className="p-4 bg-muted/20 rounded-lg">
+                    <DetailRow label="Payment Status" value={request.payment_completed ? 'Completed' : 'Pending'} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Screen-Only QR Code for convenience */}
+              <div className="mt-12 pt-8 border-t text-center">
+                <div className="inline-block p-4 bg-white rounded-xl shadow-sm border">
+                  <QRCode
+                    value={`${window.location.origin}/#/view/${request.id}`}
+                    size={140}
+                  />
+                  <p className="mt-2 text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Record QR Code</p>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

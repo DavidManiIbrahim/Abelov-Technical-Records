@@ -32,7 +32,7 @@ export const createApp = () => {
     "https://abelov-technical-records.onrender.com",
     "https://abelov-technical-records-frontend.onrender.com",
     "https://abelov-technical-records-backend.onrender.com",
-    "https://abelov-technical-records-api.onrender.com",
+    "https://abelov-technical-records-chi.vercel.app",
     // Development frontend
     "http://localhost:8080",
     "http://localhost:8081",
