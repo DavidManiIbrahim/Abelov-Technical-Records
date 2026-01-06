@@ -14,51 +14,51 @@ import { usePaystackPayment } from 'react-paystack';
 
 const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_3b90c2da7d451e39902743a32258433b014f4f7a'; // Placeholder if not set
 
-const PaymentSection = ({ request, onPaymentSuccess }: { request: ServiceRequest; onPaymentSuccess: () => void }) => {
-  const config = {
-    reference: (new Date()).getTime().toString(),
-    email: request.customer_email || "customer@abelov.com",
-    amount: Math.ceil(request.balance * 100), // Amount in kobo
-    publicKey: PAYSTACK_PUBLIC_KEY,
-    currency: 'NGN',
-  };
+// const PaymentSection = ({ request, onPaymentSuccess }: { request: ServiceRequest; onPaymentSuccess: () => void }) => {
+//   const config = {
+//     reference: (new Date()).getTime().toString(),
+//     email: request.customer_email || "customer@abelov.com",
+//     amount: Math.ceil(request.balance * 100), // Amount in kobo
+//     publicKey: PAYSTACK_PUBLIC_KEY,
+//     currency: 'NGN',
+//   };
 
-  const initializePayment = usePaystackPayment(config);
+//   const initializePayment = usePaystackPayment(config);
 
-  const onSuccess = async (reference: any) => {
-    try {
-      await serviceRequestAPI.recordPayment(request.id, request.balance, reference.reference);
-      toast({
-        title: "Payment Successful",
-        description: "Your payment has been recorded.",
-      });
-      onPaymentSuccess();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Payment successful but failed to update record. Please contact support.",
-        variant: "destructive",
-      });
-      console.error(error);
-    }
-  };
+//   const onSuccess = async (reference: any) => {
+//     try {
+//       await serviceRequestAPI.recordPayment(request.id, request.balance, reference.reference);
+//       toast({
+//         title: "Payment Successful",
+//         description: "Your payment has been recorded.",
+//       });
+//       onPaymentSuccess();
+//     } catch (error) {
+//       toast({
+//         title: "Error",
+//         description: "Payment successful but failed to update record. Please contact support.",
+//         variant: "destructive",
+//       });
+//       console.error(error);
+//     }
+//   };
 
-  const onClose = () => {
-    // console.log('Payment closed');
-  };
+//   const onClose = () => {
+//     // console.log('Payment closed');
+//   };
 
-  return (
-    <div className="mt-4">
-      <Button
-        onClick={() => initializePayment({ onSuccess, onClose })}
-        className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white"
-      >
-        <CreditCard className="w-4 h-4 mr-2" />
-        Pay Balance (₦{(request.balance || 0).toLocaleString()})
-      </Button>
-    </div>
-  );
-};
+//   return (
+//     <div className="mt-4">
+//       <Button
+//         onClick={() => initializePayment({ onSuccess, onClose })}
+//         className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white"
+//       >
+//         <CreditCard className="w-4 h-4 mr-2" />
+//         Pay Balance (₦{(request.balance || 0).toLocaleString()})
+//       </Button>
+//     </div>
+//   );
+// };
 
 
 export default function ServiceRequestViewPage() {
@@ -248,8 +248,8 @@ export default function ServiceRequestViewPage() {
             </div>
           </div>
 
-          <div className="flex gap-2 print-hide">
             {/* Only show action buttons if logged in */}
+          <div className="flex gap-2 print-hide">
             {user && (
               <>
                 <Button variant="outline" onClick={handlePrint}>
@@ -275,18 +275,18 @@ export default function ServiceRequestViewPage() {
 
           <div className="print-show mb-6 text-center hidden">
             <h1 className="text-2xl font-bold mb-1">Abelov Technical Records</h1>
-            <p className="text-sm text-muted-foreground">Service Request Report</p>
+            {/* <p className="text-sm text-muted-foreground">Service Request Report</p> */}
             <hr className="my-4" />
           </div>
 
           {/* Status Badge */}
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <Badge className={getStatusColor(request.status)}>{request.status}</Badge>
-          </div>
+          </div> */}
 
           {/* Unified Form - All Sections in One */}
-          <Card className="p-6">
             {/* Request Header */}
+          {/* <Card className="p-6">
             <div className="mb-6 pb-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
@@ -302,10 +302,10 @@ export default function ServiceRequestViewPage() {
                   <DetailRow label="Technician" value={request.technician_name} />
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Customer Information */}
-            <div className="mb-6 pb-6 print-section-break">
+            {/* <div className="mb-6 pb-6 print-section-break">
               <h3 className="text-lg font-semibold mb-3 text-primary">Customer</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -318,10 +318,10 @@ export default function ServiceRequestViewPage() {
                   <DetailRow label="Address" value={request.customer_address} />
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Device Information */}
-            <div className="mb-6 pb-6 print-section-break">
+            {/* <div className="mb-6 pb-6 print-section-break">
               <h3 className="text-lg font-semibold mb-3 text-primary">Device</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -342,16 +342,16 @@ export default function ServiceRequestViewPage() {
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
 
             {/* Problem Description */}
-            <div className="mb-6 pb-6 print-section-break">
+            {/* <div className="mb-6 pb-6 print-section-break">
               <h3 className="text-lg font-semibold mb-3 text-primary">Problem</h3>
               <p className="text-sm whitespace-pre-wrap">{request.problem_description}</p>
-            </div>
+            </div> */}
 
             {/* Diagnosis & Repair */}
-            {(request.fault_found || request.parts_used || request.repair_action) && (
+            {/* {(request.fault_found || request.parts_used || request.repair_action) && (
               <div className="print-hide mb-6 pb-6 print-section-break">
                 <h3 className="text-lg font-semibold mb-3 text-primary">Diagnosis & Repair</h3>
                 <div className="grid grid-cols-2 gap-4 mb-4">
@@ -385,10 +385,10 @@ export default function ServiceRequestViewPage() {
                   </div>
                 )}
               </div>
-            )}
+            )} */}
 
             {/* Cost Summary */}
-            <div className="print-hide mb-6 pb-6 print-section-break">
+            {/* <div className="print-hide mb-6 pb-6 print-section-break">
               <h3 className="text-lg font-semibold mb-3 text-primary">Costs</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -408,13 +408,13 @@ export default function ServiceRequestViewPage() {
                 </div>
                 <div>
                   <DetailRow label="Payment" value={request.payment_completed ? 'Completed' : 'Pending'} />
-                </div>
+                </div> */}
 
               </div>
             </div>
 
             {/* Customer Confirmation */}
-            {request.customer_confirmation && (
+            {/* {request.customer_confirmation && (
               <div className="print-hide pb-6 print-section-break">
                 <h3 className="text-lg font-semibold mb-3 text-primary">Confirmation</h3>
                 <div className="grid grid-cols-2 gap-4">
@@ -426,16 +426,16 @@ export default function ServiceRequestViewPage() {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Timestamps - Hide on Print */}
-            <div className="print-hide text-xs text-muted-foreground mt-6 pt-4 border-t">
+            {/* <div className="print-hide text-xs text-muted-foreground mt-6 pt-4 border-t">
               <p>Created: {request.created_at ? new Date(request.created_at).toLocaleString() : '-'}</p>
               <p>Last Updated: {request.updated_at ? new Date(request.updated_at).toLocaleString() : '-'}</p>
-            </div>
+            </div> */}
 
             {/* Payment Section - always visible logic */}
-            <div className="mt-6 pt-4 border-t text-center print-hide">
+            {/* <div className="mt-6 pt-4 border-t text-center print-hide">
               <h3 className="text-lg font-semibold mb-3 text-primary">Payment Status</h3>
 
               {request.payment_completed ? (
@@ -461,7 +461,7 @@ export default function ServiceRequestViewPage() {
                   </div>
                 </>
               )}
-            </div>
+            </div> */}
 
             {/* QR Code */}
             <div className="mt-6 pt-4 border-t text-center">
@@ -474,8 +474,8 @@ export default function ServiceRequestViewPage() {
 
               </div>
             </div>
-          </Card>
-        </div>
+          {/* </Card> */}
+        {/* </div> */}
 
         {/* Action Buttons - Hide on Print */}
         {/* Action Buttons - Mobile */}
@@ -498,6 +498,6 @@ export default function ServiceRequestViewPage() {
           )}
         </div>
       </div>
-    </div>
+    // </div>
   );
 }
