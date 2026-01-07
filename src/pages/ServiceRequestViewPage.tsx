@@ -486,7 +486,7 @@ export default function ServiceRequestViewPage() {
         </div>
 
         {/* Full Receipt - Print Only */}
-        <div className={cn("hidden", printType === 'receipt' && "print:block")}>
+        <div className={cn("hidden", (printType === 'receipt' || printType === null) && "print:block")}>
           <div className="print-container max-w-[8cm] mx-auto text-black p-4">
             <div className="text-center mb-4">
               <img src={abelovLogo} alt="Abelov Logo" className="w-12 h-12 mx-auto mb-2" />

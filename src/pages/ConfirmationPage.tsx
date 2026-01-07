@@ -185,7 +185,7 @@ export default function ConfirmationPage() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 print:hidden">
             <Button variant="outline" onClick={() => navigate("/requests")} className="flex-1">
               <ArrowLeft className="w-4 h-4 mr-2" />
               View All Requests
