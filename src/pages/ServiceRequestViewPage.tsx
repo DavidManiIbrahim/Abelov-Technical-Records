@@ -465,11 +465,11 @@ export default function ServiceRequestViewPage() {
             <div className="print-header">
               <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10 mx-auto mb-2" />
               <h1 className="text-lg font-bold text-black">Abelov Technical Records</h1>
-              <p className="text-[10px] text-gray-600 mt-1 uppercase tracking-tight">Service Request Record</p>
-              <p className="text-[8px] font-mono mt-0.5">ID: {request.id}</p>
+              <p className="text-[15px] font-bold text-gray-600 mt-1 uppercase tracking-tight">Service Request Record</p>
+              <p className="text-[16px] font-bold font-mono mt-0.5">ID: {request.id}</p>
               <div className="mt-2 text-center">
-                <p className="text-[11px] font-bold text-black">{request.customer_name}</p>
-                <p className="text-[9px] text-gray-700">{request.customer_phone}</p>
+                <p className="text-[22px] font-bold text-black">{request.customer_name}</p>
+                <p className="text-[18px] font-bold text-gray-700">{request.customer_phone}</p>
               </div>
               <div className="w-1/3 mx-auto border-b border-gray-200 mt-2"></div>
             </div>

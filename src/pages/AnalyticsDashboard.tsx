@@ -122,7 +122,7 @@ export default function AnalyticsDashboard() {
             </div>
             <ThemeToggle />
           </div>
-          <Button onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
+          <Button className='dark:bg-black' onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Button>
