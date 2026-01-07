@@ -106,17 +106,17 @@ export default function ServiceRequestViewPage() {
             width: 100% !important;
             max-width: none !important;
             margin: 0 !important;
-            padding: 1.5cm !important;
+            padding: 0.5cm !important;
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
             text-align: center !important;
           }
           .print-header {
-             margin-bottom: 2rem !important;
+             margin-bottom: 0.5rem !important;
           }
           .print-qr {
-             margin-top: 2rem !important;
+             margin-top: 0.5rem !important;
           }
         }
       `}</style>
@@ -176,22 +176,22 @@ export default function ServiceRequestViewPage() {
           {/* Print-Only Header (Logo + Title) */}
           <div className="hidden print:block print-container">
             <div className="print-header">
-              <img src={abelovLogo} alt="Abelov Logo" className="w-24 h-24 mx-auto mb-4" />
-              <h1 className="text-4xl font-extrabold text-black">Abelov Technical Records</h1>
-              <p className="text-xl text-gray-600 mt-2">Service Request Record</p>
-              <p className="text-lg font-mono mt-1">ID: {request.id}</p>
-              <div className="w-1/2 mx-auto border-b-2 border-gray-200 mt-6"></div>
+              <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10 mx-auto mb-2" />
+              <h1 className="text-lg font-bold text-black">Abelov Technical Records</h1>
+              <p className="text-[10px] text-gray-600 mt-1 uppercase tracking-tight">Service Request Record</p>
+              <p className="text-[8px] font-mono mt-0.5">ID: {request.id}</p>
+              <div className="w-1/3 mx-auto border-b border-gray-200 mt-2"></div>
             </div>
 
             <div className="flex flex-col items-center print-qr">
-              <div className="bg-white p-6">
+              <div className="bg-white p-2 border border-gray-100">
                 <QRCode
                   value={`${window.location.origin}/#/view/${request.id}`}
-                  size={220}
+                  size={100}
                 />
               </div>
-              <p className="mt-6 text-sm font-bold text-black">
-                SCAN TO VIEW RECORD DETAILS
+              <p className="mt-2 text-[8px] font-bold text-black uppercase tracking-widest">
+                SCAN TO VIEW DETAILS
               </p>
             </div>
           </div>
