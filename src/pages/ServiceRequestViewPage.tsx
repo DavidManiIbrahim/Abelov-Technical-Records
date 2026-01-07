@@ -101,7 +101,7 @@ export default function ServiceRequestViewPage() {
     // Give enough time for the state to update and classes to apply
     setTimeout(() => {
       window.print();
-    }, 150);
+    }, 500);
   };
 
   return (
@@ -151,6 +151,9 @@ export default function ServiceRequestViewPage() {
             border: 1px solid #e5e7eb !important;
             height: auto !important;
             width: auto !important;
+          }
+          [role="dialog"], .radix-state-open {
+            display: none !important;
           }
         }
       `}</style>
