@@ -152,212 +152,213 @@ export default function ServiceRequestViewPage() {
           </div>
         </div>
 
-        {/* Printable Content */}
-        <div ref={printRef} className="print-content">
-          {/* Print Header */}
+        {/* Unified Form - Screen Only */}
+        <div className="print-hide">
+          <div className="print-content">
+            {/* Print Header */}
 
-          <div className="print-show mb-6 text-center hidden">
-            <h1 className="text-2xl font-bold mb-1">Abelov Technical Records</h1>
-            <p className="text-sm text-muted-foreground">Service Request Report</p>
-            <hr className="my-4" />
-          </div>
-
-          {/* Status Badge */}
-          <div className="mb-4">
-            <Badge className={getStatusColor(request.status)}>{request.status}</Badge>
-          </div>
-
-          {/* Unified Form - All Sections in One */}
-          <Card className="p-6">
-            {/* Request Header */}
-            <div className="mb-6 pb-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <DetailRow label="Request ID" value={request.id} />
-                </div>
-                <div>
-                  <DetailRow label="Request Date" value={request.request_date ? new Date(request.request_date).toLocaleDateString() : '-'} />
-                </div>
-                <div>
-                  <DetailRow label="Status" value={request.status} />
-                </div>
-                <div>
-                  <DetailRow label="Technician" value={request.technician_name} />
-                </div>
-              </div>
+            <div className="print-show mb-6 text-center hidden">
+              <h1 className="text-2xl font-bold mb-1">Abelov Technical Records</h1>
+              <p className="text-sm text-muted-foreground">Service Request Report</p>
+              <hr className="my-4" />
             </div>
 
-            {/* Customer Information */}
-            <div className="mb-6 pb-6 print-section-break">
-              <h3 className="text-lg font-semibold mb-3 text-primary">Customer</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <DetailRow label="Name" value={request.customer_name} />
-                </div>
-                <div>
-                  <DetailRow label="Phone" value={request.customer_phone} />
-                </div>
-                <div>
-                  <DetailRow label="Address" value={request.customer_address} />
-                </div>
-              </div>
+            {/* Status Badge */}
+            <div className="mb-4">
+              <Badge className={getStatusColor(request.status)}>{request.status}</Badge>
             </div>
 
-            {/* Device Information */}
-            <div className="mb-6 pb-6 print-section-break">
-              <h3 className="text-lg font-semibold mb-3 text-primary">Device</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <DetailRow label="Brand" value={request.device_brand} />
-                </div>
-                <div>
-                  <DetailRow label="Model" value={request.device_model} />
-                </div>
-                <div>
-                  <DetailRow label="Serial" value={request.serial_number} />
-                </div>
-                <div>
-                  <DetailRow label="OS" value={request.operating_system} />
-                </div>
-                {request.accessories_received && (
-                  <div className="md:col-span-2">
-                    <DetailRow label="Accessories" value={request.accessories_received} />
+            {/* Unified Form - All Sections in One */}
+            <Card className="p-6">
+              {/* Request Header */}
+              <div className="mb-6 pb-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <DetailRow label="Request ID" value={request.id} />
                   </div>
-                )}
+                  <div>
+                    <DetailRow label="Request Date" value={request.request_date ? new Date(request.request_date).toLocaleDateString() : '-'} />
+                  </div>
+                  <div>
+                    <DetailRow label="Status" value={request.status} />
+                  </div>
+                  <div>
+                    <DetailRow label="Technician" value={request.technician_name} />
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Problem Description */}
-            <div className="mb-6 pb-6 print-section-break">
-              <h3 className="text-lg font-semibold mb-3 text-primary">Problem</h3>
-              <p className="text-sm whitespace-pre-wrap">{request.problem_description}</p>
-            </div>
+              {/* Customer Information */}
+              <div className="mb-6 pb-6 print-section-break">
+                <h3 className="text-lg font-semibold mb-3 text-primary">Customer</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <DetailRow label="Name" value={request.customer_name} />
+                  </div>
+                  <div>
+                    <DetailRow label="Phone" value={request.customer_phone} />
+                  </div>
+                  <div>
+                    <DetailRow label="Address" value={request.customer_address} />
+                  </div>
+                </div>
+              </div>
 
-            {/* Diagnosis & Repair */}
-            {(request.fault_found || request.parts_used || request.repair_action) && (
-              <div className="print-hide mb-6 pb-6 print-section-break">
-                <h3 className="text-lg font-semibold mb-3 text-primary">Diagnosis & Repair</h3>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  {request.diagnosis_date && (
-                    <div>
-                      <DetailRow label="Diagnosis Date" value={request.diagnosis_date ? new Date(request.diagnosis_date).toLocaleDateString() : '-'} />
-                    </div>
-                  )}
-                  {request.diagnosis_technician && (
-                    <div>
-                      <DetailRow label="Technician" value={request.diagnosis_technician} />
+              {/* Device Information */}
+              <div className="mb-6 pb-6 print-section-break">
+                <h3 className="text-lg font-semibold mb-3 text-primary">Device</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <DetailRow label="Brand" value={request.device_brand} />
+                  </div>
+                  <div>
+                    <DetailRow label="Model" value={request.device_model} />
+                  </div>
+                  <div>
+                    <DetailRow label="Serial" value={request.serial_number} />
+                  </div>
+                  <div>
+                    <DetailRow label="OS" value={request.operating_system} />
+                  </div>
+                  {request.accessories_received && (
+                    <div className="md:col-span-2">
+                      <DetailRow label="Accessories" value={request.accessories_received} />
                     </div>
                   )}
                 </div>
-                {request.fault_found && (
-                  <div className="mb-3">
-                    <p className="text-xs font-medium text-muted-foreground">Fault Found</p>
-                    <p className="text-sm whitespace-pre-wrap">{request.fault_found}</p>
-                  </div>
-                )}
-                {request.parts_used && (
-                  <div className="mb-3">
-                    <p className="text-xs font-medium text-muted-foreground">Parts Used</p>
-                    <p className="text-sm whitespace-pre-wrap">{request.parts_used}</p>
-                  </div>
-                )}
-                {request.repair_action && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">Repair Action</p>
-                    <p className="text-sm whitespace-pre-wrap">{request.repair_action}</p>
-                  </div>
-                )}
               </div>
-            )}
 
-            {/* Cost Summary */}
-            <div className="print-hide mb-6 pb-6 print-section-break">
-              <h3 className="text-lg font-semibold mb-3 text-primary">Costs</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <DetailRow label="Service" value={`₦${(request.service_charge || 0).toLocaleString()}`} />
-                </div>
-                <div>
-                  <DetailRow label="Parts" value={`₦${(request.parts_cost || 0).toLocaleString()}`} />
-                </div>
-                <div>
-                  <DetailRow label="Total" value={`₦${(request.total_cost || 0).toLocaleString()}`} />
-                </div>
-                <div>
-                  <DetailRow label="Deposit" value={`₦${(request.deposit_paid || 0).toLocaleString()}`} />
-                </div>
-                <div>
-                  <DetailRow label="Balance" value={`₦${(request.balance || 0).toLocaleString()}`} />
-                </div>
-                <div>
-                  <DetailRow label="Payment" value={request.payment_completed ? 'Completed' : 'Pending'} />
-                </div>
-
+              {/* Problem Description */}
+              <div className="mb-6 pb-6 print-section-break">
+                <h3 className="text-lg font-semibold mb-3 text-primary">Problem</h3>
+                <p className="text-sm whitespace-pre-wrap">{request.problem_description}</p>
               </div>
-            </div>
 
-            {/* Customer Confirmation */}
-            {request.customer_confirmation && (
-              <div className="print-hide pb-6 print-section-break">
-                <h3 className="text-lg font-semibold mb-3 text-primary">Confirmation</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <DetailRow label="Device Collected" value={request.customer_confirmation.customer_collected} />
+              {/* Diagnosis & Repair */}
+              {(request.fault_found || request.parts_used || request.repair_action) && (
+                <div className="print-hide mb-6 pb-6 print-section-break">
+                  <h3 className="text-lg font-semibold mb-3 text-primary">Diagnosis & Repair</h3>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    {request.diagnosis_date && (
+                      <div>
+                        <DetailRow label="Diagnosis Date" value={request.diagnosis_date ? new Date(request.diagnosis_date).toLocaleDateString() : '-'} />
+                      </div>
+                    )}
+                    {request.diagnosis_technician && (
+                      <div>
+                        <DetailRow label="Technician" value={request.diagnosis_technician} />
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <DetailRow label="Technician" value={request.customer_confirmation.technician} />
-                  </div>
+                  {request.fault_found && (
+                    <div className="mb-3">
+                      <p className="text-xs font-medium text-muted-foreground">Fault Found</p>
+                      <p className="text-sm whitespace-pre-wrap">{request.fault_found}</p>
+                    </div>
+                  )}
+                  {request.parts_used && (
+                    <div className="mb-3">
+                      <p className="text-xs font-medium text-muted-foreground">Parts Used</p>
+                      <p className="text-sm whitespace-pre-wrap">{request.parts_used}</p>
+                    </div>
+                  )}
+                  {request.repair_action && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground">Repair Action</p>
+                      <p className="text-sm whitespace-pre-wrap">{request.repair_action}</p>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-
-            {/* Timestamps - Hide on Print */}
-            <div className="print-hide text-xs text-muted-foreground mt-6 pt-4 border-t">
-              <p>Created: {request.created_at ? new Date(request.created_at).toLocaleString() : '-'}</p>
-              <p>Last Updated: {request.updated_at ? new Date(request.updated_at).toLocaleString() : '-'}</p>
-            </div>
-
-            {/* Payment Section - always visible logic */}
-            <div className="mt-6 pt-4 border-t text-center print-hide">
-              <h3 className="text-lg font-semibold mb-3 text-primary">Payment Status</h3>
-
-              {request.payment_completed ? (
-                <div className="p-4 bg-green-100 text-green-800 rounded-md inline-block">
-                  <p className="font-bold flex items-center justify-center gap-2">
-                    <span className="text-xl">✓</span> Payment Completed
-                  </p>
-                </div>
-              ) : request.balance <= 0 ? (
-                <div className="p-4 bg-gray-100 text-gray-600 rounded-md inline-block">
-                  <p className="font-medium">No pending balance to pay.</p>
-                </div>
-              ) : (
-                <>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Please complete the payment to finalize your service request.
-                  </p>
-                  <div className="flex justify-center">
-                    <PaymentSection
-                      request={request}
-                      onPaymentSuccess={() => loadRequest(request.id)}
-                    />
-                  </div>
-                </>
               )}
-            </div>
 
-            {/* QR Code */}
-            <div className="mt-6 pt-4 border-t text-center">
-              <div className="flex flex-col items-center">
-                <p className="text-xs text-muted-foreground mb-2">Service Request QR Code</p>
-                <QRCode
-                  value={`${window.location.origin}/#/view/${request.id}`}
-                  size={128}
-                />
+              {/* Cost Summary */}
+              <div className="print-hide mb-6 pb-6 print-section-break">
+                <h3 className="text-lg font-semibold mb-3 text-primary">Costs</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <DetailRow label="Service" value={`₦${(request.service_charge || 0).toLocaleString()}`} />
+                  </div>
+                  <div>
+                    <DetailRow label="Parts" value={`₦${(request.parts_cost || 0).toLocaleString()}`} />
+                  </div>
+                  <div>
+                    <DetailRow label="Total" value={`₦${(request.total_cost || 0).toLocaleString()}`} />
+                  </div>
+                  <div>
+                    <DetailRow label="Deposit" value={`₦${(request.deposit_paid || 0).toLocaleString()}`} />
+                  </div>
+                  <div>
+                    <DetailRow label="Balance" value={`₦${(request.balance || 0).toLocaleString()}`} />
+                  </div>
+                  <div>
+                    <DetailRow label="Payment" value={request.payment_completed ? 'Completed' : 'Pending'} />
+                  </div>
 
+                </div>
               </div>
-            </div>
-          </Card>
+
+              {/* Customer Confirmation */}
+              {request.customer_confirmation && (
+                <div className="print-hide pb-6 print-section-break">
+                  <h3 className="text-lg font-semibold mb-3 text-primary">Confirmation</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <DetailRow label="Device Collected" value={request.customer_confirmation.customer_collected} />
+                    </div>
+                    <div>
+                      <DetailRow label="Technician" value={request.customer_confirmation.technician} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Timestamps - Hide on Print */}
+              <div className="print-hide text-xs text-muted-foreground mt-6 pt-4 border-t">
+                <p>Created: {request.created_at ? new Date(request.created_at).toLocaleString() : '-'}</p>
+                <p>Last Updated: {request.updated_at ? new Date(request.updated_at).toLocaleString() : '-'}</p>
+              </div>
+
+              {/* Payment Section - always visible logic */}
+              <div className="mt-6 pt-4 border-t text-center print-hide">
+                <h3 className="text-lg font-semibold mb-3 text-primary">Payment Status</h3>
+
+                {request.payment_completed ? (
+                  <div className="p-4 bg-green-100 text-green-800 rounded-md inline-block">
+                    <p className="font-bold flex items-center justify-center gap-2">
+                      <span className="text-xl">✓</span> Payment Completed
+                    </p>
+                  </div>
+                ) : request.balance <= 0 ? (
+                  <div className="p-4 bg-gray-100 text-gray-600 rounded-md inline-block">
+                    <p className="font-medium">No pending balance to pay.</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Please complete the payment to finalize your service request.
+                    </p>
+                    <div className="flex justify-center">
+                      <Button variant="outline" onClick={() => loadRequest(request.id)}>
+                        Refresh Payment Status
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* QR Code */}
+              <div className="mt-6 pt-4 border-t text-center">
+                <div className="flex flex-col items-center">
+                  <p className="text-xs text-muted-foreground mb-2">Service Request QR Code</p>
+                  <QRCode
+                    value={`${window.location.origin}/#/view/${request.id}`}
+                    size={128}
+                  />
+
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
 
         {/* Action Buttons - Hide on Print */}
@@ -381,14 +382,18 @@ export default function ServiceRequestViewPage() {
           )}
         </div>
 
-        <div ref={printRef} className="print-content">
-          {/* Print-Only Header (Logo + Title) */}
-          <div className="hidden print:block print-container">
+        {/* Compact Record - Print Only */}
+        <div ref={printRef} className="hidden print:block">
+          <div className="print-container">
             <div className="print-header">
               <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10 mx-auto mb-2" />
               <h1 className="text-lg font-bold text-black">Abelov Technical Records</h1>
               <p className="text-[10px] text-gray-600 mt-1 uppercase tracking-tight">Service Request Record</p>
               <p className="text-[8px] font-mono mt-0.5">ID: {request.id}</p>
+              <div className="mt-2 text-center">
+                <p className="text-[11px] font-bold text-black">{request.customer_name}</p>
+                <p className="text-[9px] text-gray-700">{request.customer_phone}</p>
+              </div>
               <div className="w-1/3 mx-auto border-b border-gray-200 mt-2"></div>
             </div>
 
@@ -404,98 +409,8 @@ export default function ServiceRequestViewPage() {
               </p>
             </div>
           </div>
-
-          {/* Screen Content (Records Details) */}
-          <div className="print-hide space-y-6">
-            <div className="mb-4">
-              <Badge className={getStatusColor(request.status)}>{request.status}</Badge>
-            </div>
-
-            <Card className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <DetailRow label="Request Date" value={request.request_date ? new Date(request.request_date).toLocaleDateString() : '-'} />
-                <DetailRow label="Technician" value={request.technician_name} />
-                <DetailRow label="Shop Name" value={request.shop_name} />
-                <DetailRow label="Status" value={request.status} />
-              </div>
-
-              <div className="mt-8 border-t pt-8">
-                <h3 className="text-lg font-semibold mb-4 text-primary">Customer Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <DetailRow label="Name" value={request.customer_name} />
-                  <DetailRow label="Phone" value={request.customer_phone} />
-                  <DetailRow label="Email" value={request.customer_email} />
-                  <DetailRow label="Address" value={request.customer_address} />
-                </div>
-              </div>
-
-              <div className="mt-8 border-t pt-8">
-                <h3 className="text-lg font-semibold mb-4 text-primary">Device Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <DetailRow label="Brand" value={request.device_brand} />
-                  <DetailRow label="Model" value={request.device_model} />
-                  <DetailRow label="Serial Number" value={request.serial_number} />
-                  <DetailRow label="OS" value={request.operating_system} />
-                  <div className="md:col-span-3">
-                    <DetailRow label="Accessories" value={request.accessories_received || 'None'} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 border-t pt-8">
-                <h3 className="text-lg font-semibold mb-4 text-primary">Problem Description</h3>
-                <p className="text-sm bg-muted/30 p-4 rounded-lg whitespace-pre-wrap">{request.problem_description}</p>
-              </div>
-
-              {(request.fault_found || request.repair_action) && (
-                <div className="mt-8 border-t pt-8">
-                  <h3 className="text-lg font-semibold mb-4 text-primary">Diagnosis & Repair</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <DetailRow label="Fault Found" value={request.fault_found} />
-                    <DetailRow label="Repair Action" value={request.repair_action} />
-                    <DetailRow label="Parts Used" value={request.parts_used} />
-                    <DetailRow label="Diagnosis Date" value={request.diagnosis_date ? new Date(request.diagnosis_date).toLocaleDateString() : '-'} />
-                  </div>
-                </div>
-              )}
-
-              <div className="mt-8 border-t pt-8">
-                <h3 className="text-lg font-semibold mb-4 text-primary">Cost Summary</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-4 bg-muted/20 rounded-lg">
-                    <DetailRow label="Service Charge" value={`₦${(request.service_charge || 0).toLocaleString()}`} />
-                  </div>
-                  <div className="p-4 bg-muted/20 rounded-lg">
-                    <DetailRow label="Parts Cost" value={`₦${(request.parts_cost || 0).toLocaleString()}`} />
-                  </div>
-                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                    <DetailRow label="Total Cost" value={`₦${(request.total_cost || 0).toLocaleString()}`} />
-                  </div>
-                  <div className="p-4 bg-green-500/5 rounded-lg border border-green-500/20">
-                    <DetailRow label="Deposit Paid" value={`₦${(request.deposit_paid || 0).toLocaleString()}`} />
-                  </div>
-                  <div className="p-4 bg-red-500/5 rounded-lg border border-red-500/20">
-                    <DetailRow label="Balance" value={`₦${(request.balance || 0).toLocaleString()}`} />
-                  </div>
-                  <div className="p-4 bg-muted/20 rounded-lg">
-                    <DetailRow label="Payment Status" value={request.payment_completed ? 'Completed' : 'Pending'} />
-                  </div>
-                </div>
-              </div>
-
-              {/* Screen-Only QR Code for convenience */}
-              <div className="mt-12 pt-8 border-t text-center">
-                <div className="inline-block p-4 bg-white rounded-xl shadow-sm border">
-                  <QRCode
-                    value={`${window.location.origin}/#/view/${request.id}`}
-                    size={140}
-                  />
-                  <p className="mt-2 text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Record QR Code</p>
-                </div>
-              </div>
-            </Card>
-          </div>
         </div>
+
       </div>
     </div>
   );
