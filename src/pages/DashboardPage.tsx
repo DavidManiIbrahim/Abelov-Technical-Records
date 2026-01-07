@@ -10,6 +10,7 @@ import { serviceRequestAPI, adminAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
 import { Plus, Search, Edit, Eye, Trash2, BarChart3, Shield } from 'lucide-react';
 import ProfileMenu from '@/components/ProfileMenu';
+import ThemeToggle from '@/components/ThemeToggle';
 import abelovLogo from '@/assets/abelov-logo.png';
 
 export default function DashboardPage() {
@@ -188,7 +189,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-4">
             <img src={abelovLogo} alt="Abelov Logo" className="w-12 rounded-3xl h-12" />
             <div>
-              <h1 className="text-2xl font-bold text-primary">Abelov Technical Records</h1>
+              <h1 className="text-2xl font-bold text-primary dark:text-black">Abelov Technical Records</h1>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
           </div>
@@ -211,6 +212,7 @@ export default function DashboardPage() {
                 </Button>
               </>
             )}
+            <ThemeToggle />
             <ProfileMenu />
           </div>
         </div>

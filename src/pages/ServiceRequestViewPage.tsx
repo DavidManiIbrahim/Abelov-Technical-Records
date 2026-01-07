@@ -98,25 +98,45 @@ export default function ServiceRequestViewPage() {
             margin: 0 !important;
             padding: 0 !important;
             height: auto !important;
+            min-height: auto !important;
+            width: auto !important;
             background: white !important;
           }
           .print-hide { display: none !important; }
           .print-show { display: block !important; }
-          .print-container {
-            width: 100% !important;
+          .print-content {
+            height: auto !important;
+            min-height: auto !important;
+            width: auto !important;
             max-width: none !important;
             margin: 0 !important;
-            padding: 0.5cm !important;
+            padding: 0.2cm !important;
+          }
+          .print-container {
+            width: auto !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0.2cm !important;
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
             text-align: center !important;
+            height: auto !important;
+            min-height: auto !important;
           }
           .print-header {
-             margin-bottom: 0.5rem !important;
+             margin-bottom: 0.2rem !important;
           }
           .print-qr {
-             margin-top: 0.5rem !important;
+             margin-top: 0.2rem !important;
+          }
+          .card {
+            padding: 0.3cm !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: 1px solid #e5e7eb !important;
+            height: auto !important;
+            width: auto !important;
           }
         }
       `}</style>
@@ -251,21 +271,21 @@ export default function ServiceRequestViewPage() {
                     )}
                   </div>
                   {request.fault_found && (
-                    <div className="mb-3">
+                    <div className="mb-3 text-primary">
                       <p className="text-xs font-medium text-muted-foreground">Fault Found</p>
                       <p className="text-sm whitespace-pre-wrap">{request.fault_found}</p>
                     </div>
                   )}
                   {request.parts_used && (
-                    <div className="mb-3">
+                    <div className="mb-3 text-primary">
                       <p className="text-xs font-medium text-muted-foreground">Parts Used</p>
                       <p className="text-sm whitespace-pre-wrap">{request.parts_used}</p>
                     </div>
                   )}
                   {request.repair_action && (
-                    <div>
+                    <div className="text-primary">
                       <p className="text-xs font-medium text-muted-foreground">Repair Action</p>
-                      <p className="text-sm whitespace-pre-wrap">{request.repair_action}</p>
+                      <p className="text-sm text-primary whitespace-pre-wrap">{request.repair_action}</p>
                     </div>
                   )}
                 </div>

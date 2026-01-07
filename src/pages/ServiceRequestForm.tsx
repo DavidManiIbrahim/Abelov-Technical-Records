@@ -16,6 +16,7 @@ import { ServiceRequest } from '@/types/database';
 import { Loader2, LogOut, Home } from 'lucide-react';
 import { FaStore, FaUser, FaLaptop, FaExclamationTriangle, FaTools, FaMoneyBill, FaCheckCircle } from 'react-icons/fa';
 import abelovLogo from '@/assets/abelov-logo.png';
+import ThemeToggle from '@/components/ThemeToggle';
 
 
 
@@ -564,11 +565,12 @@ export default function ServiceRequestForm() {
 
             <img src={abelovLogo} alt="Abelov Logo" className="w-12 rounded-3xl h-12" />
             <div>
-              <h1 className="text-2xl font-bold text-primary">Abelov Technical Records</h1>
+              <h1 className="text-2xl font-bold text-primary dark:text-black">Abelov Technical Records</h1>
               <p className="text-sm text-muted-foreground mt-1">{user?.email}</p>
             </div>
           </div>
           <div className="flex gap-2">
+            <ThemeToggle />
             <Button variant="outline" onClick={() => navigate('/dashboard')} className="md:flex hidden">
               <Home className="w-4 h-4 mr-2" />
               Home

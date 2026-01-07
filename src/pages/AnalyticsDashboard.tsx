@@ -8,6 +8,7 @@ import { ServiceRequest } from '@/types/database';
 import { ArrowLeft, TrendingUp, DollarSign, Clock, CheckCircle } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import abelovLogo from '@/assets/abelov-logo.png';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function AnalyticsDashboard() {
   const navigate = useNavigate();
@@ -114,9 +115,12 @@ export default function AnalyticsDashboard() {
       {/* Header */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
-          <div className="flex items-center gap-4 mb-2">
-            <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10" />
-            <h1 className="text-2xl font-bold text-primary">Analytics Dashboard</h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-4">
+              <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10" />
+              <h1 className="text-2xl font-bold text-primary dark:text-black">Analytics Dashboard</h1>
+            </div>
+            <ThemeToggle />
           </div>
           <Button onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />

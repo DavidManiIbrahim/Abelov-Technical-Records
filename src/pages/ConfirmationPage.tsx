@@ -81,6 +81,29 @@ export default function ConfirmationPage() {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
+      <style>{`
+        @media print {
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            min-height: auto !important;
+            width: auto !important;
+            background: white !important;
+          }
+          .print\:hidden {
+            display: none !important;
+          }
+          .card {
+            padding: 0.3cm !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: 1px solid #e5e7eb !important;
+            height: auto !important;
+            width: auto !important;
+          }
+        }
+      `}</style>
       <div className="max-w-3xl mx-auto">
         <div className="flex gap-2 mb-4 print:hidden">
           <Button onClick={() => navigate("/requests")} variant="outline" size="sm">
