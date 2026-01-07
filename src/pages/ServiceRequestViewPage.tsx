@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
@@ -10,15 +10,25 @@ import { ArrowLeft, Loader2, Printer, Edit } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import QRCode from 'react-qr-code';
 import abelovLogo from '@/assets/abelov-logo.png';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { QrCode, FileText } from "lucide-react";
 
 
 export default function ServiceRequestViewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const printRef = useRef<HTMLDivElement>(null);
   const [request, setRequest] = useState<ServiceRequest | null>(null);
   const [loading, setLoading] = useState(true);
+  const [printModalOpen, setPrintModalOpen] = useState(false);
+  const [printType, setPrintType] = useState<'qr' | 'receipt' | null>(null);
 
   const loadRequest = useCallback(async (requestId: string) => {
     try {
@@ -85,9 +95,13 @@ export default function ServiceRequestViewPage() {
     </div>
   );
 
-  const handlePrint = () => {
-    if (!printRef.current) return;
-    window.print();
+  const handlePrint = (type: 'qr' | 'receipt') => {
+    setPrintType(type);
+    setPrintModalOpen(false);
+    // Give enough time for the state to update and classes to apply
+    setTimeout(() => {
+      window.print();
+    }, 150);
   };
 
   return (
@@ -155,7 +169,7 @@ export default function ServiceRequestViewPage() {
           <div className="flex gap-2">
             {user && (
               <>
-                <Button variant="outline" size="sm" onClick={handlePrint}>
+                <Button variant="outline" size="sm" onClick={() => setPrintModalOpen(true)}>
                   <Printer className="w-4 h-4 mr-2" />
                   Print
                 </Button>
@@ -386,7 +400,7 @@ export default function ServiceRequestViewPage() {
         <div className="md:hidden flex flex-col gap-2 mb-6 print-hide">
           {user && (
             <>
-              <Button variant="outline" onClick={handlePrint} className="w-full">
+              <Button variant="outline" onClick={() => setPrintModalOpen(true)} className="w-full">
                 <Printer className="w-4 h-4 mr-2" />
                 Print
               </Button>
@@ -402,8 +416,48 @@ export default function ServiceRequestViewPage() {
           )}
         </div>
 
-        {/* Compact Record - Print Only */}
-        <div ref={printRef} className="hidden print:block">
+        {/* Print Modal */}
+        <Dialog open={printModalOpen} onOpenChange={setPrintModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Print Options</DialogTitle>
+              <DialogDescription>
+                Choose what you would like to print for this service request.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <Button
+                variant="outline"
+                className="h-32 flex flex-col items-center justify-center gap-4 hover:border-primary hover:bg-primary/5 transition-all"
+                onClick={() => handlePrint('qr')}
+              >
+                <div className="p-3 rounded-full bg-blue-100 text-blue-600">
+                  <QrCode className="h-6 w-6" />
+                </div>
+                <div className="text-center">
+                  <p className="font-semibold text-sm">QR Code</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Compact tag for device</p>
+                </div>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-32 flex flex-col items-center justify-center gap-4 hover:border-primary hover:bg-primary/5 transition-all"
+                onClick={() => handlePrint('receipt')}
+              >
+                <div className="p-3 rounded-full bg-green-100 text-green-600">
+                  <FileText className="h-6 w-6" />
+                </div>
+                <div className="text-center">
+                  <p className="font-semibold text-sm">Full Receipt</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Detailed service record</p>
+                </div>
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* QR Code - Print Only */}
+        <div className={cn("hidden", printType === 'qr' && "print:block")}>
           <div className="print-container">
             <div className="print-header">
               <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10 mx-auto mb-2" />
@@ -427,6 +481,83 @@ export default function ServiceRequestViewPage() {
               <p className="mt-2 text-[8px] font-bold text-black uppercase tracking-widest">
                 SCAN TO VIEW DETAILS
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Full Receipt - Print Only */}
+        <div className={cn("hidden", printType === 'receipt' && "print:block")}>
+          <div className="print-container max-w-[8cm] mx-auto text-black p-4">
+            <div className="text-center mb-4">
+              <img src={abelovLogo} alt="Abelov Logo" className="w-12 h-12 mx-auto mb-2" />
+              <h1 className="text-xl font-bold">Abelov Technical Records</h1>
+              <p className="text-[10px] uppercase font-semibold">Service Receipt</p>
+            </div>
+
+            <div className="border-t border-b border-gray-200 py-3 mb-4 text-[11px]">
+              <div className="flex justify-between mb-1">
+                <span className="text-gray-600">Request ID:</span>
+                <span className="font-mono font-bold">{request.id}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Date:</span>
+                <span className="font-bold">{request.request_date ? new Date(request.request_date).toLocaleDateString() : '-'}</span>
+              </div>
+            </div>
+
+            <div className="mb-4 text-[11px]">
+              <h3 className="font-bold border-b border-gray-100 mb-1 pb-1">CUSTOMER</h3>
+              <p className="font-semibold">{request.customer_name}</p>
+              <p className="text-gray-700">{request.customer_phone}</p>
+              <p className="text-[10px] text-gray-600">{request.customer_address}</p>
+            </div>
+
+            <div className="mb-4 text-[11px]">
+              <h3 className="font-bold border-b border-gray-100 mb-1 pb-1">DEVICE INFO</h3>
+              <p className="font-semibold">{request.device_brand} {request.device_model}</p>
+              <p className="text-gray-700">S/N: {request.serial_number}</p>
+              <p className="text-gray-700">OS: {request.operating_system}</p>
+            </div>
+
+            <div className="mb-4 text-[11px]">
+              <h3 className="font-bold border-b border-gray-100 mb-1 pb-1">CHARGES</h3>
+              <div className="flex justify-between py-1">
+                <span>Service Charge:</span>
+                <span>₦{Number(request.service_charge || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span>Parts Cost:</span>
+                <span>₦{Number(request.parts_cost || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between font-bold border-t border-gray-100 mt-1 pt-1">
+                <span>Total Amount:</span>
+                <span>₦{Number(request.total_cost || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span>Deposit Paid:</span>
+                <span>₦{Number(request.deposit_paid || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg border-t-2 border-double border-gray-200 mt-1 pt-2">
+                <span>Total Balance:</span>
+                <span>₦{Number(request.balance || 0).toLocaleString()}</span>
+              </div>
+              <div className="mt-2 text-center">
+                <span className={cn("px-2 py-0.5 rounded text-[9px] uppercase font-bold",
+                  request.payment_completed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")}>
+                  {request.payment_completed ? "Payment Completed" : "Payment Pending"}
+                </span>
+              </div>
+            </div>
+
+            <div className="text-center mt-8 border-t border-dashed pt-4">
+              <p className="text-[10px] italic text-gray-600 mb-4">Thank you for choosing Abelov Technical Records!</p>
+              <div className="flex flex-col items-center gap-2">
+                <QRCode
+                  value={`${window.location.origin}/#/view/${request.id}`}
+                  size={64}
+                />
+                <p className="text-[8px] font-bold uppercase tracking-tight">Scan to Track Progress</p>
+              </div>
             </div>
           </div>
         </div>
