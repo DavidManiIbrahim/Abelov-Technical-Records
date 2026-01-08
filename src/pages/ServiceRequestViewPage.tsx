@@ -470,6 +470,7 @@ export default function ServiceRequestViewPage() {
               <div className="mt-2 text-center">
                 <p className="text-[22px] font-bold text-black">{request.customer_name}</p>
                 <p className="text-[18px] font-bold text-gray-700">{request.customer_phone}</p>
+                <p className="text-[18px] font-bold text-gray-700">{request.problem_description}</p>
               </div>
               <div className="w-1/3 mx-auto border-b border-gray-200 mt-2"></div>
             </div>
