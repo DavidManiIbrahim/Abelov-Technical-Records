@@ -431,7 +431,7 @@ export default function AdminDashboard() {
                                 <TableCell>
                                   <Badge className={getStatusColor(req.status)}>{req.status}</Badge>
                                 </TableCell>
-                                <TableCell className="text-sm font-semibold">₦{req.total_cost?.toLocaleString() || '0.00'}</TableCell>
+                                <TableCell className="text-sm font-semibold">₦{req.total_cost?.toLocaleString()}</TableCell>
                                 <TableCell className="text-sm text-muted-foreground">{req.technician_name}</TableCell>
                                 <TableCell className="text-sm text-muted-foreground">
                                   {new Date(req.created_at).toLocaleDateString()}
