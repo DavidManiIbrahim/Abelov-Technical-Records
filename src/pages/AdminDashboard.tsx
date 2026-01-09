@@ -227,7 +227,7 @@ export default function AdminDashboard() {
           <div className='flex items-center gap-4'>
             <img src={abelovLogo} alt="Abelov Logo" className="w-12 rounded-3xl h-12" />
             <div>
-              <h1 className="text-3xl font-bold text-primary dark:text-black">Admin Dashboard</h1>
+              <h1 className="text-3xl font-bold text-primary dark:text-white">Admin Dashboard</h1>
               <p className="text-sm text-muted-foreground mt-1">{user?.email}</p>
             </div>
           </div>
@@ -255,7 +255,7 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Global Stats */}
           {globalStats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {/* Total Users */}
               <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-50 border-blue-200">
                 <div className="space-y-2">
