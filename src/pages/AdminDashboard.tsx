@@ -560,7 +560,7 @@ export default function AdminDashboard() {
                                   {primaryRole}
                                 </TableCell>
                                 <TableCell className="text-sm font-semibold">{u.ticketCount}</TableCell>
-                                <TableCell className="text-sm font-semibold">₦{u.totalRevenue?.toFixed(0) || '0'}</TableCell>
+                                <TableCell className="text-sm font-semibold">₦{u.totalRevenue?.toLocaleString()}</TableCell>
                                 <TableCell>
                                   <Badge variant={u.is_active ? 'default' : 'secondary'}>
                                     {u.is_active ? 'Active' : 'Inactive'}
