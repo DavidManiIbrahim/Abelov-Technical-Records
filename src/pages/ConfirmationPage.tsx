@@ -2,9 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ServiceRequest } from "@/types/serviceRequest";
-import { getServiceRequestById } from "@/utils/storage";
-import { CheckCircle, FileText, ArrowLeft, Printer, Download } from "lucide-react";
+import { ServiceRequest } from "@/types/database";
+import { serviceRequestAPI } from "@/lib/api";
+import { CheckCircle, FileText, ArrowLeft, Printer, Download, Loader2 } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { toast } from "@/hooks/use-toast";
@@ -13,12 +13,25 @@ export default function ConfirmationPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [request, setRequest] = useState<ServiceRequest | null>(null);
+  const [loading, setLoading] = useState(true);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const loadRequest = async (requestId: string) => {
+      try {
+        const foundRequest = await serviceRequestAPI.getById(requestId);
+        setRequest(foundRequest || null);
+      } catch (error) {
+        console.error("Failed to load request:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (id) {
-      const foundRequest = getServiceRequestById(id);
-      setRequest(foundRequest || null);
+      loadRequest(id);
+    } else {
+      setLoading(false);
     }
   }, [id]);
 
@@ -67,6 +80,14 @@ export default function ConfirmationPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   if (!request) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -90,6 +111,12 @@ export default function ConfirmationPage() {
             min-height: auto !important;
             width: auto !important;
             background: white !important;
+            color: black !important;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-scheme: light !important;
           }
           .print\:hidden {
             display: none !important;
@@ -101,6 +128,8 @@ export default function ConfirmationPage() {
             border: 1px solid #e5e7eb !important;
             height: auto !important;
             width: auto !important;
+            background: white !important;
+            color: black !important;
           }
         }
       `}</style>

@@ -40,7 +40,7 @@ export const ensureAdminWithSampleRequest = async () => {
       shop_name: "Abelov Technical Records",
       technician_name: "Admin Technician",
       request_date: new Date().toISOString().slice(0, 10),
-      customer_name: "John Doe",
+      customer_name: "",
       customer_phone: "+234-000-0000",
       customer_email: "john.doe@example.com",
       customer_address: "123 Main Street, Lagos",

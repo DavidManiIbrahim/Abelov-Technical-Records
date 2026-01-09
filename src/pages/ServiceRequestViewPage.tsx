@@ -115,6 +115,12 @@ export default function ServiceRequestViewPage() {
             min-height: auto !important;
             width: auto !important;
             background: white !important;
+            color: black !important;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-scheme: light !important;
           }
           .print-hide { display: none !important; }
           .print-show { display: block !important; }
@@ -125,6 +131,8 @@ export default function ServiceRequestViewPage() {
             max-width: none !important;
             margin: 0 !important;
             padding: 0.2cm !important;
+            background: white !important;
+            color: black !important;
           }
           .print-container {
             width: auto !important;
@@ -137,6 +145,8 @@ export default function ServiceRequestViewPage() {
             text-align: center !important;
             height: auto !important;
             min-height: auto !important;
+            background: white !important;
+            color: black !important;
           }
           .print-header {
              margin-bottom: 0.2rem !important;
@@ -151,6 +161,8 @@ export default function ServiceRequestViewPage() {
             border: 1px solid #e5e7eb !important;
             height: auto !important;
             width: auto !important;
+            background: white !important;
+            color: black !important;
           }
           [role="dialog"], .radix-state-open {
             display: none !important;
@@ -465,12 +477,14 @@ export default function ServiceRequestViewPage() {
             <div className="print-header">
               <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10 mx-auto mb-2" />
               <h1 className="text-lg font-bold text-black">Abelov Technical Records</h1>
-              <p className="text-[15px] font-bold text-gray-600 mt-1 uppercase tracking-tight">Service Request Record</p>
-              <p className="text-[16px] font-bold font-mono mt-0.5">ID: {request.id}</p>
+              <h5 className="text-[15px] font-bold text-gray-600 mt-1 uppercase tracking-tight">Service Request Record</h5>
+              <h6 className="text-[16px] font-bold font-mono mt-0.5">ID: {request.id}</h6>
               <div className="mt-2 text-center">
-                <p className="text-[22px] font-bold text-black">{request.customer_name}</p>
-                <p className="text-[18px] font-bold text-gray-700">{request.customer_phone}</p>
-                <p className="text-[18px] font-bold text-gray-700">{request.problem_description}</p>
+                <h4 className="text-[22px] font-bold text-black">{request.customer_name}</h4>
+                <h5 className="text-[18px] font-bold text-gray-700">{request.customer_phone}</h5>
+                <h6 className="text-[18px] font-bold text-gray-700">{request.problem_description}</h6>
+              <h6 className="text-xs italic text-gray-600 mb-4">Thank you for choosing Abelov International Ltd!</h6>
+
               </div>
               <div className="w-1/3 mx-auto border-b border-gray-200 mt-2"></div>
             </div>
@@ -482,9 +496,9 @@ export default function ServiceRequestViewPage() {
                   size={100}
                 />
               </div>
-              <p className="mt-2 text-[8px] font-bold text-black uppercase tracking-widest">
+              <h5 className="mt-2 text-[8px] font-bold text-black uppercase tracking-widest">
                 SCAN TO VIEW DETAILS
-              </p>
+              </h5>
             </div>
           </div>
         </div>
@@ -554,7 +568,7 @@ export default function ServiceRequestViewPage() {
             </div>
 
             <div className="text-center mt-8 border-t border-dashed pt-4">
-              <p className="text-xs italic text-gray-600 mb-4">Thank you for choosing Abelov Technical Records!</p>
+              <p className="text-xs italic text-gray-600 mb-4">Thank you for choosing Abelov International Ltd!</p>
               <div className="flex flex-col items-center gap-2">
                 <QRCode
                   value={`${window.location.origin}/#/view/${request.id}`}
