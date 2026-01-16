@@ -5,6 +5,13 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from '@/contexts/AuthContext';
 import { serviceRequestAPI, adminAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
@@ -23,6 +30,7 @@ export default function DashboardPage() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<ServiceRequest[]>([]);
   const [searchQuery, setSearchQuery] = usePersistentState('dashboard_search', '');
+  const [statusFilter, setStatusFilter] = usePersistentState('dashboard_status_filter', 'All');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
@@ -37,8 +45,12 @@ export default function DashboardPage() {
     if (!user?.id) return;
     setLoading(true);
     try {
+      const requestsPromise = statusFilter === 'All'
+        ? adminAPI.getAllServiceRequests(100, 0, true)
+        : adminAPI.getRequestsByStatus(statusFilter, 100, 0);
+
       const [data, statsData] = await Promise.all([
-        adminAPI.getAllServiceRequests(100, 0, true), // Force refresh on load
+        requestsPromise,
         adminAPI.getGlobalStats(true), // Force refresh on load
       ]);
       setRequests(data.requests || []);
@@ -57,7 +69,10 @@ export default function DashboardPage() {
       console.error('Error loading requests:', error);
       // Fallback: try to load just requests if stats fail
       try {
-        const data = await adminAPI.getAllServiceRequests(100, 0);
+        const data = statusFilter === 'All'
+          ? await adminAPI.getAllServiceRequests(100, 0)
+          : await adminAPI.getRequestsByStatus(statusFilter, 100, 0);
+
         setRequests(data.requests || []);
         setFilteredRequests(data.requests || []);
 
@@ -125,22 +140,32 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, statusFilter]);
 
   useEffect(() => {
-    loadRequests();
-  }, [loadRequests]);
+    if (!searchQuery) {
+      loadRequests();
+    } else {
+      handleSearch(searchQuery);
+    }
+  }, [loadRequests, statusFilter]);
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     if (!user?.id) return;
 
     if (query.trim() === '') {
-      setFilteredRequests(requests);
+      loadRequests();
     } else {
       try {
         const results = await adminAPI.searchRequests(query, 100, 0);
-        setFilteredRequests(results.requests || []);
+        let foundRequests = results.requests || [];
+
+        if (statusFilter !== 'All') {
+          foundRequests = foundRequests.filter(r => r.status === statusFilter);
+        }
+
+        setFilteredRequests(foundRequests);
       } catch (error) {
         console.error('Error searching:', error);
       }
@@ -252,6 +277,22 @@ export default function DashboardPage() {
               className="pl-10"
             />
           </div>
+
+          <div className="w-full md:w-[200px]">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All Statuses</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="In-Progress">In Progress</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value="On-Hold">On Hold</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <Button onClick={() => navigate('/new-request')} size="lg" className="md:flex hidden">
             <Plus className="w-4 h-4 mr-2" />
             New Request
@@ -269,10 +310,10 @@ export default function DashboardPage() {
         ) : filteredRequests.length === 0 ? (
           <Card className="p-12 text-center">
             <h3 className="text-xl font-semibold mb-2">
-              {searchQuery ? 'No Results Found' : 'No Service Requests Yet'}
+              {searchQuery || statusFilter !== 'All' ? 'No Results Found' : 'No Service Requests Yet'}
             </h3>
             <p className="text-muted-foreground mb-6">
-              {searchQuery ? 'Try adjusting your search query.' : 'Create your first service request to get started.'}
+              {searchQuery || statusFilter !== 'All' ? 'Try adjusting your search or filter.' : 'Create your first service request to get started.'}
             </p>
             <Button onClick={() => navigate('/new-request')}>
               <Plus className="w-4 h-4 mr-2" />
