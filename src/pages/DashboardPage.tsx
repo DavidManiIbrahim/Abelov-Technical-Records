@@ -214,7 +214,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
           <StatCard title="Total Requests" value={stats.total} />
           <StatCard title="Completed" value={stats.completed} />
           <StatCard title="Pending" value={stats.pending} />
@@ -279,7 +279,7 @@ export default function DashboardPage() {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {filteredRequests.map((request) => (
               <Card key={request.id} className="p-6 hover:shadow-lg transition-shadow">
                 <div className="flex items-start justify-between mb-4">
@@ -353,13 +353,15 @@ export default function DashboardPage() {
                   >
                     <Edit className="w-3 h-3" />
                   </Button>
-                  <Button
-                    onClick={() => handleDelete(request.id)}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+                  {isAdmin && (
+                    <Button
+                      onClick={() => handleDelete(request.id)}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
                 </div>
               </Card>
             ))}

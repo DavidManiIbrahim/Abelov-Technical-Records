@@ -16,6 +16,9 @@ router.delete("/users/:id", ctrl.deleteUser);
 router.get("/logs", ctrl.getActivityLogs);
 router.get("/requests/search", ctrl.searchRequests);
 router.get("/requests", ctrl.getAllRequests);
+router.post("/users/:id/roles", ctrl.assignRole);
+router.delete("/users/:id/roles/:role", ctrl.removeRole);
+router.put("/users/:id/status", ctrl.toggleUserStatus);
 
 
 export default router;

@@ -227,7 +227,7 @@ export const adminAPI = {
         pendingTickets: number;
         completedTickets: number;
         inProgressTickets: number;
-        onHoldTickets: number;
+        unsuccessfulTickets: number;
         totalRevenue: number;
       }>(key);
       if (cached) return cached;
@@ -240,7 +240,7 @@ export const adminAPI = {
       pendingTickets: number;
       completedTickets: number;
       inProgressTickets: number;
-      onHoldTickets: number;
+      unsuccessfulTickets: number;
       totalRevenue: number;
     };
     setCache(key, stats);

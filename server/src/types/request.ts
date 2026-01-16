@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const RequestStatusEnum = z.enum(["Pending", "In-Progress", "Completed", "On-Hold"]);
+export const RequestStatusEnum = z.enum(["Pending", "In-Progress", "Completed", "Unsuccessful"]);
 
 export const RequestSchema = z.object({
   shop_name: z.string().optional().default(''),

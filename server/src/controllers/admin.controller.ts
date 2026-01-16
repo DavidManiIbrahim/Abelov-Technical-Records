@@ -184,6 +184,66 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+export const assignRole = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (!role) {
+      throw new ApiError(400, "Role is required");
+    }
+
+    const user = await UserModel.findById(id);
+    if (!user) throw new ApiError(404, "User not found");
+
+    // Replace existing roles with the new role to ensure consistency with single-role UI
+    user.roles = [role];
+    await user.save();
+
+    res.json({ message: `User role updated to '${role}'`, user: user.toJSON() });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const removeRole = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id, role } = req.params;
+
+    const user = await UserModel.findById(id);
+    if (!user) throw new ApiError(404, "User not found");
+
+    const initialRoleCount = user.roles.length;
+    user.roles = user.roles.filter((r: string) => r !== role);
+
+    if (user.roles.length === initialRoleCount) {
+      throw new ApiError(404, `Role '${role}' not found for this user`);
+    }
+
+    await user.save();
+
+    res.json({ message: `Role '${role}' removed from user successfully`, user: user.toJSON() });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const toggleUserStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    const user = await UserModel.findById(id);
+    if (!user) throw new ApiError(404, "User not found");
+
+    user.is_active = !user.is_active;
+    await user.save();
+
+    res.json({ message: `User status toggled to ${user.is_active ? 'active' : 'inactive'} successfully`, user: user.toJSON() });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const getAllRequests = async (req: Request, res: Response, next: NextFunction) => {
 
   try {

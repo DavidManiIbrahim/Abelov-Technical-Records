@@ -34,17 +34,5 @@ if (!parsed.success) {
   throw new Error(`Invalid environment configuration: ${parsed.error.message}`);
 }
 
-export const env = parsed.data as unknown as {
-  NODE_ENV: "development" | "test" | "production";
-  PORT: number;
-  RATE_LIMIT_WINDOW_MS: number;
-  RATE_LIMIT_MAX: number;
-  MONGODB_URI: string;
-  MONGODB_DB_NAME: string;
-  MONGODB_MIN_POOL_SIZE: number;
-  MONGODB_MAX_POOL_SIZE: number;
-  FIELD_ENCRYPTION_KEY?: string;
-  ADMIN_EMAIL?: string;
-  ADMIN_PASSWORD?: string;
-  AUTH_SECRET?: string;
-};
+export type Env = z.infer<typeof EnvSchema>;
+export const env = parsed.data as Env;

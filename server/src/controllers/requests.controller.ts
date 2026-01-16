@@ -76,10 +76,13 @@ export const remove = async (req: Request, res: Response, next: NextFunction) =>
   const user = (req as any).user;
   const isAdmin = user.roles.includes("admin");
 
+  if (!isAdmin) {
+    return next(new ApiError(403, "Forbidden - Only admins can delete requests"));
+  }
+
   const existing = await RequestModel.findById(id);
   if (!existing) return next(new ApiError(404, "Request not found"));
 
-  // Made global: allow any authenticated user to delete
   await RequestModel.findByIdAndDelete(id);
   res.status(204).send();
 };
@@ -131,7 +134,7 @@ export const getStats = async (req: Request, res: Response, next: NextFunction) 
       pending: requests.filter((r: any) => r.status === "Pending").length,
       completed: requests.filter((r: any) => r.status === "Completed").length,
       inProgress: requests.filter((r: any) => r.status === "In-Progress").length,
-      onHold: requests.filter((r: any) => r.status === "On-Hold").length,
+      unsuccessful: requests.filter((r: any) => r.status === "Unsuccessful").length,
       totalRevenue: requests.reduce((sum: number, r: any) => sum + (r.total_cost || 0), 0),
     };
 
