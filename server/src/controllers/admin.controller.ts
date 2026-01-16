@@ -85,8 +85,10 @@ export const getGlobalStats = async (_req: Request, res: Response, next: NextFun
     const completedTickets = await RequestModel.countDocuments({ status: "Completed" });
     const unsuccessfulTickets = await RequestModel.countDocuments({ status: "Unsuccessful" });
 
-    const requests = await RequestModel.find();
-    const totalRevenue = requests.reduce((sum: number, r: any) => sum + (r.total_cost || 0), 0);
+    const totalRevenueResult = await RequestModel.aggregate([
+      { $group: { _id: null, total: { $sum: "$total_cost" } } }
+    ]);
+    const totalRevenue = totalRevenueResult[0]?.total || 0;
 
     res.json({
       totalUsers,
@@ -287,7 +289,7 @@ export const searchRequests = async (req: Request, res: Response, next: NextFunc
         { customer_name: { $regex: query, $options: "i" } },
         { customer_phone: { $regex: query, $options: "i" } },
         { customer_email: { $regex: query, $options: "i" } },
-        { device_serial: { $regex: query, $options: "i" } },
+        { serial_number: { $regex: query, $options: "i" } },
       ],
     };
 

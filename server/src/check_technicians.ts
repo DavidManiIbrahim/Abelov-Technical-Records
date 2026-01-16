@@ -1,11 +1,11 @@
 
 import mongoose from 'mongoose';
-import { RequestModel } from '../models/request.model'; // Adjust path if needed
-import { env } from '../config/env';
+import { RequestModel } from './models/request.model';
+import { env } from './config/env';
 
 const run = async () => {
     try {
-        await mongoose.connect(env.MONGO_URI || 'mongodb://localhost:27017/abelov_records');
+        await mongoose.connect(env.MONGODB_URI);
         console.log('Connected to DB');
 
         const technicians = await RequestModel.distinct('technician_name');

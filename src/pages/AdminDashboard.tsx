@@ -93,10 +93,10 @@ export default function AdminDashboard() {
       ]);
 
       setGlobalStats(stats as GlobalStats);
-      setUsers((usersData as unknown[]).map((u) => ({ ...u } as UserData)));
+      setUsers((usersData as any[]).map((u) => ({ ...u } as UserData)));
       setRequests((requestsData.requests || []) as RequestData[]);
       setTotalRequests(requestsData.total || 0);
-      setActivityLogs(logsData.logs);
+      setActivityLogs(logsData.logs as ActivityLog[]);
       setTotalLogs(logsData.total);
     } catch (error) {
       console.error('Failed to load admin data:', error);
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
 
     setLoading(true);
     try {
-      const results = await adminAPI.searchRequests(searchQuery, 50, 0);
+      const results = await adminAPI.searchRequests(searchQuery, 20, 0);
       setRequests(results.requests);
       setTotalRequests(results.total);
       setCurrentPage(0);
@@ -133,15 +133,19 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleStatusFilter = async () => {
-    if (statusFilter === 'all') {
+  const handleStatusFilterChange = (val: string) => {
+    setStatusFilter(val);
+    if (val === 'all') {
       loadData();
-      return;
+    } else {
+      filterByStatus(val);
     }
+  };
 
+  const filterByStatus = async (status: string) => {
     setLoading(true);
     try {
-      const results = await adminAPI.getRequestsByStatus(statusFilter, 50, 0);
+      const results = await adminAPI.getRequestsByStatus(status, 20, 0);
       setRequests(results.requests);
       setTotalRequests(results.total);
       setCurrentPage(0);
@@ -151,6 +155,29 @@ export default function AdminDashboard() {
         description: 'Filter failed',
         variant: 'destructive',
       });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePageChange = async (newPage: number) => {
+    setCurrentPage(newPage);
+    setLoading(true);
+    try {
+      const offset = newPage * 20;
+      let results;
+      if (searchQuery.trim()) {
+        results = await adminAPI.searchRequests(searchQuery, 20, offset);
+      } else if (statusFilter !== 'all') {
+        results = await adminAPI.getRequestsByStatus(statusFilter, 20, offset);
+      } else {
+        results = await adminAPI.getAllServiceRequests(20, offset, true);
+      }
+
+      setRequests(results.requests || []);
+      setTotalRequests(results.total || 0);
+    } catch (error) {
+      console.error('Pagination error:', error);
     } finally {
       setLoading(false);
     }
@@ -411,11 +438,7 @@ export default function AdminDashboard() {
                   </div>
 
                   <div>
-                    <Select value={statusFilter} onValueChange={(val) => {
-                      setStatusFilter(val);
-                      // Trigger filter when changed
-                      setTimeout(() => handleStatusFilter(), 0);
-                    }}>
+                    <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
                       <SelectTrigger className="w-full md:w-48">
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
@@ -487,16 +510,16 @@ export default function AdminDashboard() {
                       </p>
                       <div className="flex gap-2">
                         <Button
-                          onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                          disabled={currentPage === 0}
+                          onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
+                          disabled={currentPage === 0 || loading}
                           variant="outline"
                           size="sm"
                         >
                           Previous
                         </Button>
                         <Button
-                          onClick={() => setCurrentPage(currentPage + 1)}
-                          disabled={requests.length < 20}
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={requests.length < 20 || loading}
                           variant="outline"
                           size="sm"
                         >

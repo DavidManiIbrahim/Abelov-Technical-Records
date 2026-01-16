@@ -214,7 +214,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
           <StatCard title="Total Requests" value={stats.total} />
           <StatCard title="Completed" value={stats.completed} />
           <StatCard title="Pending" value={stats.pending} />
