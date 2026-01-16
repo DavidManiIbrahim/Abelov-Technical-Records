@@ -37,7 +37,8 @@ export default function DashboardPage() {
     completed: 0,
     pending: 0,
     inProgress: 0,
-    onHold: 0,
+    inProgress: 0,
+    unsuccessful: 0,
     totalRevenue: 0,
   });
 
@@ -62,7 +63,8 @@ export default function DashboardPage() {
         completed: statsData.completedTickets || 0,
         pending: statsData.pendingTickets || 0,
         inProgress: statsData.inProgressTickets || 0,
-        onHold: statsData.onHoldTickets || 0,
+        inProgress: statsData.inProgressTickets || 0,
+        unsuccessful: statsData.unsuccessfulTickets || 0,
         totalRevenue: statsData.totalRevenue || 0,
       });
     } catch (error) {
@@ -84,7 +86,8 @@ export default function DashboardPage() {
             completed: globalStats.completedTickets || 0,
             pending: globalStats.pendingTickets || 0,
             inProgress: globalStats.inProgressTickets || 0,
-            onHold: globalStats.onHoldTickets || 0,
+            inProgress: globalStats.inProgressTickets || 0,
+            unsuccessful: globalStats.unsuccessfulTickets || 0,
             totalRevenue: globalStats.totalRevenue || 0,
           });
         } catch {
@@ -105,8 +108,8 @@ export default function DashboardPage() {
                 case 'In-Progress':
                   acc.inProgress++;
                   break;
-                case 'On-Hold':
-                  acc.onHold++;
+                case 'Unsuccessful':
+                  acc.unsuccessful++;
                   break;
               }
 
@@ -117,7 +120,7 @@ export default function DashboardPage() {
               completed: 0,
               pending: 0,
               inProgress: 0,
-              onHold: 0,
+              unsuccessful: 0,
               totalRevenue: 0,
             }
           );
@@ -133,7 +136,7 @@ export default function DashboardPage() {
           completed: 0,
           pending: 0,
           inProgress: 0,
-          onHold: 0,
+          unsuccessful: 0,
           totalRevenue: 0,
         });
       }
@@ -191,8 +194,8 @@ export default function DashboardPage() {
         return 'bg-blue-100 text-blue-800';
       case 'Pending':
         return 'bg-yellow-100 text-yellow-800';
-      case 'On-Hold':
-        return 'bg-red-100 text-red-800';
+      case 'Unsuccessful':
+        return 'bg-gray-200 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -256,12 +259,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
           <StatCard title="Total Requests" value={stats.total} />
           <StatCard title="Completed" value={stats.completed} />
           <StatCard title="Pending" value={stats.pending} />
           <StatCard title="In Progress" value={stats.inProgress} />
-          <StatCard title="On Hold" value={stats.onHold} />
+          <StatCard title="Unsuccessful" value={stats.unsuccessful} />
           <StatCard title="Total Revenue" value={`₦${(stats.totalRevenue || 0).toLocaleString()}`} />
         </div>
 
@@ -288,7 +291,7 @@ export default function DashboardPage() {
                 <SelectItem value="Pending">Pending</SelectItem>
                 <SelectItem value="In-Progress">In Progress</SelectItem>
                 <SelectItem value="Completed">Completed</SelectItem>
-                <SelectItem value="On-Hold">On Hold</SelectItem>
+                <SelectItem value="Unsuccessful">Unsuccessful</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -321,7 +324,7 @@ export default function DashboardPage() {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
             {filteredRequests.map((request) => (
               <Card key={request.id} className="p-6 hover:shadow-lg transition-shadow">
                 <div className="flex items-start justify-between mb-4">
@@ -340,7 +343,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="border-t pt-4 mb-4">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-sm mb-2">
                     <div>
                       <p className="text-xs text-muted-foreground">Total Cost</p>
                       <p className="font-bold text-primary">₦{request.total_cost.toLocaleString()}</p>
@@ -351,6 +354,12 @@ export default function DashboardPage() {
                         ₦{request.balance.toLocaleString()}
                       </p>
                     </div>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <p className="text-xs text-muted-foreground">Payment Status</p>
+                    <Badge variant="outline" className={request.payment_completed ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}>
+                      {request.payment_completed ? 'Paid' : 'Unpaid'}
+                    </Badge>
                   </div>
                 </div>
 

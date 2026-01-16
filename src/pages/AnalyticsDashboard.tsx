@@ -63,7 +63,7 @@ export default function AnalyticsDashboard() {
     { status: 'Completed', count: requests.filter(r => r.status === 'Completed').length },
     { status: 'In-Progress', count: requests.filter(r => r.status === 'In-Progress').length },
     { status: 'Pending', count: requests.filter(r => r.status === 'Pending').length },
-    { status: 'On-Hold', count: requests.filter(r => r.status === 'On-Hold').length },
+
   ].filter(item => item.count > 0);
 
   // Technician work histogram
@@ -74,7 +74,7 @@ export default function AnalyticsDashboard() {
       existing.completed += req.status === 'Completed' ? 1 : 0;
       existing.inProgress += req.status === 'In-Progress' ? 1 : 0;
       existing.pending += req.status === 'Pending' ? 1 : 0;
-      existing.onHold += req.status === 'On-Hold' ? 1 : 0;
+
       existing.total += 1;
     } else {
       acc.push({
@@ -82,13 +82,13 @@ export default function AnalyticsDashboard() {
         completed: req.status === 'Completed' ? 1 : 0,
         inProgress: req.status === 'In-Progress' ? 1 : 0,
         pending: req.status === 'Pending' ? 1 : 0,
-        onHold: req.status === 'On-Hold' ? 1 : 0,
+
         total: 1,
       });
     }
     return acc;
     // }, [] as { technician: string; completed: number; inProgress: number; pending: number; total: number }[]);
-  }, [] as { technician: string; completed: number; inProgress: number; pending: number; onHold: number; total: number }[]);
+  }, [] as { technician: string; completed: number; inProgress: number; pending: number; total: number }[]);
 
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
 
@@ -242,7 +242,7 @@ export default function AnalyticsDashboard() {
                 <Bar dataKey="completed" fill="#10b981" name="Completed" stackId="a" />
                 <Bar dataKey="inProgress" fill="#3b82f6" name="In Progress" stackId="a" />
                 <Bar dataKey="pending" fill="#f59e0b" name="Pending" stackId="a" />
-                <Bar dataKey="onHold" fill="#ff0000" name="On Hold" stackId="a" />
+
               </BarChart>
             </ResponsiveContainer>
           ) : (

@@ -83,7 +83,7 @@ export const getGlobalStats = async (_req: Request, res: Response, next: NextFun
     const pendingTickets = await RequestModel.countDocuments({ status: "Pending" });
     const inProgressTickets = await RequestModel.countDocuments({ status: "In-Progress" });
     const completedTickets = await RequestModel.countDocuments({ status: "Completed" });
-    const onHoldTickets = await RequestModel.countDocuments({ status: "On-Hold" });
+    const unsuccessfulTickets = await RequestModel.countDocuments({ status: "Unsuccessful" });
 
     const requests = await RequestModel.find();
     const totalRevenue = requests.reduce((sum: number, r: any) => sum + (r.total_cost || 0), 0);
@@ -94,7 +94,7 @@ export const getGlobalStats = async (_req: Request, res: Response, next: NextFun
       pendingTickets,
       completedTickets,
       inProgressTickets,
-      onHoldTickets,
+      unsuccessfulTickets,
       totalRevenue,
     });
   } catch (err) {

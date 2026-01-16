@@ -248,11 +248,20 @@ export default function ServiceRequestForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="technician_name">Technician Name</Label>
-                <Input
-                  id="technician_name"
+                <Select
                   value={formData.technician_name}
-                  onChange={(e) => updateField('technician_name', e.target.value)}
-                />
+                  onValueChange={(value) => updateField('technician_name', value)}
+                >
+                  <SelectTrigger id="technician_name">
+                    <SelectValue placeholder="Select Technician" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Godwin Elkana">Godwin Elkana</SelectItem>
+                    <SelectItem value="Emmanuel Daniel">Emmanuel Daniel</SelectItem>
+                    <SelectItem value="Douglas Noku">Douglas Noku</SelectItem>
+                    <SelectItem value="Boss Abel">Boss Abel</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="request_date">Request Date</Label>
@@ -386,11 +395,20 @@ export default function ServiceRequestForm() {
               </div>
               <div>
                 <Label htmlFor="diagnosis_technician">Diagnosis Technician</Label>
-                <Input
-                  id="diagnosis_technician"
+                <Select
                   value={formData.diagnosis_technician}
-                  onChange={(e) => updateField('diagnosis_technician', e.target.value)}
-                />
+                  onValueChange={(value) => updateField('diagnosis_technician', value)}
+                >
+                  <SelectTrigger id="diagnosis_technician">
+                    <SelectValue placeholder="Select Technician" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Godwin Elkana">Godwin Elkana</SelectItem>
+                    <SelectItem value="Emmanuel Daniel">Emmanuel Daniel</SelectItem>
+                    <SelectItem value="Douglas Noku">Douglas Noku</SelectItem>
+                    <SelectItem value="Boss Abel">Boss Abel</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="md:col-span-2">
                 <Label htmlFor="fault_found">Fault Found</Label>
@@ -432,7 +450,9 @@ export default function ServiceRequestForm() {
                     <SelectItem value="Pending">Pending</SelectItem>
                     <SelectItem value="In-Progress">In-Progress</SelectItem>
                     <SelectItem value="Completed">Completed</SelectItem>
-                    <SelectItem value="On-Hold">On-Hold</SelectItem>
+
+
+                    <SelectItem value="Unsuccessful">Unsuccessful</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -537,16 +557,25 @@ export default function ServiceRequestForm() {
               </div>
               <div>
                 <Label htmlFor="confirmation_technician">Technician</Label>
-                <Input
-                  id="confirmation_technician"
+                <Select
                   value={formData.customer_confirmation?.technician}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     updateField('customer_confirmation', {
                       ...formData.customer_confirmation,
-                      technician: e.target.value,
+                      technician: value,
                     })
                   }
-                />
+                >
+                  <SelectTrigger id="confirmation_technician">
+                    <SelectValue placeholder="Select Technician" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Godwin Elkana">Godwin Elkana</SelectItem>
+                    <SelectItem value="Emmanuel Daniel">Emmanuel Daniel</SelectItem>
+                    <SelectItem value="Douglas Noku">Douglas Noku</SelectItem>
+                    <SelectItem value="Boss Abel">Boss Abel</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </Card>
