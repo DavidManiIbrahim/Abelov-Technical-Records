@@ -43,107 +43,62 @@ export default function DashboardPage() {
   });
 
   const loadRequests = useCallback(async () => {
-    if (!user?.id) return;
     setLoading(true);
     try {
-      const requestsPromise = statusFilter === 'All'
-        ? adminAPI.getAllServiceRequests(100, 0, true)
-        : adminAPI.getRequestsByStatus(statusFilter, 100, 0);
-
-      const [data, statsData] = await Promise.all([
-        requestsPromise,
-        adminAPI.getGlobalStats(true), // Force refresh on load
+      // Logic for fetching global requests for everyone
+      const [data, globalStatsData] = await Promise.allSettled([
+        serviceRequestAPI.getAll(true),
+        adminAPI.getGlobalStats(true),
       ]);
-      setRequests(data.requests || []);
-      setFilteredRequests(data.requests || []);
 
-      // Map global stats to expected format
-      setStats({
-        total: statsData.totalTickets || 0,
-        completed: statsData.completedTickets || 0,
-        pending: statsData.pendingTickets || 0,
-        inProgress: statsData.inProgressTickets || 0,
-        inProgress: statsData.inProgressTickets || 0,
-        unsuccessful: statsData.unsuccessfulTickets || 0,
-        totalRevenue: statsData.totalRevenue || 0,
-      });
-    } catch (error) {
-      console.error('Error loading requests:', error);
-      // Fallback: try to load just requests if stats fail
-      try {
-        const data = statusFilter === 'All'
-          ? await adminAPI.getAllServiceRequests(100, 0)
-          : await adminAPI.getRequestsByStatus(statusFilter, 100, 0);
+      const requestsData = data.status === 'fulfilled' ? data.value : [];
+      setRequests(requestsData);
+      setFilteredRequests(requestsData);
 
-        setRequests(data.requests || []);
-        setFilteredRequests(data.requests || []);
-
-        // Try to get global stats as fallback
-        try {
-          const globalStats = await adminAPI.getGlobalStats();
-          setStats({
-            total: globalStats.totalTickets || 0,
-            completed: globalStats.completedTickets || 0,
-            pending: globalStats.pendingTickets || 0,
-            inProgress: globalStats.inProgressTickets || 0,
-            inProgress: globalStats.inProgressTickets || 0,
-            unsuccessful: globalStats.unsuccessfulTickets || 0,
-            totalRevenue: globalStats.totalRevenue || 0,
-          });
-        } catch {
-          // Calculate stats locally from loaded requests as last resort
-          const loadedRequests = data.requests || [];
-          const calculatedStats = loadedRequests.reduce(
-            (acc, request) => {
-              acc.total++;
-              acc.totalRevenue += request.total_cost || 0;
-
-              switch (request.status) {
-                case 'Completed':
-                  acc.completed++;
-                  break;
-                case 'Pending':
-                  acc.pending++;
-                  break;
-                case 'In-Progress':
-                  acc.inProgress++;
-                  break;
-                case 'Unsuccessful':
-                  acc.unsuccessful++;
-                  break;
-              }
-
-              return acc;
-            },
-            {
-              total: 0,
-              completed: 0,
-              pending: 0,
-              inProgress: 0,
-              unsuccessful: 0,
-              totalRevenue: 0,
-            }
-          );
-
-          setStats(calculatedStats);
-        }
-      } catch (fallbackError) {
-        console.error('Fallback request loading also failed:', fallbackError);
-        setRequests([]);
-        setFilteredRequests([]);
+      if (globalStatsData.status === 'fulfilled') {
+        const gs = globalStatsData.value;
         setStats({
-          total: 0,
-          completed: 0,
-          pending: 0,
-          inProgress: 0,
-          unsuccessful: 0,
-          totalRevenue: 0,
+          total: gs.totalTickets || 0,
+          completed: gs.completedTickets || 0,
+          pending: gs.pendingTickets || 0,
+          inProgress: gs.inProgressTickets || 0,
+          unsuccessful: gs.unsuccessfulTickets || 0,
+          totalRevenue: gs.totalRevenue || 0,
         });
+      } else {
+        // Fallback to local calculation from global requests
+        const calculatedStats = requestsData.reduce(
+          (acc, request) => {
+            acc.total++;
+            acc.totalRevenue += request.total_cost || 0;
+            switch (request.status) {
+              case 'Completed': acc.completed++; break;
+              case 'Pending': acc.pending++; break;
+              case 'In-Progress': acc.inProgress++; break;
+              case 'Unsuccessful': acc.unsuccessful++; break;
+            }
+            return acc;
+          },
+          { total: 0, completed: 0, pending: 0, inProgress: 0, unsuccessful: 0, totalRevenue: 0 }
+        );
+        setStats(calculatedStats);
       }
+    } catch (error) {
+      console.error('Fatal error loading dashboard data:', error);
+      setRequests([]);
+      setFilteredRequests([]);
+      setStats({
+        total: 0,
+        completed: 0,
+        pending: 0,
+        inProgress: 0,
+        unsuccessful: 0,
+        totalRevenue: 0,
+      });
     } finally {
       setLoading(false);
     }
-  }, [user?.id, statusFilter]);
+  }, [statusFilter]);
 
   useEffect(() => {
     if (!searchQuery) {

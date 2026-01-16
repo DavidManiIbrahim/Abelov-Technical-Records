@@ -100,7 +100,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md p-8 shadow-2xl relative z-10 bg-white/95 backdrop-blur">
         <div className="mb-8 text-center">
           <img src={abelovLogo} alt="Abelov Logo" className="w-20 rounded-3xl h-20 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-primary mb-2">Abelov Technical Records</h1>
+          <h1 className="text-3xl font-bold dark:text-black text-primary mb-2">Abelov Technical Records</h1>
           <p className="text-muted-foreground">
             {isSignUp ? 'Create your account' : 'Welcome back'}
           </p>
@@ -108,7 +108,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label className="dark:text-black" htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
@@ -120,7 +120,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <Label htmlFor="password">Password</Label>
+            <Label className="dark:text-black" htmlFor="password">Password</Label>
             <Input
               id="password"
               type="password"
@@ -166,7 +166,7 @@ export default function LoginPage() {
             </>
           )}
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full border " disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

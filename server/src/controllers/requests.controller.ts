@@ -7,7 +7,8 @@ export const getAll = async (req: Request, res: Response) => {
   const user = (req as any).user;
   const isAdmin = user.roles.includes("admin");
 
-  const data = await RequestModel.find(isAdmin ? {} : { user_id: user.id })
+  // Made global: any authenticated user can see all requests
+  const data = await RequestModel.find({})
     .sort({ created_at: -1 });
 
   res.json({ data: data.map(d => (d as any).toJSON()) });
@@ -21,10 +22,7 @@ export const getById = async (req: Request, res: Response, next: NextFunction) =
   const entity = await RequestModel.findById(id);
   if (!entity) return next(new ApiError(404, "Request not found"));
 
-  if (!isAdmin && entity.user_id !== user.id.toString()) {
-    return next(new ApiError(403, "Forbidden - Access denied to this request"));
-  }
-
+  // Made global: no ownership check needed for fetching by ID
   res.json({ data: (entity as any).toJSON() });
 };
 
@@ -55,10 +53,7 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
     const existing = await RequestModel.findById(id);
     if (!existing) return next(new ApiError(404, "Request not found"));
 
-    if (!isAdmin && existing.user_id !== user.id.toString()) {
-      return next(new ApiError(403, "Forbidden - Access denied"));
-    }
-
+    // Made global: allow any authenticated user to update
     const parsed = RequestUpdateSchema.parse(req.body);
 
     // Prevent changing user_id through update
@@ -84,10 +79,7 @@ export const remove = async (req: Request, res: Response, next: NextFunction) =>
   const existing = await RequestModel.findById(id);
   if (!existing) return next(new ApiError(404, "Request not found"));
 
-  if (!isAdmin && existing.user_id !== user.id.toString()) {
-    return next(new ApiError(403, "Forbidden"));
-  }
-
+  // Made global: allow any authenticated user to delete
   await RequestModel.findByIdAndDelete(id);
   res.status(204).send();
 };

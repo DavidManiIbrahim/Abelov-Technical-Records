@@ -15,10 +15,12 @@ const VALID_TECHNICIANS = [
 const normalizeName = (name: string | undefined): string | undefined => {
     if (!name) return name;
 
-    // If exact match, return it
-    if (VALID_TECHNICIANS.includes(name)) return name;
+    // Trim whitespace
+    const trimmed = name.trim();
+    if (!trimmed) return undefined;
 
-    const lowerName = name.toLowerCase();
+    // Use canonical case for matching
+    const lowerName = trimmed.toLowerCase();
 
     // Keyword matching
     if (lowerName.includes('godwin') || lowerName.includes('elkana')) {
@@ -34,8 +36,8 @@ const normalizeName = (name: string | undefined): string | undefined => {
         return 'Boss Abel';
     }
 
-    // If no match found, keep original or return a default (keeping original for safety)
-    return name;
+    // Default to Title Case for unknown names to avoid casing duplicates
+    return trimmed.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 };
 
 const runMigration = async () => {
