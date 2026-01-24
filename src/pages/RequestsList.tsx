@@ -3,23 +3,37 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ServiceRequest } from "@/types/serviceRequest";
-import { getServiceRequests } from "@/utils/storage";
+import { ServiceRequest } from "@/types/database";
+import { serviceRequestAPI } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { Plus, FileText, Calendar, User, Phone, Search, Edit } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function RequestsList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   useEffect(() => {
-    setRequests(getServiceRequests().reverse());
-  }, []);
+    const fetchRequests = async () => {
+      if (user) {
+        try {
+          const data = await serviceRequestAPI.getByUserId(user.id);
+          setRequests(data.reverse());
+        } catch (error) {
+          console.error('Failed to fetch requests:', error);
+        }
+      }
+    };
+    fetchRequests();
+  }, [user]);
 
   const filteredRequests = requests.filter(request => {
     const query = searchQuery.toLowerCase();
-    return (
+    const matchesSearch = (
       request.customer_name.toLowerCase().includes(query) ||
       request.customer_phone.toLowerCase().includes(query) ||
       request.device_model.toLowerCase().includes(query) ||
@@ -27,6 +41,8 @@ export default function RequestsList() {
       request.id.toLowerCase().includes(query) ||
       request.status.toLowerCase().includes(query)
     );
+    const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
   const getStatusColor = (status: string) => {
@@ -35,8 +51,10 @@ export default function RequestsList() {
         return "bg-green-100 text-green-800 border-green-300";
       case "Pending":
         return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "Awaiting":
+      case "In-Progress":
         return "bg-blue-100 text-blue-800 border-blue-300";
+      case "On-Hold":
+        return "bg-red-100 text-red-800 border-red-300";
       default:
         return "bg-gray-100 text-gray-800 border-gray-300";
     }
@@ -56,15 +74,29 @@ export default function RequestsList() {
               New Request
             </Button>
           </div>
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search by name, phone, device, ID, or status..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search by name, phone, device, ID, or status..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="In-Progress">In-Progress</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value="On-Hold">On-Hold</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

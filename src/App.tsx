@@ -13,6 +13,7 @@ import ServiceRequestViewPage from "@/pages/ServiceRequestViewPage";
 import DashboardPage from "@/pages/DashboardPage";
 import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
+import RequestsList from "@/pages/RequestsList";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -73,6 +74,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <AnalyticsDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/requests"
+                element={
+                  <ProtectedRoute>
+                    <RequestsList />
                   </ProtectedRoute>
                 }
               />
