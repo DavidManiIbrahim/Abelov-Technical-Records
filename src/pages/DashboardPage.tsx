@@ -37,7 +37,6 @@ export default function DashboardPage() {
     completed: 0,
     pending: 0,
     inProgress: 0,
-    inProgress: 0,
     unsuccessful: 0,
     totalRevenue: 0,
   });
