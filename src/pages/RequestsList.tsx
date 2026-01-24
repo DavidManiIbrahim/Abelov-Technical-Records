@@ -17,6 +17,10 @@ export default function RequestsList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+  };
+
   useEffect(() => {
     const fetchRequests = async () => {
       if (user) {
@@ -85,16 +89,16 @@ export default function RequestsList() {
                 className="pl-10"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="Pending">Pending</SelectItem>
                 <SelectItem value="In-Progress">In-Progress</SelectItem>
                 <SelectItem value="Completed">Completed</SelectItem>
-                <SelectItem value="On-Hold">On-Hold</SelectItem>
+                <SelectItem value="On-Hold">Unsuccessful</SelectItem>
               </SelectContent>
             </Select>
           </div>
