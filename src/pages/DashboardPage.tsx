@@ -53,7 +53,12 @@ export default function DashboardPage() {
 
       const requestsData = data.status === 'fulfilled' ? data.value : [];
       setRequests(requestsData);
-      setFilteredRequests(requestsData);
+
+      let filtered = requestsData;
+      if (statusFilter !== 'All') {
+        filtered = requestsData.filter(r => r.status === statusFilter);
+      }
+      setFilteredRequests(filtered);
 
       if (globalStatsData.status === 'fulfilled') {
         const gs = globalStatsData.value;
