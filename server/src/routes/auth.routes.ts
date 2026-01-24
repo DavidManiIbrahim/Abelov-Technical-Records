@@ -5,9 +5,9 @@ import * as ctrl from "../controllers/auth.controller";
 import { authenticate } from "../middlewares/auth";
 
 const authRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 5 * 60 * 1000, // 5 minutes
   max: 5, // Limit each IP to 5 requests per window for registration/login
-  message: { error: "Too many authentication attempts, please try again after 15 minutes" },
+  message: { error: "Too many authentication attempts, please try again after 5 minutes" },
   standardHeaders: true,
   legacyHeaders: false,
 });

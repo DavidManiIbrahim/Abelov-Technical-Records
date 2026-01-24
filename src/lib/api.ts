@@ -116,6 +116,18 @@ export const serviceRequestAPI = {
     return list;
   },
 
+  async getAll(forceRefresh = false) {
+    const key = 'service_requests_global';
+    if (!forceRefresh) {
+      const cached = getCache<ServiceRequest[]>(key);
+      if (cached) return cached;
+    }
+    const res = await apiFetch('/requests');
+    const list = (res?.data || res) as ServiceRequest[];
+    setCache<ServiceRequest[]>(key, list);
+    return list;
+  },
+
   async update(id: string, updates: Partial<ServiceRequest>) {
     const res = await apiFetch(`/requests/${id}`, {
       method: 'PUT',
@@ -215,7 +227,7 @@ export const adminAPI = {
         pendingTickets: number;
         completedTickets: number;
         inProgressTickets: number;
-        onHoldTickets: number;
+        unsuccessfulTickets: number;
         totalRevenue: number;
       }>(key);
       if (cached) return cached;
@@ -228,7 +240,7 @@ export const adminAPI = {
       pendingTickets: number;
       completedTickets: number;
       inProgressTickets: number;
-      onHoldTickets: number;
+      unsuccessfulTickets: number;
       totalRevenue: number;
     };
     setCache(key, stats);

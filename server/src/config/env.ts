@@ -24,6 +24,7 @@ const EnvSchema = z.object({
   MONGODB_MAX_POOL_SIZE: z.string().transform((v) => Number(v)).default("20"),
   FIELD_ENCRYPTION_KEY: z.string().min(32).optional(),
   ADMIN_EMAIL: z.string().email().optional(),
+  ADMIN_PASSWORD: z.string().min(6).optional(),
   AUTH_SECRET: z.string().min(16).optional()
 });
 
@@ -33,16 +34,5 @@ if (!parsed.success) {
   throw new Error(`Invalid environment configuration: ${parsed.error.message}`);
 }
 
-export const env = parsed.data as unknown as {
-  NODE_ENV: "development" | "test" | "production";
-  PORT: number;
-  RATE_LIMIT_WINDOW_MS: number;
-  RATE_LIMIT_MAX: number;
-  MONGODB_URI: string;
-  MONGODB_DB_NAME: string;
-  MONGODB_MIN_POOL_SIZE: number;
-  MONGODB_MAX_POOL_SIZE: number;
-  FIELD_ENCRYPTION_KEY?: string;
-  ADMIN_EMAIL?: string;
-  AUTH_SECRET?: string;
-};
+export type Env = z.infer<typeof EnvSchema>;
+export const env = parsed.data as Env;

@@ -1,5 +1,5 @@
 export type DeviceModel = "Laptop" | "Desktop" | "Other";
-export type RequestStatus = "Pending" | "Completed" | "Awaiting";
+export type RequestStatus = "Pending" | "Completed" | "Awaiting" | "Unsuccessful";
 
 export interface RepairTimelineStep {
   step: string;

@@ -2,20 +2,13 @@ import type { Request, Response, NextFunction } from "express";
 import { ApiError } from "../middlewares/error";
 import { RequestSchema, RequestUpdateSchema } from "../types/request";
 import { RequestModel } from "../models/request.model";
-import {
-  listRequests,
-  getRequestById,
-  createRequest,
-  updateRequest,
-  deleteRequest,
-  recordPayment as recordPaymentService,
-} from "../services/requests.service";
 
 export const getAll = async (req: Request, res: Response) => {
   const user = (req as any).user;
   const isAdmin = user.roles.includes("admin");
 
-  const data = await RequestModel.find(isAdmin ? {} : { user_id: user.id })
+  // Made global: any authenticated user can see all requests
+  const data = await RequestModel.find({})
     .sort({ created_at: -1 });
 
   res.json({ data: data.map(d => (d as any).toJSON()) });
@@ -29,10 +22,7 @@ export const getById = async (req: Request, res: Response, next: NextFunction) =
   const entity = await RequestModel.findById(id);
   if (!entity) return next(new ApiError(404, "Request not found"));
 
-  if (!isAdmin && entity.user_id !== user.id.toString()) {
-    return next(new ApiError(403, "Forbidden - Access denied to this request"));
-  }
-
+  // Made global: no ownership check needed for fetching by ID
   res.json({ data: (entity as any).toJSON() });
 };
 
@@ -42,12 +32,13 @@ export const create = async (req: Request, res: Response, next: NextFunction) =>
     const parsed = RequestSchema.parse(req.body);
 
     // Force user_id to be the authenticated user
-    const entity = await createRequest({
+    const entity = new RequestModel({
       ...parsed,
       user_id: user.id
-    } as any);
+    });
+    await entity.save();
 
-    res.status(201).json({ data: entity });
+    res.status(201).json({ data: (entity as any).toJSON() });
   } catch (err) {
     next(err);
   }
@@ -62,17 +53,19 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
     const existing = await RequestModel.findById(id);
     if (!existing) return next(new ApiError(404, "Request not found"));
 
-    if (!isAdmin && existing.user_id !== user.id.toString()) {
-      return next(new ApiError(403, "Forbidden - Access denied"));
-    }
-
+    // Made global: allow any authenticated user to update
     const parsed = RequestUpdateSchema.parse(req.body);
 
     // Prevent changing user_id through update
     delete (parsed as any).user_id;
 
-    const entity = await updateRequest(id, parsed);
-    res.json({ data: entity });
+    const entity = await RequestModel.findByIdAndUpdate(
+      id,
+      { $set: parsed },
+      { new: true, runValidators: true }
+    );
+
+    res.json({ data: (entity as any).toJSON() });
   } catch (err) {
     next(err);
   }
@@ -83,14 +76,14 @@ export const remove = async (req: Request, res: Response, next: NextFunction) =>
   const user = (req as any).user;
   const isAdmin = user.roles.includes("admin");
 
+  if (!isAdmin) {
+    return next(new ApiError(403, "Forbidden - Only admins can delete requests"));
+  }
+
   const existing = await RequestModel.findById(id);
   if (!existing) return next(new ApiError(404, "Request not found"));
 
-  if (!isAdmin && existing.user_id !== user.id.toString()) {
-    return next(new ApiError(403, "Forbidden"));
-  }
-
-  const ok = await deleteRequest(id);
+  await RequestModel.findByIdAndDelete(id);
   res.status(204).send();
 };
 
@@ -110,10 +103,21 @@ export const recordPayment = async (req: Request, res: Response, next: NextFunct
       }
     }
 
-    const { amount, reference } = req.body;
+    const { amount } = req.body;
 
-    const entity = await recordPaymentService(id, amount, reference);
-    res.json({ data: entity });
+    const currentDeposit = existing.get("deposit_paid") || 0;
+    const newDeposit = currentDeposit + amount;
+    const totalCost = existing.get("total_cost") || 0;
+    const newBalance = totalCost - newDeposit;
+    const paymentCompleted = newBalance <= 0;
+
+    existing.set("deposit_paid", newDeposit);
+    existing.set("balance", newBalance);
+    existing.set("payment_completed", paymentCompleted);
+
+    await existing.save();
+
+    res.json({ data: (existing as any).toJSON() });
   } catch (err) {
     next(err);
   }
@@ -130,7 +134,7 @@ export const getStats = async (req: Request, res: Response, next: NextFunction) 
       pending: requests.filter((r: any) => r.status === "Pending").length,
       completed: requests.filter((r: any) => r.status === "Completed").length,
       inProgress: requests.filter((r: any) => r.status === "In-Progress").length,
-      onHold: requests.filter((r: any) => r.status === "On-Hold").length,
+      unsuccessful: requests.filter((r: any) => r.status === "Unsuccessful").length,
       totalRevenue: requests.reduce((sum: number, r: any) => sum + (r.total_cost || 0), 0),
     };
 

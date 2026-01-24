@@ -5,11 +5,19 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from '@/contexts/AuthContext';
 import { serviceRequestAPI, adminAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
 import { Plus, Search, Edit, Eye, Trash2, BarChart3, Shield } from 'lucide-react';
 import ProfileMenu from '@/components/ProfileMenu';
+import ThemeToggle from '@/components/ThemeToggle';
 import abelovLogo from '@/assets/abelov-logo.png';
 
 export default function DashboardPage() {
@@ -22,124 +30,100 @@ export default function DashboardPage() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<ServiceRequest[]>([]);
   const [searchQuery, setSearchQuery] = usePersistentState('dashboard_search', '');
+  const [statusFilter, setStatusFilter] = usePersistentState('dashboard_status_filter', 'All');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
     completed: 0,
     pending: 0,
     inProgress: 0,
-    onHold: 0,
+    inProgress: 0,
+    unsuccessful: 0,
     totalRevenue: 0,
   });
 
   const loadRequests = useCallback(async () => {
-    if (!user?.id) return;
     setLoading(true);
     try {
-      const [data, statsData] = await Promise.all([
-        adminAPI.getAllServiceRequests(100, 0, true), // Force refresh on load
-        adminAPI.getGlobalStats(true), // Force refresh on load
+      // Logic for fetching global requests for everyone
+      const [data, globalStatsData] = await Promise.allSettled([
+        serviceRequestAPI.getAll(true),
+        adminAPI.getGlobalStats(true),
       ]);
-      setRequests(data.requests || []);
-      setFilteredRequests(data.requests || []);
 
-      // Map global stats to expected format
-      setStats({
-        total: statsData.totalTickets || 0,
-        completed: statsData.completedTickets || 0,
-        pending: statsData.pendingTickets || 0,
-        inProgress: statsData.inProgressTickets || 0,
-        onHold: statsData.onHoldTickets || 0,
-        totalRevenue: statsData.totalRevenue || 0,
-      });
-    } catch (error) {
-      console.error('Error loading requests:', error);
-      // Fallback: try to load just requests if stats fail
-      try {
-        const data = await adminAPI.getAllServiceRequests(100, 0);
-        setRequests(data.requests || []);
-        setFilteredRequests(data.requests || []);
+      const requestsData = data.status === 'fulfilled' ? data.value : [];
+      setRequests(requestsData);
+      setFilteredRequests(requestsData);
 
-        // Try to get global stats as fallback
-        try {
-          const globalStats = await adminAPI.getGlobalStats();
-          setStats({
-            total: globalStats.totalTickets || 0,
-            completed: globalStats.completedTickets || 0,
-            pending: globalStats.pendingTickets || 0,
-            inProgress: globalStats.inProgressTickets || 0,
-            onHold: globalStats.onHoldTickets || 0,
-            totalRevenue: globalStats.totalRevenue || 0,
-          });
-        } catch {
-          // Calculate stats locally from loaded requests as last resort
-          const loadedRequests = data.requests || [];
-          const calculatedStats = loadedRequests.reduce(
-            (acc, request) => {
-              acc.total++;
-              acc.totalRevenue += request.total_cost || 0;
-
-              switch (request.status) {
-                case 'Completed':
-                  acc.completed++;
-                  break;
-                case 'Pending':
-                  acc.pending++;
-                  break;
-                case 'In-Progress':
-                  acc.inProgress++;
-                  break;
-                case 'On-Hold':
-                  acc.onHold++;
-                  break;
-              }
-
-              return acc;
-            },
-            {
-              total: 0,
-              completed: 0,
-              pending: 0,
-              inProgress: 0,
-              onHold: 0,
-              totalRevenue: 0,
-            }
-          );
-
-          setStats(calculatedStats);
-        }
-      } catch (fallbackError) {
-        console.error('Fallback request loading also failed:', fallbackError);
-        setRequests([]);
-        setFilteredRequests([]);
+      if (globalStatsData.status === 'fulfilled') {
+        const gs = globalStatsData.value;
         setStats({
-          total: 0,
-          completed: 0,
-          pending: 0,
-          inProgress: 0,
-          onHold: 0,
-          totalRevenue: 0,
+          total: gs.totalTickets || 0,
+          completed: gs.completedTickets || 0,
+          pending: gs.pendingTickets || 0,
+          inProgress: gs.inProgressTickets || 0,
+          unsuccessful: gs.unsuccessfulTickets || 0,
+          totalRevenue: gs.totalRevenue || 0,
         });
+      } else {
+        // Fallback to local calculation from global requests
+        const calculatedStats = requestsData.reduce(
+          (acc, request) => {
+            acc.total++;
+            acc.totalRevenue += request.total_cost || 0;
+            switch (request.status) {
+              case 'Completed': acc.completed++; break;
+              case 'Pending': acc.pending++; break;
+              case 'In-Progress': acc.inProgress++; break;
+              case 'Unsuccessful': acc.unsuccessful++; break;
+            }
+            return acc;
+          },
+          { total: 0, completed: 0, pending: 0, inProgress: 0, unsuccessful: 0, totalRevenue: 0 }
+        );
+        setStats(calculatedStats);
       }
+    } catch (error) {
+      console.error('Fatal error loading dashboard data:', error);
+      setRequests([]);
+      setFilteredRequests([]);
+      setStats({
+        total: 0,
+        completed: 0,
+        pending: 0,
+        inProgress: 0,
+        unsuccessful: 0,
+        totalRevenue: 0,
+      });
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [statusFilter]);
 
   useEffect(() => {
-    loadRequests();
-  }, [loadRequests]);
+    if (!searchQuery) {
+      loadRequests();
+    } else {
+      handleSearch(searchQuery);
+    }
+  }, [loadRequests, statusFilter]);
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     if (!user?.id) return;
 
     if (query.trim() === '') {
-      setFilteredRequests(requests);
+      loadRequests();
     } else {
       try {
         const results = await adminAPI.searchRequests(query, 100, 0);
-        setFilteredRequests(results.requests || []);
+        let foundRequests = results.requests || [];
+
+        if (statusFilter !== 'All') {
+          foundRequests = foundRequests.filter(r => r.status === statusFilter);
+        }
+
+        setFilteredRequests(foundRequests);
       } catch (error) {
         console.error('Error searching:', error);
       }
@@ -165,8 +149,8 @@ export default function DashboardPage() {
         return 'bg-blue-100 text-blue-800';
       case 'Pending':
         return 'bg-yellow-100 text-yellow-800';
-      case 'On-Hold':
-        return 'bg-red-100 text-red-800';
+      case 'Unsuccessful':
+        return 'bg-gray-200 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -188,7 +172,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-4">
             <img src={abelovLogo} alt="Abelov Logo" className="w-12 rounded-3xl h-12" />
             <div>
-              <h1 className="text-2xl font-bold text-primary">Abelov Technical Records</h1>
+              <h1 className="text-2xl font-bold text-primary dark:text-black">Abelov Technical Records</h1>
               <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
           </div>
@@ -211,6 +195,7 @@ export default function DashboardPage() {
                 </Button>
               </>
             )}
+            <ThemeToggle />
             <ProfileMenu />
           </div>
         </div>
@@ -229,12 +214,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
           <StatCard title="Total Requests" value={stats.total} />
           <StatCard title="Completed" value={stats.completed} />
           <StatCard title="Pending" value={stats.pending} />
           <StatCard title="In Progress" value={stats.inProgress} />
-          <StatCard title="On Hold" value={stats.onHold} />
+          <StatCard title="Unsuccessful" value={stats.unsuccessful} />
           <StatCard title="Total Revenue" value={`₦${(stats.totalRevenue || 0).toLocaleString()}`} />
         </div>
 
@@ -250,6 +235,22 @@ export default function DashboardPage() {
               className="pl-10"
             />
           </div>
+
+          <div className="w-full md:w-[200px]">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All Statuses</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="In-Progress">In Progress</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
+                <SelectItem value="Unsuccessful">Unsuccessful</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <Button onClick={() => navigate('/new-request')} size="lg" className="md:flex hidden">
             <Plus className="w-4 h-4 mr-2" />
             New Request
@@ -267,10 +268,10 @@ export default function DashboardPage() {
         ) : filteredRequests.length === 0 ? (
           <Card className="p-12 text-center">
             <h3 className="text-xl font-semibold mb-2">
-              {searchQuery ? 'No Results Found' : 'No Service Requests Yet'}
+              {searchQuery || statusFilter !== 'All' ? 'No Results Found' : 'No Service Requests Yet'}
             </h3>
             <p className="text-muted-foreground mb-6">
-              {searchQuery ? 'Try adjusting your search query.' : 'Create your first service request to get started.'}
+              {searchQuery || statusFilter !== 'All' ? 'Try adjusting your search or filter.' : 'Create your first service request to get started.'}
             </p>
             <Button onClick={() => navigate('/new-request')}>
               <Plus className="w-4 h-4 mr-2" />
@@ -278,7 +279,7 @@ export default function DashboardPage() {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {filteredRequests.map((request) => (
               <Card key={request.id} className="p-6 hover:shadow-lg transition-shadow">
                 <div className="flex items-start justify-between mb-4">
@@ -297,7 +298,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="border-t pt-4 mb-4">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-sm mb-2">
                     <div>
                       <p className="text-xs text-muted-foreground">Total Cost</p>
                       <p className="font-bold text-primary">₦{request.total_cost.toLocaleString()}</p>
@@ -308,6 +309,12 @@ export default function DashboardPage() {
                         ₦{request.balance.toLocaleString()}
                       </p>
                     </div>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <p className="text-xs text-muted-foreground">Payment Status</p>
+                    <Badge variant="outline" className={request.payment_completed ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}>
+                      {request.payment_completed ? 'Paid' : 'Unpaid'}
+                    </Badge>
                   </div>
                 </div>
 
@@ -346,13 +353,15 @@ export default function DashboardPage() {
                   >
                     <Edit className="w-3 h-3" />
                   </Button>
-                  <Button
-                    onClick={() => handleDelete(request.id)}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+                  {isAdmin && (
+                    <Button
+                      onClick={() => handleDelete(request.id)}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
                 </div>
               </Card>
             ))}

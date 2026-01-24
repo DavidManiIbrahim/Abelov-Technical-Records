@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import AdminProtectedRoute from "@/components/AdminProtectedRoute";
 import LoginPage from "@/pages/LoginPage";
+import SignupPage from "@/pages/SignupPage";
 import ServiceRequestForm from "@/pages/ServiceRequestForm";
 import ServiceRequestViewPage from "@/pages/ServiceRequestViewPage";
 import DashboardPage from "@/pages/DashboardPage";
@@ -33,6 +34,7 @@ const App = () => (
           <AuthProvider>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
               <Route
                 path="/"
                 element={

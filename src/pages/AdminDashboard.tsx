@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { adminAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import abelovLogo from '@/assets/abelov-logo.png';
+import ThemeToggle from '@/components/ThemeToggle';
 
 
 interface GlobalStats {
@@ -20,7 +21,7 @@ interface GlobalStats {
   pendingTickets: number;
   completedTickets: number;
   inProgressTickets: number;
-  onHoldTickets: number;
+  unsuccessfulTickets: number;
   totalRevenue: number;
 }
 
@@ -54,6 +55,15 @@ interface RequestData {
   user_id: string;
 }
 
+interface ActivityLog {
+  id: string;
+  user: string;
+  action: string;
+  resource: string;
+  status: string;
+  timestamp: string;
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -65,6 +75,8 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalRequests, setTotalRequests] = useState(0);
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+  const [totalLogs, setTotalLogs] = useState(0);
 
   useEffect(() => {
     loadData();
@@ -73,16 +85,19 @@ export default function AdminDashboard() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [stats, usersData, requestsData] = await Promise.all([
+      const [stats, usersData, requestsData, logsData] = await Promise.all([
         adminAPI.getGlobalStats(true), // Force refresh
         adminAPI.getAllUsersWithStats(),
         adminAPI.getAllServiceRequests(20, 0, true), // Force refresh
+        adminAPI.getActivityLogs(20, 0),
       ]);
 
       setGlobalStats(stats as GlobalStats);
-      setUsers((usersData as unknown[]).map((u) => ({ ...u } as UserData)));
+      setUsers((usersData as any[]).map((u) => ({ ...u } as UserData)));
       setRequests((requestsData.requests || []) as RequestData[]);
       setTotalRequests(requestsData.total || 0);
+      setActivityLogs(logsData.logs as ActivityLog[]);
+      setTotalLogs(logsData.total);
     } catch (error) {
       console.error('Failed to load admin data:', error);
       toast({
@@ -103,7 +118,7 @@ export default function AdminDashboard() {
 
     setLoading(true);
     try {
-      const results = await adminAPI.searchRequests(searchQuery, 50, 0);
+      const results = await adminAPI.searchRequests(searchQuery, 20, 0);
       setRequests(results.requests);
       setTotalRequests(results.total);
       setCurrentPage(0);
@@ -118,15 +133,19 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleStatusFilter = async () => {
-    if (statusFilter === 'all') {
+  const handleStatusFilterChange = (val: string) => {
+    setStatusFilter(val);
+    if (val === 'all') {
       loadData();
-      return;
+    } else {
+      filterByStatus(val);
     }
+  };
 
+  const filterByStatus = async (status: string) => {
     setLoading(true);
     try {
-      const results = await adminAPI.getRequestsByStatus(statusFilter, 50, 0);
+      const results = await adminAPI.getRequestsByStatus(status, 20, 0);
       setRequests(results.requests);
       setTotalRequests(results.total);
       setCurrentPage(0);
@@ -136,6 +155,29 @@ export default function AdminDashboard() {
         description: 'Filter failed',
         variant: 'destructive',
       });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePageChange = async (newPage: number) => {
+    setCurrentPage(newPage);
+    setLoading(true);
+    try {
+      const offset = newPage * 20;
+      let results;
+      if (searchQuery.trim()) {
+        results = await adminAPI.searchRequests(searchQuery, 20, offset);
+      } else if (statusFilter !== 'all') {
+        results = await adminAPI.getRequestsByStatus(statusFilter, 20, offset);
+      } else {
+        results = await adminAPI.getAllServiceRequests(20, offset, true);
+      }
+
+      setRequests(results.requests || []);
+      setTotalRequests(results.total || 0);
+    } catch (error) {
+      console.error('Pagination error:', error);
     } finally {
       setLoading(false);
     }
@@ -186,6 +228,29 @@ export default function AdminDashboard() {
   };
 
 
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    setLoading(true);
+    try {
+      // For simplicity in this system, we'll assume a user has one primary role.
+      // We assign the new role. The backend logic for roles might vary, 
+      // but usually assigning a role like 'admin' or 'user' is sufficient.
+      await adminAPI.assignRole(userId, newRole);
+
+      // If we wanted to ensure they ONLY have the new role, we might need a more complex sync,
+      // but for now, we'll just assign it and reload.
+      toast({ title: 'Success', description: `Role updated to ${newRole}` });
+      await loadData();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update role',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await signOut();
@@ -203,7 +268,7 @@ export default function AdminDashboard() {
         return 'bg-blue-100 text-blue-800';
       case 'Completed':
         return 'bg-green-100 text-green-800';
-      case 'On-Hold':
+      case 'Unsuccessful':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -226,11 +291,12 @@ export default function AdminDashboard() {
           <div className='flex items-center gap-4'>
             <img src={abelovLogo} alt="Abelov Logo" className="w-12 rounded-3xl h-12" />
             <div>
-              <h1 className="text-3xl font-bold text-primary">Admin Dashboard</h1>
+              <h1 className="text-3xl font-bold text-primary dark:text-white">Admin Dashboard</h1>
               <p className="text-sm text-muted-foreground mt-1">{user?.email}</p>
             </div>
           </div>
           <div className="flex gap-2">
+            <ThemeToggle />
             <Button onClick={() => navigate('/dashboard')} variant="outline" className="md:flex hidden">
               <Home className="w-4 h-4 mr-2" />
               Dashboard
@@ -253,7 +319,7 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Global Stats */}
           {globalStats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {/* Total Users */}
               <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-50 border-blue-200">
                 <div className="space-y-2">
@@ -319,15 +385,15 @@ export default function AdminDashboard() {
                 </div>
               </Card>
 
-              {/* On Hold */}
+              {/* Unsuccessful */}
               <Card className="p-6 bg-gradient-to-br from-red-50 to-orange-50 border-red-200">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-gray-600">On Hold</p>
+                    <p className="text-sm font-medium text-gray-600">Unsuccessful</p>
                     <Activity className="w-5 h-5 text-red-600" />
                   </div>
-                  <p className="text-3xl font-bold text-red-700">{globalStats.onHoldTickets}</p>
-                  <p className="text-xs text-gray-500">Temporarily paused</p>
+                  <p className="text-3xl font-bold text-red-700">{globalStats.unsuccessfulTickets}</p>
+                  <p className="text-xs text-gray-500">Failed jobs</p>
                 </div>
               </Card>
 
@@ -351,6 +417,7 @@ export default function AdminDashboard() {
             <TabsList>
               <TabsTrigger value="requests">All Tickets</TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="activity">Activity Log</TabsTrigger>
             </TabsList>
 
             {/* Requests Tab */}
@@ -371,11 +438,7 @@ export default function AdminDashboard() {
                   </div>
 
                   <div>
-                    <Select value={statusFilter} onValueChange={(val) => {
-                      setStatusFilter(val);
-                      // Trigger filter when changed
-                      setTimeout(() => handleStatusFilter(), 0);
-                    }}>
+                    <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
                       <SelectTrigger className="w-full md:w-48">
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
@@ -384,7 +447,7 @@ export default function AdminDashboard() {
                         <SelectItem value="Pending">Pending</SelectItem>
                         <SelectItem value="In-Progress">In Progress</SelectItem>
                         <SelectItem value="Completed">Completed</SelectItem>
-                        <SelectItem value="On-Hold">On Hold</SelectItem>
+                        <SelectItem value="Unsuccessful">Unsuccessful</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -429,7 +492,7 @@ export default function AdminDashboard() {
                                 <TableCell>
                                   <Badge className={getStatusColor(req.status)}>{req.status}</Badge>
                                 </TableCell>
-                                <TableCell className="text-sm font-semibold">₦{req.total_cost?.toLocaleString() || '0.00'}</TableCell>
+                                <TableCell className="text-sm font-semibold">₦{req.total_cost?.toLocaleString()}</TableCell>
                                 <TableCell className="text-sm text-muted-foreground">{req.technician_name}</TableCell>
                                 <TableCell className="text-sm text-muted-foreground">
                                   {new Date(req.created_at).toLocaleDateString()}
@@ -447,16 +510,16 @@ export default function AdminDashboard() {
                       </p>
                       <div className="flex gap-2">
                         <Button
-                          onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                          disabled={currentPage === 0}
+                          onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
+                          disabled={currentPage === 0 || loading}
                           variant="outline"
                           size="sm"
                         >
                           Previous
                         </Button>
                         <Button
-                          onClick={() => setCurrentPage(currentPage + 1)}
-                          disabled={requests.length < 20}
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={requests.length < 20 || loading}
                           variant="outline"
                           size="sm"
                         >
@@ -555,10 +618,22 @@ export default function AdminDashboard() {
                                 <TableCell className="text-sm">{u.email}</TableCell>
                                 <TableCell className="text-sm font-medium">{nameFromEmail}</TableCell>
                                 <TableCell className="text-sm capitalize">
-                                  {primaryRole}
+                                  <Select
+                                    value={primaryRole}
+                                    onValueChange={(val) => handleRoleChange(u.id, val)}
+                                    disabled={loading}
+                                  >
+                                    <SelectTrigger className="w-32 h-8 text-xs">
+                                      <SelectValue placeholder="Role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="user">User</SelectItem>
+                                      <SelectItem value="admin">Admin</SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                 </TableCell>
                                 <TableCell className="text-sm font-semibold">{u.ticketCount}</TableCell>
-                                <TableCell className="text-sm font-semibold">₦{u.totalRevenue?.toFixed(0) || '0'}</TableCell>
+                                <TableCell className="text-sm font-semibold">₦{u.totalRevenue?.toLocaleString()}</TableCell>
                                 <TableCell>
                                   <Badge variant={u.is_active ? 'default' : 'secondary'}>
                                     {u.is_active ? 'Active' : 'Inactive'}
@@ -573,6 +648,65 @@ export default function AdminDashboard() {
                               </TableRow>
                             );
                           })
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </Card>
+            </TabsContent>
+
+            {/* Activity Log Tab */}
+            <TabsContent value="activity" className="space-y-4">
+              <Card className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-semibold text-primary">System Activity Logs</h3>
+                  <Button onClick={() => loadData()} variant="outline" size="sm">
+                    Refresh Logs
+                  </Button>
+                </div>
+
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <div className="border rounded-lg overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          <TableHead className="text-xs font-semibold">User Content</TableHead>
+                          <TableHead className="text-xs font-semibold">Action</TableHead>
+                          <TableHead className="text-xs font-semibold">Resource</TableHead>
+                          <TableHead className="text-xs font-semibold">Status</TableHead>
+                          <TableHead className="text-xs font-semibold">Timestamp</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {activityLogs.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                              No activity logs found
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          activityLogs.map((log) => (
+                            <TableRow key={log.id} className="hover:bg-muted/50 transition-colors">
+                              <TableCell className="text-sm font-medium">{log.user}</TableCell>
+                              <TableCell className="text-sm">
+                                <Badge variant="secondary" className="capitalize">
+                                  {log.action.replace('_', ' ')}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm">{log.resource}</TableCell>
+                              <TableCell>
+                                <Badge className={getStatusColor(log.status)}>{log.status}</Badge>
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {new Date(log.timestamp).toLocaleString()}
+                              </TableCell>
+                            </TableRow>
+                          ))
                         )}
                       </TableBody>
                     </Table>

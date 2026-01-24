@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { serviceRequestAPI } from '@/lib/api';
+import { serviceRequestAPI, adminAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
 import { ArrowLeft, TrendingUp, DollarSign, Clock, CheckCircle } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import abelovLogo from '@/assets/abelov-logo.png';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function AnalyticsDashboard() {
   const navigate = useNavigate();
@@ -15,18 +16,47 @@ export default function AnalyticsDashboard() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Define a list of canonical technician names. This would ideally come from a backend or configuration.
+  // For now, we'll derive it from existing data or assume a small set.
+  // If the goal is to remove duplicates like "John Doe" and "john doe", we need a canonical list.
+  // Let's assume for now that the primary goal is case-insensitive matching and trimming.
+  // If a fixed list of VALID_TECHNICIANS is needed, it should be provided.
+  // For the purpose of this change, we'll make `normalizeName` handle trimming and casing for comparison.
+  // The `VALID_TECHNICIANS` part in the instruction snippet seems to be a placeholder or an incomplete thought.
+  // I will implement `normalizeName` to handle trimming and consistent casing for comparison.
+  // If `VALID_TECHNICIANS` is truly meant to be used, it needs to be defined.
+  // Given the instruction "Normalize technician names... to remove duplicates", the primary mechanism
+  // will be consistent processing of names (trimming, lowercasing) before comparison.
+
+  const normalizeNameForComparison = (name: string | undefined): string => {
+    if (!name) return 'unassigned'; // Default to 'unassigned' for comparison
+    return name.trim().toLowerCase();
+  };
+
+  const getCanonicalName = (name: string | undefined): string => {
+    if (!name) return 'Unassigned';
+    const trimmedName = name.trim();
+    if (!trimmedName) return 'Unassigned';
+    // In a real application, VALID_TECHNICIANS would be a predefined list of canonical names.
+    // For this exercise, we'll just capitalize the first letter of each word for a "canonical" look
+    // if it's not 'Unassigned'.
+    if (trimmedName.toLowerCase() === 'unassigned') return 'Unassigned';
+    return trimmedName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+  };
+
   const loadData = useCallback(async () => {
-    if (!user?.id) return;
     setLoading(true);
     try {
-      const data = await serviceRequestAPI.getByUserId(user.id, true); // Force refresh
+      // Fetch ALL service requests globally
+      const data = await serviceRequestAPI.getAll(true);
       setRequests(data || []);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading global analytics data:', error);
+      setRequests([]);
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -62,32 +92,53 @@ export default function AnalyticsDashboard() {
     { status: 'Completed', count: requests.filter(r => r.status === 'Completed').length },
     { status: 'In-Progress', count: requests.filter(r => r.status === 'In-Progress').length },
     { status: 'Pending', count: requests.filter(r => r.status === 'Pending').length },
-    { status: 'On-Hold', count: requests.filter(r => r.status === 'On-Hold').length },
+    { status: 'Unsuccessful', count: requests.filter(r => r.status === 'Unsuccessful').length },
+
   ].filter(item => item.count > 0);
 
   // Technician work histogram
   const technicianWork = requests.reduce((acc, req) => {
-    const tech = req.technician_name || 'Unassigned';
-    const existing = acc.find(item => item.technician === tech);
+    const techRaw = req.technician_name;
+    const techCanonical = getCanonicalName(techRaw);
+    const techForComparison = normalizeNameForComparison(techRaw);
+
+    const existing = acc.find(item => normalizeNameForComparison(item.technician) === techForComparison);
     if (existing) {
       existing.completed += req.status === 'Completed' ? 1 : 0;
       existing.inProgress += req.status === 'In-Progress' ? 1 : 0;
       existing.pending += req.status === 'Pending' ? 1 : 0;
-      existing.onHold += req.status === 'On-Hold' ? 1 : 0;
+      existing.unsuccessful += req.status === 'Unsuccessful' ? 1 : 0;
+
       existing.total += 1;
     } else {
       acc.push({
-        technician: tech,
+        technician: techCanonical, // Use canonical name for display
         completed: req.status === 'Completed' ? 1 : 0,
         inProgress: req.status === 'In-Progress' ? 1 : 0,
         pending: req.status === 'Pending' ? 1 : 0,
-        onHold: req.status === 'On-Hold' ? 1 : 0,
+        unsuccessful: req.status === 'Unsuccessful' ? 1 : 0,
         total: 1,
       });
     }
     return acc;
-    // }, [] as { technician: string; completed: number; inProgress: number; pending: number; total: number }[]);
-  }, [] as { technician: string; completed: number; inProgress: number; pending: number; onHold: number; total: number }[]);
+  }, [] as { technician: string; completed: number; inProgress: number; pending: number; unsuccessful: number; total: number }[]);
+
+  // Revenue per Technician
+  const technicianRevenue = requests.reduce((acc, req) => {
+    const techRaw = req.technician_name;
+    const techCanonical = getCanonicalName(techRaw);
+    const techForComparison = normalizeNameForComparison(techRaw);
+
+    const revenue = req.total_cost || 0;
+
+    const existing = acc.find(item => normalizeNameForComparison(item.technician) === techForComparison);
+    if (existing) {
+      existing.revenue += revenue;
+    } else {
+      acc.push({ technician: techCanonical, revenue }); // Use canonical name for display
+    }
+    return acc;
+  }, [] as { technician: string; revenue: number }[]).sort((a, b) => b.revenue - a.revenue);
 
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
 
@@ -114,11 +165,14 @@ export default function AnalyticsDashboard() {
       {/* Header */}
       <div className="bg-white border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
-          <div className="flex items-center gap-4 mb-2">
-            <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10" />
-            <h1 className="text-2xl font-bold text-primary">Analytics Dashboard</h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-4">
+              <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10" />
+              <h1 className="text-2xl font-bold text-primary dark:text-black">Analytics Dashboard</h1>
+            </div>
+            <ThemeToggle />
           </div>
-          <Button onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
+          <Button className='dark:bg-black' onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Button>
@@ -172,14 +226,20 @@ export default function AnalyticsDashboard() {
         <Card className="p-6 mb-8">
           <h2 className="text-xl font-bold mb-4 text-primary">Revenue Over Time</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={revenueOverTime}>
+            <AreaChart data={revenueOverTime}>
+              <defs>
+                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
-              <Tooltip formatter={(value) => `₦${value}`} />
+              <Tooltip formatter={(value) => `₦${Number(value).toLocaleString()}`} />
               <Legend />
-              <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} name="Revenue" />
-            </LineChart>
+              <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fillOpacity={1} fill="url(#colorRevenue)" name="Revenue" />
+            </AreaChart>
           </ResponsiveContainer>
         </Card>
 
@@ -224,27 +284,48 @@ export default function AnalyticsDashboard() {
           </Card>
         </div>
 
-        {/* Technician Work Histogram */}
-        <Card className="p-6 mt-8">
-          <h2 className="text-xl font-bold mb-4 text-primary">Technician Work Distribution</h2>
-          {technicianWork.length > 0 ? (
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={technicianWork} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="technician" angle={-45} textAnchor="end" height={100} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="completed" fill="#10b981" name="Completed" stackId="a" />
-                <Bar dataKey="inProgress" fill="#3b82f6" name="In Progress" stackId="a" />
-                <Bar dataKey="pending" fill="#f59e0b" name="Pending" stackId="a" />
-                <Bar dataKey="onHold" fill="#ff0000" name="On Hold" stackId="a" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="text-center text-muted-foreground py-8">No technician data available</p>
-          )}
-        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+          {/* Technician Work Histogram */}
+          <Card className="p-6">
+            <h2 className="text-xl font-bold mb-4 text-primary">Technician Work Distribution</h2>
+            {technicianWork.length > 0 ? (
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={technicianWork} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="technician" angle={-45} textAnchor="end" height={100} />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="completed" fill="#10b981" name="Completed" stackId="a" />
+                  <Bar dataKey="inProgress" fill="#3b82f6" name="In Progress" stackId="a" />
+                  <Bar dataKey="pending" fill="#f59e0b" name="Pending" stackId="a" />
+                  <Bar dataKey="unsuccessful" fill="#9ca3af" name="Unsuccessful" stackId="a" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">No technician data available</p>
+            )}
+          </Card>
+
+          {/* Technician Revenue Chart */}
+          <Card className="p-6">
+            <h2 className="text-xl font-bold mb-4 text-primary">Revenue per Technician</h2>
+            {technicianRevenue.length > 0 ? (
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={technicianRevenue} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="technician" angle={-45} textAnchor="end" height={100} />
+                  <YAxis />
+                  <Tooltip formatter={(value) => `₦${Number(value).toLocaleString()}`} />
+                  <Legend />
+                  <Bar dataKey="revenue" fill="#8884d8" name="Revenue (₦)" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">No revenue data available</p>
+            )}
+          </Card>
+        </div>
       </div>
     </div>
   );

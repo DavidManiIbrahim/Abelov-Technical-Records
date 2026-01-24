@@ -2,9 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ServiceRequest } from "@/types/serviceRequest";
-import { getServiceRequestById } from "@/utils/storage";
-import { CheckCircle, FileText, ArrowLeft, Printer, Download } from "lucide-react";
+import { ServiceRequest } from "@/types/database";
+import { serviceRequestAPI } from "@/lib/api";
+import { CheckCircle, FileText, ArrowLeft, Printer, Download, Loader2 } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { toast } from "@/hooks/use-toast";
@@ -13,12 +13,25 @@ export default function ConfirmationPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [request, setRequest] = useState<ServiceRequest | null>(null);
+  const [loading, setLoading] = useState(true);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const loadRequest = async (requestId: string) => {
+      try {
+        const foundRequest = await serviceRequestAPI.getById(requestId);
+        setRequest(foundRequest || null);
+      } catch (error) {
+        console.error("Failed to load request:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (id) {
-      const foundRequest = getServiceRequestById(id);
-      setRequest(foundRequest || null);
+      loadRequest(id);
+    } else {
+      setLoading(false);
     }
   }, [id]);
 
@@ -67,6 +80,14 @@ export default function ConfirmationPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   if (!request) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -81,6 +102,37 @@ export default function ConfirmationPage() {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
+      <style>{`
+        @media print {
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            min-height: auto !important;
+            width: auto !important;
+            background: white !important;
+            color: black !important;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-scheme: light !important;
+          }
+          .print\:hidden {
+            display: none !important;
+          }
+          .card {
+            padding: 0.3cm !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: 1px solid #e5e7eb !important;
+            height: auto !important;
+            width: auto !important;
+            background: white !important;
+            color: black !important;
+          }
+        }
+      `}</style>
       <div className="max-w-3xl mx-auto">
         <div className="flex gap-2 mb-4 print:hidden">
           <Button onClick={() => navigate("/requests")} variant="outline" size="sm">
@@ -162,7 +214,7 @@ export default function ConfirmationPage() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 print:hidden">
             <Button variant="outline" onClick={() => navigate("/requests")} className="flex-1">
               <ArrowLeft className="w-4 h-4 mr-2" />
               View All Requests
