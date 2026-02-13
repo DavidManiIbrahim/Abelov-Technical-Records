@@ -176,25 +176,36 @@ export default function ServiceRequestViewPage() {
           <div className="flex items-center gap-4">
             <img src={abelovLogo} alt="Abelov Logo" className="w-16 h-16" />
             <div>
-              <h1 className="text-2xl font-bold text-primary">Service Request</h1>
-              <p className="text-muted-foreground text-sm">ID: {request.id}</p>
+              <h1 className="text-lg md:text-2xl font-bold text-primary">Service Request</h1>
+              <p className="text-muted-foreground text-xs md:text-sm">ID: {request.id}</p>
             </div>
           </div>
 
           <div className="flex gap-2">
             {user && (
               <>
-                <Button variant="outline" size="sm" onClick={() => setPrintModalOpen(true)}>
+                <Button variant="outline" size="sm" onClick={() => setPrintModalOpen(true)} className="hidden md:flex">
                   <Printer className="w-4 h-4 mr-2" />
                   Print
                 </Button>
-                <Button size="sm" onClick={() => navigate(`/edit/${request.id}`)}>
+                <Button variant="outline" size="sm" onClick={() => setPrintModalOpen(true)} className="md:hidden">
+                  <Printer className="w-4 h-4" />
+                </Button>
+
+                <Button size="sm" onClick={() => navigate(`/edit/${request.id}`)} className="hidden md:flex">
                   <Edit className="w-4 h-4 mr-2" />
                   Edit
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
+                <Button size="sm" onClick={() => navigate(`/edit/${request.id}`)} className="md:hidden">
+                  <Edit className="w-4 h-4" />
+                </Button>
+
+                <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')} className="hidden md:flex">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')} className="md:hidden">
+                  <ArrowLeft className="w-4 h-4" />
                 </Button>
               </>
             )}
@@ -483,7 +494,7 @@ export default function ServiceRequestViewPage() {
                 <h4 className="text-[22px] font-bold text-black">{request.customer_name}</h4>
                 <h5 className="text-[18px] font-bold text-gray-700">{request.customer_phone}</h5>
                 <h6 className="text-[18px] font-bold text-gray-700">{request.problem_description}</h6>
-              <h6 className="text-xs italic text-gray-600 mb-4">Thank you for choosing Abelov International Ltd!</h6>
+                <h6 className="text-xs italic text-gray-600 mb-4">Thank you for choosing Abelov International Ltd!</h6>
 
               </div>
               <div className="w-1/3 mx-auto border-b border-gray-200 mt-2"></div>

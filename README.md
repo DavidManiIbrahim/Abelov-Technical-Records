@@ -339,7 +339,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Changelog
 
-### v3.0.0 (Current)
+### v3.1.0 (Current)
+- ✅ **Responsive UI Improvements**: 
+  - Optimized navbar text sizes for mobile devices across Dashboard, Admin, and Form pages.
+  - Enhanced button responsiveness in headers (icon-only mode on mobile) to reduce clutter.
+  - Improved layout for Login and Signup pages on smaller screens.
+
+### v3.0.0
 - ✅ Migrated backend to Node.js + Express + MongoDB
 - ✅ Added RESTful API with controllers/services/routes
 - ✅ Implemented security: helmet, cors, compression, rate limiting

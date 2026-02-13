@@ -168,13 +168,16 @@ export default function AnalyticsDashboard() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-4">
               <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10" />
-              <h1 className="text-2xl font-bold text-primary dark:text-black">Analytics Dashboard</h1>
+              <h1 className="text-lg md:text-2xl font-bold text-primary dark:text-black">Analytics Dashboard</h1>
             </div>
             <ThemeToggle />
           </div>
-          <Button className='dark:bg-black' onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
+          <Button className='dark:bg-black hidden md:flex' onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
+          </Button>
+          <Button className='dark:bg-black md:hidden' onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
+            <ArrowLeft className="w-4 h-4" />
           </Button>
         </div>
       </div>
