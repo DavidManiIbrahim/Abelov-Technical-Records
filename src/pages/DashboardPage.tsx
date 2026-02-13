@@ -37,7 +37,6 @@ export default function DashboardPage() {
     completed: 0,
     pending: 0,
     inProgress: 0,
-    inProgress: 0,
     unsuccessful: 0,
     totalRevenue: 0,
   });
@@ -53,7 +52,12 @@ export default function DashboardPage() {
 
       const requestsData = data.status === 'fulfilled' ? data.value : [];
       setRequests(requestsData);
-      setFilteredRequests(requestsData);
+
+      let filtered = requestsData;
+      if (statusFilter !== 'All') {
+        filtered = requestsData.filter(r => r.status === statusFilter);
+      }
+      setFilteredRequests(filtered);
 
       if (globalStatsData.status === 'fulfilled') {
         const gs = globalStatsData.value;
