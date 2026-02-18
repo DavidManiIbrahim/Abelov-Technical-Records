@@ -283,7 +283,7 @@ export default function DashboardPage() {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {filteredRequests.map((request) => (
               <Card key={request.id} className="p-6 hover:shadow-lg transition-shadow">
                 <div className="flex items-start justify-between mb-4">
