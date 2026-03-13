@@ -7,10 +7,18 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, LogOut, Home, Users, Ticket, Activity, TrendingUp, Trash2 } from 'lucide-react';
+import { Loader2, LogOut, Home, Users, Ticket, Activity, TrendingUp, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { adminAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import abelovLogo from '@/assets/abelov-logo.png';
 import ThemeToggle from '@/components/ThemeToggle';
 
@@ -50,6 +58,9 @@ interface RequestData {
   device_model: string;
   status: string;
   total_cost: number | null;
+  deposit_paid?: number | null;
+  balance?: number | null;
+  payment_completed?: boolean;
   technician_name: string;
   created_at: string;
   user_id: string;
@@ -77,6 +88,8 @@ export default function AdminDashboard() {
   const [totalRequests, setTotalRequests] = useState(0);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [totalLogs, setTotalLogs] = useState(0);
+  const [previewRequest, setPreviewRequest] = useState<RequestData | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -467,15 +480,19 @@ export default function AdminDashboard() {
                             <TableHead className="text-xs font-semibold">Customer</TableHead>
                             <TableHead className="text-xs font-semibold">Device</TableHead>
                             <TableHead className="text-xs font-semibold">Status</TableHead>
-                            <TableHead className="text-xs font-semibold">Cost</TableHead>
+                            <TableHead className="text-xs font-semibold">Total Cost</TableHead>
+                            <TableHead className="text-xs font-semibold">Deposit Paid</TableHead>
+                            <TableHead className="text-xs font-semibold">Balance</TableHead>
+                            <TableHead className="text-xs font-semibold">Payment</TableHead>
                             <TableHead className="text-xs font-semibold">Technician</TableHead>
                             <TableHead className="text-xs font-semibold">Date</TableHead>
+                            <TableHead className="text-xs font-semibold text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
                           {requests.length === 0 ? (
                             <TableRow>
-                              <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                              <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                                 No requests found
                               </TableCell>
                             </TableRow>
@@ -488,14 +505,47 @@ export default function AdminDashboard() {
                               >
                                 <TableCell className="font-mono text-sm font-semibold">{req.id}</TableCell>
                                 <TableCell className="text-sm">{req.customer_name}</TableCell>
-                                <TableCell className="text-sm">{req.device_brand} {req.device_model}</TableCell>
+                                <TableCell className="text-sm">
+                                  {req.device_brand} {req.device_model}
+                                </TableCell>
                                 <TableCell>
                                   <Badge className={getStatusColor(req.status)}>{req.status}</Badge>
                                 </TableCell>
-                                <TableCell className="text-sm font-semibold">₦{req.total_cost?.toLocaleString()}</TableCell>
+                                <TableCell className="text-sm font-semibold">
+                                  ₦{req.total_cost != null ? req.total_cost.toLocaleString() : '0'}
+                                </TableCell>
+                                <TableCell className="text-sm">
+                                  ₦{req.deposit_paid != null ? req.deposit_paid.toLocaleString() : '0'}
+                                </TableCell>
+                                <TableCell className="text-sm">
+                                  ₦{req.balance != null ? req.balance.toLocaleString() : '0'}
+                                </TableCell>
+                                <TableCell className="text-sm">
+                                  <Badge
+                                    variant="outline"
+                                    className={
+                                      req.payment_completed ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
+                                    }
+                                  >
+                                    {req.payment_completed ? 'Paid' : 'Unpaid'}
+                                  </Badge>
+                                </TableCell>
                                 <TableCell className="text-sm text-muted-foreground">{req.technician_name}</TableCell>
                                 <TableCell className="text-sm text-muted-foreground">
                                   {new Date(req.created_at).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell className="text-sm text-right">
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPreviewRequest(req);
+                                      setIsPreviewOpen(true);
+                                    }}
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
                                 </TableCell>
                               </TableRow>
                             ))
@@ -717,6 +767,88 @@ export default function AdminDashboard() {
           </Tabs>
         </div>
       </div>
+
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ticket Preview</DialogTitle>
+            <DialogDescription>
+              Quick view of key details for this service ticket.
+            </DialogDescription>
+          </DialogHeader>
+          {previewRequest && (
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="font-medium text-muted-foreground">Request ID</span>
+                <span className="font-mono">{previewRequest.id}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-muted-foreground">Customer</span>
+                <span>{previewRequest.customer_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-muted-foreground">Device</span>
+                <span>
+                  {previewRequest.device_brand} {previewRequest.device_model}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-muted-foreground">Technician</span>
+                <span>{previewRequest.technician_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-muted-foreground">Status</span>
+                <Badge className={getStatusColor(previewRequest.status)}>{previewRequest.status}</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-muted-foreground">Total Cost</span>
+                <span>₦{(previewRequest.total_cost || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-muted-foreground">Deposit Paid</span>
+                <span>₦{(previewRequest.deposit_paid || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-muted-foreground">Balance</span>
+                <span>₦{(previewRequest.balance || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-muted-foreground">Payment</span>
+                <Badge
+                  variant="outline"
+                  className={
+                    previewRequest.payment_completed
+                      ? 'bg-green-50 text-green-700 border-green-200'
+                      : 'bg-red-50 text-red-700 border-red-200'
+                  }
+                >
+                  {previewRequest.payment_completed ? 'Paid' : 'Unpaid'}
+                </Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-muted-foreground">Created</span>
+                <span>{new Date(previewRequest.created_at).toLocaleString()}</span>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="mt-4 flex justify-end gap-2">
+            {previewRequest && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsPreviewOpen(false);
+                  navigate(`/view/${previewRequest.id}`);
+                }}
+              >
+                Open full ticket
+              </Button>
+            )}
+            <Button variant="ghost" onClick={() => setIsPreviewOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

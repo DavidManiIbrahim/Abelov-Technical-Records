@@ -10,6 +10,36 @@ import { AreaChart, Area, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, X
 import abelovLogo from '@/assets/abelov-logo.png';
 import ThemeToggle from '@/components/ThemeToggle';
 
+const formatCurrencyCompact = (value: number): string => {
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000) {
+    const num = value / 1_000_000;
+    return `${Number.isInteger(num) ? num.toFixed(0) : num.toFixed(1)}M`;
+  }
+  if (abs >= 1_000) {
+    const num = value / 1_000;
+    return `${Number.isInteger(num) ? num.toFixed(0) : num.toFixed(1)}k`;
+  }
+  return value.toLocaleString();
+};
+
+const TechnicianTick = ({ x, y, payload }: any) => {
+  const value: string = String(payload?.value ?? '');
+  const parts = value.split(' ');
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text textAnchor="middle" style={{ fontSize: 10 }}>
+        {parts.map((part, index) => (
+          <tspan key={index} x={0} dy={index === 0 ? 0 : 12}>
+            {part}
+          </tspan>
+        ))}
+      </text>
+    </g>
+  );
+};
+
 export default function AnalyticsDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -67,13 +97,20 @@ export default function AnalyticsDashboard() {
     const month = new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
     const existing = acc.find(item => item.month === month);
     if (existing) {
-      existing.revenue += req.payment_completed ? (req.total_cost || 0) : (req.deposit_paid || 0);
+      existing.revenue += req.total_cost || 0;
       existing.count += 1;
     } else {
-      acc.push({ month, revenue: req.payment_completed ? (req.total_cost || 0) : (req.deposit_paid || 0), count: 1 });
+      acc.push({ month, revenue: req.total_cost || 0, count: 1 });
     }
     return acc;
   }, [] as { month: string; revenue: number; count: number }[]);
+
+  const revenueOverTimeSorted = [...revenueOverTime].sort((a, b) => {
+    // Parse "Jan 2025" style labels into Date objects for reliable sorting
+    const aDate = new Date(`${a.month} 1`);
+    const bDate = new Date(`${b.month} 1`);
+    return aDate.getTime() - bDate.getTime();
+  });
 
   // Device breakdown
   const deviceBreakdown = requests.reduce((acc, req) => {
@@ -142,7 +179,11 @@ export default function AnalyticsDashboard() {
 
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
 
-  const totalRevenue = requests.reduce((sum, r) => sum + (r.payment_completed ? (r.total_cost || 0) : (r.deposit_paid || 0)), 0);
+  const totalRevenue = requests.reduce((sum, r) => sum + (r.total_cost || 0), 0);
+
+  const latestMonthRevenue = revenueOverTimeSorted.length
+    ? revenueOverTimeSorted[revenueOverTimeSorted.length - 1]
+    : null;
   const avgServiceTime = requests.length > 0 ? Math.round(requests.reduce((sum, r) => {
     const created = new Date(r.created_at);
     // Use updated_at if status is completed, otherwise use current time for duration calculation
@@ -184,12 +225,12 @@ export default function AnalyticsDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold text-primary">₦{totalRevenue.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-primary">₦{formatCurrencyCompact(totalRevenue)}</p>
               </div>
               <DollarSign className="w-8 h-8 text-green-500" />
             </div>
@@ -223,6 +264,19 @@ export default function AnalyticsDashboard() {
               <CheckCircle className="w-8 h-8 text-green-500" />
             </div>
           </Card>
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Revenue for {latestMonthRevenue ? latestMonthRevenue.month : 'Current Month'}
+                </p>
+                <p className="text-2xl font-bold text-primary">
+                  ₦{latestMonthRevenue ? formatCurrencyCompact(latestMonthRevenue.revenue) : '0'}
+                </p>
+              </div>
+              <DollarSign className="w-8 h-8 text-blue-500" />
+            </div>
+          </Card>
         </div>
 
         {/* Revenue Over Time */}
@@ -238,12 +292,41 @@ export default function AnalyticsDashboard() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip formatter={(value) => `₦${Number(value).toLocaleString()}`} />
+              <YAxis tickFormatter={(value) => formatCurrencyCompact(Number(value))} />
+              <Tooltip formatter={(value) => `₦${formatCurrencyCompact(Number(value))}`} />
               <Legend />
               <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fillOpacity={1} fill="url(#colorRevenue)" name="Revenue" />
             </AreaChart>
           </ResponsiveContainer>
+        </Card>
+
+        {/* Monthly Revenue Summary */}
+        <Card className="p-6 mb-8">
+          <h2 className="text-xl font-bold mb-4 text-primary">Monthly Revenue Summary</h2>
+          {revenueOverTimeSorted.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Month</th>
+                    <th className="text-right py-2 px-4 font-medium text-muted-foreground">Revenue (₦)</th>
+                    <th className="text-right py-2 pl-4 font-medium text-muted-foreground">Number of Requests</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {revenueOverTimeSorted.map((item) => (
+                    <tr key={item.month} className="border-b last:border-0">
+                      <td className="py-2 pr-4">{item.month}</td>
+                      <td className="py-2 px-4 text-right">₦{item.revenue.toLocaleString()}</td>
+                      <td className="py-2 pl-4 text-right">{item.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-muted-foreground">No revenue data available yet.</p>
+          )}
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -293,9 +376,15 @@ export default function AnalyticsDashboard() {
             <h2 className="text-xl font-bold mb-4 text-primary">Technician Work Distribution</h2>
             {technicianWork.length > 0 ? (
               <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={technicianWork} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <BarChart data={technicianWork} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="technician" angle={-45} textAnchor="end" height={100} />
+                  <XAxis
+                    dataKey="technician"
+                    height={60}
+                    interval={0}
+                    tickLine={false}
+                    tick={<TechnicianTick />}
+                  />
                   <YAxis />
                   <Tooltip />
                   <Legend />
@@ -315,11 +404,17 @@ export default function AnalyticsDashboard() {
             <h2 className="text-xl font-bold mb-4 text-primary">Revenue per Technician</h2>
             {technicianRevenue.length > 0 ? (
               <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={technicianRevenue} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <BarChart data={technicianRevenue} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="technician" angle={-45} textAnchor="end" height={100} />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `₦${Number(value).toLocaleString()}`} />
+                  <XAxis
+                    dataKey="technician"
+                    height={60}
+                    interval={0}
+                    tickLine={false}
+                    tick={<TechnicianTick />}
+                  />
+                  <YAxis tickFormatter={(value) => formatCurrencyCompact(Number(value))} />
+                  <Tooltip formatter={(value) => `₦${formatCurrencyCompact(Number(value))}`} />
                   <Legend />
                   <Bar dataKey="revenue" fill="#8884d8" name="Revenue (₦)" />
                 </BarChart>

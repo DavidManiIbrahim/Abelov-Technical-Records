@@ -20,6 +20,19 @@ import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
 import abelovLogo from '@/assets/abelov-logo.png';
 
+const formatCurrencyCompact = (value: number): string => {
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000) {
+    const num = value / 1_000_000;
+    return `${Number.isInteger(num) ? num.toFixed(0) : num.toFixed(1)}M`;
+  }
+  if (abs >= 1_000) {
+    const num = value / 1_000;
+    return `${Number.isInteger(num) ? num.toFixed(0) : num.toFixed(1)}k`;
+  }
+  return value.toLocaleString();
+};
+
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
@@ -40,6 +53,27 @@ export default function DashboardPage() {
     unsuccessful: 0,
     totalRevenue: 0,
   });
+
+  const revenueOverTime = requests.reduce((acc, req) => {
+    const month = new Date(req.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    const existing = acc.find((item) => item.month === month);
+    if (existing) {
+      existing.revenue += req.total_cost || 0;
+    } else {
+      acc.push({ month, revenue: req.total_cost || 0 });
+    }
+    return acc;
+  }, [] as { month: string; revenue: number }[]);
+
+  const revenueOverTimeSorted = [...revenueOverTime].sort((a, b) => {
+    const aDate = new Date(`${a.month} 1`);
+    const bDate = new Date(`${b.month} 1`);
+    return aDate.getTime() - bDate.getTime();
+  });
+
+  const latestMonthRevenue = revenueOverTimeSorted.length
+    ? revenueOverTimeSorted[revenueOverTimeSorted.length - 1]
+    : null;
 
   const loadRequests = useCallback(async () => {
     setLoading(true);
@@ -218,13 +252,17 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 mb-8">
           <StatCard title="Total Requests" value={stats.total} />
           <StatCard title="Completed" value={stats.completed} />
           <StatCard title="Pending" value={stats.pending} />
           <StatCard title="In Progress" value={stats.inProgress} />
           <StatCard title="Unsuccessful" value={stats.unsuccessful} />
-          <StatCard title="Total Revenue" value={`₦${(stats.totalRevenue || 0).toLocaleString()}`} />
+          <StatCard title="Total Revenue" value={`₦${formatCurrencyCompact(stats.totalRevenue || 0)}`} />
+          <StatCard
+            title={`Revenue for ${latestMonthRevenue ? latestMonthRevenue.month : 'Current Month'}`}
+            value={`₦${latestMonthRevenue ? formatCurrencyCompact(latestMonthRevenue.revenue) : '0'}`}
+          />
         </div>
 
         {/* Search and Create */}
