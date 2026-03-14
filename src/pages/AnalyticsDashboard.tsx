@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { serviceRequestAPI, adminAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { ArrowLeft, TrendingUp, DollarSign, Clock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, TrendingUp, DollarSign, Clock, CheckCircle, Loader2 } from 'lucide-react';
 import { AreaChart, Area, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import abelovLogo from '@/assets/abelov-logo.png';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -126,12 +126,11 @@ export default function AnalyticsDashboard() {
 
   // Status trends
   const statusTrends = [
-    { status: 'Completed', count: requests.filter(r => r.status === 'Completed').length },
-    { status: 'In-Progress', count: requests.filter(r => r.status === 'In-Progress').length },
-    { status: 'Pending', count: requests.filter(r => r.status === 'Pending').length },
-    { status: 'Unsuccessful', count: requests.filter(r => r.status === 'Unsuccessful').length },
-
-  ].filter(item => item.count > 0);
+    { status: 'Completed', Completed: requests.filter(r => r.status === 'Completed').length },
+    { status: 'In-Progress', 'In-Progress': requests.filter(r => r.status === 'In-Progress').length },
+    { status: 'Pending', Pending: requests.filter(r => r.status === 'Pending').length },
+    { status: 'Unsuccessful', Unsuccessful: requests.filter(r => r.status === 'Unsuccessful').length },
+  ];
 
   // Technician work histogram
   const technicianWork = requests.reduce((acc, req) => {
@@ -195,7 +194,8 @@ export default function AnalyticsDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
         <p className="text-muted-foreground">Loading analytics...</p>
       </div>
     );
@@ -358,13 +358,16 @@ export default function AnalyticsDashboard() {
           <Card className="p-6">
             <h2 className="text-xl font-bold mb-4 text-primary">Service Status Distribution</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={statusTrends}>
+              <BarChart layout="vertical" data={statusTrends} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="status" />
-                <YAxis />
+                <XAxis type="number" />
+                <YAxis dataKey="status" type="category" tick={false} width={5} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="count" fill="#3b82f6" name="Requests" />
+                <Bar dataKey="Completed" fill="#10b981" name="Completed" stackId="a" />
+                <Bar dataKey="In-Progress" fill="#3b82f6" name="In-Progress" stackId="a" />
+                <Bar dataKey="Pending" fill="#f59e0b" name="Pending" stackId="a" />
+                <Bar dataKey="Unsuccessful" fill="#ef4444" name="Unsuccessful" stackId="a" />
               </BarChart>
             </ResponsiveContainer>
           </Card>
