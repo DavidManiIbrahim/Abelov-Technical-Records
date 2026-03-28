@@ -1,4 +1,4 @@
-# Service Hub Pro
+# Abelov Technical Records
 
 A comprehensive technical service request management application for tracking device repairs and service operations with **full CRUD functionality**, **secure REST API**, and a **Node.js + Express + MongoDB backend**.
 
