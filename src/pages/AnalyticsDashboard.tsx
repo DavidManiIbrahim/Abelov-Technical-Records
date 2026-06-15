@@ -225,7 +225,7 @@ export default function AnalyticsDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -328,6 +328,64 @@ export default function AnalyticsDashboard() {
             <p className="text-muted-foreground">No revenue data available yet.</p>
           )}
         </Card>
+
+{/* Monthly Job Status Summary */}
+<Card className="p-6 mb-8">
+  <h2 className="text-xl font-bold mb-4 text-primary">Monthly Job Status Summary</h2>
+  {revenueOverTimeSorted.length > 0 ? (
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-sm">
+        <thead>
+          <tr className="border-b">
+            <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Month</th>
+            <th className="text-right py-2 px-4 font-medium text-muted-foreground">Completed</th>
+            <th className="text-right py-2 px-4 font-medium text-muted-foreground">In-Progress</th>
+            <th className="text-right py-2 px-4 font-medium text-muted-foreground">Pending</th>
+            <th className="text-right py-2 px-4 font-medium text-muted-foreground">Unsuccessful</th>
+            <th className="text-right py-2 pl-4 font-medium text-muted-foreground">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {revenueOverTimeSorted.map((item) => {
+            const monthRequests = requests.filter(
+              (r) =>
+                new Date(r.created_at).toLocaleDateString('en-US', {
+                  month: 'short',
+                  year: 'numeric',
+                }) === item.month
+            );
+            const completed   = monthRequests.filter(r => r.status === 'Completed').length;
+            const inProgress  = monthRequests.filter(r => r.status === 'In-Progress').length;
+            const pending     = monthRequests.filter(r => r.status === 'Pending').length;
+            const unsuccessful = monthRequests.filter(r => r.status === 'Unsuccessful').length;
+
+            return (
+              <tr key={item.month} className="border-b last:border-0">
+                <td className="py-2 pr-4">{item.month}</td>
+                <td className="py-2 px-4 text-right text-green-600 dark:text-green-400">
+                  {completed}
+                </td>
+                <td className="py-2 px-4 text-right text-blue-600 dark:text-blue-400">
+                  {inProgress}
+                </td>
+                <td className="py-2 px-4 text-right text-amber-600 dark:text-amber-400">
+                  {pending}
+                </td>
+                <td className="py-2 px-4 text-right text-red-600 dark:text-red-400">
+                  {unsuccessful}
+                </td>
+                <td className="py-2 pl-4 text-right font-medium">{item.count}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <p className="text-muted-foreground">No job status data available yet.</p>
+  )}
+</Card>
+
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Device Type Breakdown */}
