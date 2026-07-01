@@ -116,6 +116,7 @@ export const getAllUsers = async (_req: Request, res: Response, next: NextFuncti
         full_name: null, // Not stored in user model currently
         company_name: null, // Not stored in user model currently
         is_active: user.is_active,
+        roles: user.roles || [],
         created_at: user.created_at,
         ticketCount: await RequestModel.countDocuments({ user_id: user.id }),
         totalRevenue: await RequestModel.aggregate([

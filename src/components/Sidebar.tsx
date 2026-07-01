@@ -30,7 +30,7 @@ interface NavItem {
   label: string;
   path: string;
   icon: React.ReactNode;
-  section: 'main' | 'sales' | 'admin' | 'academy';
+  section: 'repairs' | 'sales' | 'admin' | 'academy';
   roles?: string[];
 }
 
