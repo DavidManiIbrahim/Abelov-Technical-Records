@@ -7,14 +7,30 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import AdminProtectedRoute from "@/components/AdminProtectedRoute";
+
+// Auth Pages
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
+
+// Service Request Pages
 import ServiceRequestForm from "@/pages/ServiceRequestForm";
 import ServiceRequestViewPage from "@/pages/ServiceRequestViewPage";
+import RequestsList from "@/pages/RequestsList";
+import ConfirmationPage from "@/pages/ConfirmationPage";
+
+// Dashboard & Analytics
 import DashboardPage from "@/pages/DashboardPage";
 import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
-import RequestsList from "@/pages/RequestsList";
+
+// Sales & Inventory Module Pages
+import GoodsList from "@/pages/sales/GoodsList";
+import PurchasesList from "@/pages/sales/PurchasesList";
+import OrdersList from "@/pages/sales/OrdersList";
+import ExpensesList from "@/pages/sales/ExpensesList";
+import CreditsList from "@/pages/sales/CreditsList";
+
+// Error Pages
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,8 +49,11 @@ const App = () => (
         <HashRouter>
           <AuthProvider>
             <Routes>
+              {/* Auth Routes */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+
+              {/* Home Route */}
               <Route
                 path="/"
                 element={
@@ -43,6 +62,8 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+
+              {/* Service Request Routes */}
               <Route
                 path="/new-request"
                 element={
@@ -64,6 +85,24 @@ const App = () => (
                 element={<ServiceRequestViewPage />}
               />
               <Route
+                path="/confirmation/:id"
+                element={
+                  <ProtectedRoute>
+                    <ConfirmationPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/requests"
+                element={
+                  <ProtectedRoute>
+                    <RequestsList />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Dashboard Routes */}
+              <Route
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
@@ -79,14 +118,50 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+
+              {/* Sales & Inventory Module Routes */}
               <Route
-                path="/requests"
+                path="/goods"
                 element={
                   <ProtectedRoute>
-                    <RequestsList />
+                    <GoodsList />
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/purchases"
+                element={
+                  <ProtectedRoute>
+                    <PurchasesList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <OrdersList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/expenses"
+                element={
+                  <ProtectedRoute>
+                    <ExpensesList />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/credits"
+                element={
+                  <ProtectedRoute>
+                    <CreditsList />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Admin Route */}
               <Route
                 path="/admin"
                 element={
@@ -95,7 +170,8 @@ const App = () => (
                   </AdminProtectedRoute>
                 }
               />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+              {/* Error Route - MUST BE LAST */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
