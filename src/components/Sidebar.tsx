@@ -16,7 +16,6 @@ import {
   Menu,
   X,
   LogOut,
-  Settings,
 } from 'lucide-react';
 
 interface NavItem {
@@ -200,15 +199,6 @@ export default function Sidebar() {
 
         {/* Footer */}
         <div className="p-4 border-t border-border space-y-2 shrink-0">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start"
-            onClick={() => handleNavigation('/settings')}
-          >
-            <Settings size={16} className="mr-2" />
-            Settings
-          </Button>
           <Button
             variant="outline"
             size="sm"
