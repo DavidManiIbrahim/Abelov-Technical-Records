@@ -24,13 +24,14 @@ import {
   X,
   LogOut,
   User,
+  Activity,
 } from 'lucide-react';
 
 interface NavItem {
   label: string;
   path: string;
   icon: React.ReactNode;
-  section: 'repairs' | 'sales' | 'admin' | 'academy';
+  section: 'main' | 'sales' | 'admin' | 'academy';
   roles?: string[];
 }
 
@@ -54,7 +55,10 @@ const navItems: NavItem[] = [
   { label: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, section: 'main' },
 
   // Admin Section
-  { label: 'Admin Panel', path: '/admin', icon: <Shield size={20} />, section: 'admin', roles: ['admin'] },
+  { label: 'Analytics', path: '/admin', icon: <BarChart3 size={20} />, section: 'admin', roles: ['admin'] },
+  { label: 'Ticket Management', path: '/admin/tickets', icon: <FileText size={20} />, section: 'admin', roles: ['admin'] },
+  { label: 'User Management', path: '/admin/users', icon: <User size={20} />, section: 'admin', roles: ['admin'] },
+  { label: 'Activity Log', path: '/admin/activity', icon: <Activity size={20} />, section: 'admin', roles: ['admin'] },
 ];
 
 export default function Sidebar() {
@@ -131,11 +135,11 @@ export default function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4 min-h-0 px-4">
-          <Accordion type="multiple" defaultValue={['main', 'academy', 'sales', 'admin']} className="space-y-1">
+          <Accordion type="multiple" defaultValue={[]} className="space-y-1">
             {/* Main Section */}
             <AccordionItem value="main" className="border-0">
               <AccordionTrigger className="py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:no-underline">
-                Main
+                Repairs
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-1 pt-1">

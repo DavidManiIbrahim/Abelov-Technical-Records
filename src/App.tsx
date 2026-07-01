@@ -23,6 +23,10 @@ import ConfirmationPage from "@/pages/ConfirmationPage";
 import DashboardPage from "@/pages/DashboardPage";
 import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AdminAnalyticsPage from "@/pages/admin/AdminAnalyticsPage";
+import TicketManagementPage from "@/pages/admin/TicketManagementPage";
+import UserManagementPage from "@/pages/admin/UserManagementPage";
+import ActivityLogPage from "@/pages/admin/ActivityLogPage";
 
 // Sales & Inventory Module Pages
 import GoodsList from "@/pages/sales/GoodsList";
@@ -198,13 +202,43 @@ const App = () => (
                 }
               />
 
-              {/* Admin Route */}
+              {/* Admin Routes */}
               <Route
                 path="/admin"
                 element={
                   <AdminProtectedRoute>
                     <MainLayout>
-                      <AdminDashboard />
+                      <AdminAnalyticsPage />
+                    </MainLayout>
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/tickets"
+                element={
+                  <AdminProtectedRoute>
+                    <MainLayout>
+                      <TicketManagementPage />
+                    </MainLayout>
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <AdminProtectedRoute>
+                    <MainLayout>
+                      <UserManagementPage />
+                    </MainLayout>
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/activity"
+                element={
+                  <AdminProtectedRoute>
+                    <MainLayout>
+                      <ActivityLogPage />
                     </MainLayout>
                   </AdminProtectedRoute>
                 }

@@ -1,275 +1,139 @@
+import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Shield, Zap, Database, Box, Route, Key, Terminal, FileType, GitBranch, Eye } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Plus, BookOpen, Search, Edit, Loader2, Trash2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { academyAPI } from '@/lib/api';
+import { AcademyCourse } from '@/types/database';
+import { toast } from '@/hooks/use-toast';
+import AddAcademyModal from '@/components/AddAcademyModal';
 
-const features = [
-  {
-    title: 'Authentication & User Management',
-    items: [
-      'Simple Login/Signup (Local) for development',
-      'Protected Routes in frontend',
-      'Session Persistence via localStorage',
-      'Convex Auth integration',
-    ],
-    icon: Shield,
-  },
-  {
-    title: 'Hub Record Management',
-    items: [
-      'Create: Add new service requests with comprehensive details',
-      'Read: View all records on the dashboard or individual details',
-      'Update: Edit any existing record',
-      'Delete: Remove records from the system',
-      'Search & Filter: Find records by customer name, phone, device, ID, or status',
-    ],
-    icon: Database,
-  },
-  {
-    title: 'Comprehensive Form',
-    items: [
-      'Single-Page Form: All fields visible on one scrollable page (no tabs)',
-      'Shop Information (shop name, technician, date)',
-      'Customer Information (name, phone, email, address)',
-      'Device Information (model, brand, serial number, OS, accessories)',
-      'Problem Description (detailed issue report)',
-      'Diagnosis & Repair (diagnosis date, technician, fault, parts, action, status)',
-      'Cost Summary (service charge, parts cost, auto-calculated totals and balance)',
-      'Repair Timeline (track multiple repair steps with dates and notes)',
-      'Customer Confirmation (signature, device collection, technician sign-off)',
-    ],
-    icon: FileType,
-  },
-  {
-    title: 'Dashboard Features',
-    items: [
-      'Statistics Cards: Total requests, completed, pending, in-progress, revenue, outstanding balance',
-      'Record Cards: Quick overview of each entry with essential info',
-      'Fast Actions: Edit, view details, or delete from the dashboard',
-      'Smart Search: Real-time search across multiple fields',
-      'Real-Time Updates: Data automatically syncs across clients',
-    ],
-    icon: BarChart3,
-  },
-  {
-    title: 'Cost Management',
-    items: [
-      'Auto-Calculation: Total cost = service charge + parts cost',
-      'Balance Tracking: Balance = total cost - deposit paid',
-      'Payment Status: Mark payments as completed',
-      'Financial Overview: Dashboard shows total revenue and outstanding balance',
-    ],
-    icon: Zap,
-  },
-  {
-    title: 'Data Persistence & Backend',
-    items: [
-      'Backend: Convex (Serverless)',
-      'Database: Convex Database',
-      'Real-time: Built-in websocket subscriptions',
-      'Authentication: Custom auth functions on Convex',
-      'Type Safety: End-to-end type safety from database to frontend',
-    ],
-    icon: Box,
-  },
-];
-
-const techStack = [
-  { name: 'React', description: 'Frontend' },
-  { name: 'TypeScript', description: 'Language' },
-  { name: 'Tailwind CSS', description: 'Styling' },
-  { name: 'shadcn-ui', description: 'UI Components' },
-  { name: 'React Router v6', description: 'Routing' },
-  { name: 'Convex', description: 'Backend' },
-  { name: 'Vite', description: 'Build Tool' },
-  { name: 'Lucide React', description: 'Icons' },
-  { name: 'React Query', description: 'State Management' },
-];
-
-const projectStructure = [
-  { label: 'convex/', description: 'Convex backend', detail: 'schema.ts, auth.ts, hubRecords.ts' },
-  { label: 'src/', description: 'Frontend', detail: 'pages, components, lib' },
-  { label: 'src/lib/api.ts', description: 'API client (Convex)' },
-  { label: 'src/lib/api.rest.ts', description: 'Old REST API (backup)' },
-  { label: 'convex.json', description: 'Convex configuration' },
-];
-
-function BarChart3({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <line x1="12" y1="20" x2="12" y2="10" />
-      <line x1="18" y1="20" x2="18" y2="4" />
-      <line x1="6" y1="20" x2="6" y2="16" />
-    </svg>
-  );
-}
+const statusColor: Record<string, string> = {
+  draft: 'bg-gray-100 text-gray-800',
+  published: 'bg-green-100 text-green-800',
+  archived: 'bg-yellow-100 text-yellow-800',
+};
 
 export default function AcademyPage() {
-  return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-primary">Abelov Hub Records</h1>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            A comprehensive record management system for tracking product entries, verifications, and distribution with full CRUD functionality and a real-time Convex backend.
-          </p>
-        </div>
+  const { user } = useAuth();
+  const [courses, setCourses] = useState<AcademyCourse[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<AcademyCourse | null>(null);
 
-        {/* Quick Start */}
-        <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4 text-primary flex items-center gap-2">
-            <Zap className="w-6 h-6" />
-            Quick Start
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold mb-2">Prerequisites</h3>
-              <p className="text-sm text-muted-foreground">Node.js 18+ and npm. A Convex account (free tier available at convex.dev)</p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Setup Instructions</h3>
-              <div className="space-y-3">
-                <div className="bg-muted p-4 rounded-lg">
-                  <p className="text-sm font-mono mb-1">1. Install Dependencies</p>
-                  <code className="text-sm bg-background px-3 py-1.5 rounded block">npm install</code>
-                </div>
-                <div className="bg-muted p-4 rounded-lg">
-                  <p className="text-sm font-mono mb-1">2. Initialize Convex</p>
-                  <code className="text-sm bg-background px-3 py-1.5 rounded block">npx convex dev</code>
-                  <p className="text-xs text-muted-foreground mt-2">Creates .env.local, starts Convex dev server, generates TypeScript types</p>
-                </div>
-                <div className="bg-muted p-4 rounded-lg">
-                  <p className="text-sm font-mono mb-1">3. Start the Frontend</p>
-                  <code className="text-sm bg-background px-3 py-1.5 rounded block">npm run dev</code>
-                  <p className="text-xs text-muted-foreground mt-2">Or run both together: <code className="text-xs bg-background px-1 rounded">npm run dev:all</code></p>
-                </div>
-                <div className="bg-muted p-4 rounded-lg">
-                  <p className="text-sm font-mono mb-1">4. Open in Browser</p>
-                  <code className="text-sm bg-background px-3 py-1.5 rounded block">http://localhost:5173</code>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
+  useEffect(() => {
+    loadCourses();
+  }, [user]);
 
-        {/* Key Features */}
-        <div>
-          <h2 className="text-2xl font-bold mb-6 text-primary flex items-center gap-2">
-            <BookOpen className="w-6 h-6" />
-            Key Features
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {features.map((feature) => (
-              <Card key={feature.title} className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-                    <feature.icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-3">{feature.title}</h3>
-                    <ul className="space-y-2">
-                      {feature.items.map((item) => (
-                        <li key={item} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <span className="text-primary mt-0.5 shrink-0">•</span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
+  const loadCourses = async () => {
+    if (!user?.id) return;
+    setLoading(true);
+    try {
+      const data = await academyAPI.getAll(user.id);
+      setCourses(data || []);
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to load courses', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        {/* Technology Stack */}
-        <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4 text-primary flex items-center gap-2">
-            <Terminal className="w-6 h-6" />
-            Technology Stack
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {techStack.map((tech) => (
-              <Badge key={tech.name} variant="secondary" className="text-sm px-3 py-1.5">
-                {tech.name}
-                <span className="text-muted-foreground ml-1.5 font-normal">({tech.description})</span>
-              </Badge>
-            ))}
-          </div>
-        </Card>
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this course?')) return;
+    try {
+      await academyAPI.delete(id);
+      toast({ title: 'Success', description: 'Course deleted' });
+      loadCourses();
+    } catch {
+      toast({ title: 'Error', description: 'Failed to delete course', variant: 'destructive' });
+    }
+  };
 
-        {/* Project Structure */}
-        <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4 text-primary flex items-center gap-2">
-            <GitBranch className="w-6 h-6" />
-            Project Structure
-          </h2>
-          <div className="space-y-2 font-mono text-sm">
-            <p className="text-muted-foreground">abelov-hub-records/</p>
-            {projectStructure.map((item) => (
-              <div key={item.label} className="ml-4">
-                <p>
-                  <span className="text-primary">├──</span> {item.label}
-                  {item.description && <span className="text-muted-foreground ml-2"># {item.description}</span>}
-                </p>
-                {item.detail && <p className="text-xs text-muted-foreground ml-8">{item.detail}</p>}
-              </div>
-            ))}
-          </div>
-        </Card>
+  const filtered = courses.filter((c) =>
+    c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.instructor.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-        {/* Environment Variables */}
-        <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4 text-primary flex items-center gap-2">
-            <Key className="w-6 h-6" />
-            Environment Variables
-          </h2>
-          <p className="text-sm text-muted-foreground mb-3">
-            The project uses .env.local which is automatically generated by Convex:
-          </p>
-          <div className="bg-muted p-4 rounded-lg">
-            <code className="text-sm">VITE_CONVEX_URL=https://your-project.convex.cloud</code>
-          </div>
-        </Card>
-
-        {/* Migration Notes */}
-        <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4 text-primary flex items-center gap-2">
-            <Route className="w-6 h-6" />
-            Migration Notes
-          </h2>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-0.5 shrink-0">•</span>
-              This project was migrated from Express + MongoDB to Convex.
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-0.5 shrink-0">•</span>
-              Old backend code is still in server/ but deprecated.
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-0.5 shrink-0">•</span>
-              Old API client is backed up at src/lib/api.rest.ts.
-            </li>
-          </ul>
-        </Card>
-
-        {/* License */}
-        <Card className="p-6 text-center">
-          <p className="text-lg font-semibold text-primary">MIT License</p>
-        </Card>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Academy Courses</h1>
+        <Button onClick={() => setShowAddModal(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Course
+        </Button>
+      </div>
+
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search courses..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-4">
+        {filtered.map((course) => (
+          <Card key={course.id} className="p-4">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">{course.title}</h3>
+                  <Badge className={statusColor[course.status] || ''}>{course.status}</Badge>
+                  {course.category && <Badge variant="outline">{course.category}</Badge>}
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">{course.description}</p>
+                <div className="flex gap-4 text-sm">
+                  {course.instructor && <span>Instructor: {course.instructor}</span>}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setEditingItem(course)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button variant="destructive" size="sm" onClick={() => handleDelete(course.id)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="text-center py-12">
+          <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No courses found</h3>
+          <p className="text-muted-foreground">Add your first course to get started.</p>
+        </div>
+      )}
+
+      <AddAcademyModal
+        open={showAddModal || !!editingItem}
+        onOpenChange={(open) => {
+          setShowAddModal(open);
+          if (!open) setEditingItem(null);
+        }}
+        editItem={editingItem}
+        onSuccess={loadCourses}
+      />
     </div>
   );
 }
