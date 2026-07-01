@@ -239,7 +239,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div> */}
-      <Header title="Abelov Records Management System" showEmail>
+      {/* <Header title="Abelov Records Management System" showEmail>
         <Button onClick={() => navigate('/analytics')} variant="outline" className="md:flex hidden">
           <BarChart3 className="w-4 h-4 mr-2" />
           Analytics
@@ -260,7 +260,7 @@ export default function DashboardPage() {
         )}
         <ThemeToggle />
         <ProfileMenu />
-      </Header>
+      </Header> */}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">

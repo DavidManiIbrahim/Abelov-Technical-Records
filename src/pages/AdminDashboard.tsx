@@ -328,7 +328,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div> */}
-      <Header title="Admin Dashboard" showEmail>
+      {/* <Header title="Admin Dashboard" showEmail>
         <ThemeToggle />
         <Button onClick={() => navigate('/dashboard')} variant="outline" className="md:flex hidden">
           <Home className="w-4 h-4 mr-2" />
@@ -344,7 +344,7 @@ export default function AdminDashboard() {
         <Button onClick={handleLogout} variant="outline" className="md:hidden">
           <LogOut className="w-4 h-4" />
         </Button>
-      </Header>
+      </Header> */}
 
       <div className="flex-1 p-4 md:p-8">
         <div className="max-w-7xl mx-auto space-y-8">

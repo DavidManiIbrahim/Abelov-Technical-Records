@@ -223,7 +223,7 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
       </div> */}
-      <Header title="Analytics Dashboard">
+      {/* <Header title="Analytics Dashboard">
         <ThemeToggle />
         <div className="flex gap-2 w-full mt-2">
           <Button className='dark:bg-black hidden md:flex' onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
@@ -234,7 +234,7 @@ export default function AnalyticsDashboard() {
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </div>
-      </Header>
+      </Header> */}
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         {/* Quick Stats */}

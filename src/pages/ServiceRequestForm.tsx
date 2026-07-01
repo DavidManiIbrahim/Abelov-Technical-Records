@@ -618,7 +618,7 @@ export default function ServiceRequestForm() {
           </div>
         </div>
       </div> */}
-      <Header title="Abelov Records Management System" showEmail>
+      {/* <Header title="Abelov Records Management System" showEmail>
         <ThemeToggle />
         <Button variant="outline" onClick={() => navigate('/dashboard')} className="md:flex hidden">
           <Home className="w-4 h-4 mr-2" />
@@ -634,7 +634,7 @@ export default function ServiceRequestForm() {
         <Button variant="outline" onClick={handleLogout} className="md:hidden">
           <LogOut className="w-4 h-4" />
         </Button>
-      </Header>
+      </Header> */}
 
       <div className="flex-1 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
