@@ -22,6 +22,7 @@ interface NavItem {
   path: string;
   icon: React.ReactNode;
   section: 'main' | 'sales' | 'admin';
+  roles?: string[];
 }
 
 const navItems: NavItem[] = [
@@ -31,11 +32,11 @@ const navItems: NavItem[] = [
   { label: 'New Request', path: '/new-request', icon: <FileText size={20} />, section: 'main' },
   
   // Sales & Inventory Section
-  { label: 'Goods Inventory', path: '/goods', icon: <Package size={20} />, section: 'sales' },
-  { label: 'Purchases', path: '/purchases', icon: <ShoppingCart size={20} />, section: 'sales' },
-  { label: 'Orders', path: '/orders', icon: <Truck size={20} />, section: 'sales' },
-  { label: 'Expenses', path: '/expenses', icon: <DollarSign size={20} />, section: 'sales' },
-  { label: 'Credits', path: '/credits', icon: <CreditCard size={20} />, section: 'sales' },
+  { label: 'Goods Inventory', path: '/goods', icon: <Package size={20} />, section: 'sales', roles: ['sales', 'admin'] },
+  { label: 'Purchases', path: '/purchases', icon: <ShoppingCart size={20} />, section: 'sales', roles: ['sales', 'admin'] },
+  { label: 'Orders', path: '/orders', icon: <Truck size={20} />, section: 'sales', roles: ['sales', 'admin'] },
+  { label: 'Expenses', path: '/expenses', icon: <DollarSign size={20} />, section: 'sales', roles: ['sales', 'admin'] },
+  { label: 'Credits', path: '/credits', icon: <CreditCard size={20} />, section: 'sales', roles: ['sales', 'admin'] },
   
   // Analytics Section
   { label: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, section: 'main' },
@@ -118,6 +119,7 @@ export default function Sidebar() {
             <div className="space-y-2">
               {navItems
                 .filter((item) => item.section === 'main')
+                .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
                 .map((item) => (
                   <button
                     key={item.path}
@@ -136,27 +138,30 @@ export default function Sidebar() {
           </div>
 
           {/* Sales & Inventory Section */}
-          <div className="px-4 mb-6">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Sales & Inventory</p>
-            <div className="space-y-2">
-              {navItems
-                .filter((item) => item.section === 'sales')
-                .map((item) => (
-                  <button
-                    key={item.path}
-                    onClick={() => handleNavigation(item.path)}
-                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isActive(item.path)
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-foreground hover:bg-accent'
-                    }`}
-                  >
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </button>
-                ))}
+          {navItems.some((item) => item.section === 'sales' && (!item.roles || item.roles.some((r) => userRoles.includes(r)))) && (
+            <div className="px-4 mb-6">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Sales & Inventory</p>
+              <div className="space-y-2">
+                {navItems
+                  .filter((item) => item.section === 'sales')
+                  .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
+                  .map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => handleNavigation(item.path)}
+                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        isActive(item.path)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-foreground hover:bg-accent'
+                      }`}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+              </div>
             </div>
-          </div>
+          )}
         </nav>
 
         {/* Footer */}
