@@ -218,6 +218,27 @@ export const adminAPI = {
     };
   },
 
+  async getModuleStats(forceRefresh = false) {
+    const key = 'admin_module_stats';
+    if (!forceRefresh) {
+      const cached = getCache<{
+        repairs: { totalTickets: number; pendingTickets: number; inProgressTickets: number; completedTickets: number; unsuccessfulTickets: number; totalRevenue: number };
+        sales: { totalGoods: number; totalOrders: number; totalPurchases: number; totalExpenses: number; totalCredits: number; salesRevenue: number; salesCost: number };
+        academy: { totalCourses: number; publishedCourses: number };
+      }>(key);
+      if (cached) return cached;
+    }
+
+    const res = await apiFetch('/admin/module-stats');
+    const stats = res as {
+      repairs: { totalTickets: number; pendingTickets: number; inProgressTickets: number; completedTickets: number; unsuccessfulTickets: number; totalRevenue: number };
+      sales: { totalGoods: number; totalOrders: number; totalPurchases: number; totalExpenses: number; totalCredits: number; salesRevenue: number; salesCost: number };
+      academy: { totalCourses: number; publishedCourses: number };
+    };
+    setCache(key, stats);
+    return stats;
+  },
+
   async getGlobalStats(forceRefresh = false) {
     const key = 'admin_global_stats';
     if (!forceRefresh) {

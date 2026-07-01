@@ -2,6 +2,12 @@ import type { Request, Response, NextFunction } from "express";
 import { ApiError } from "../middlewares/error";
 import { RequestModel } from "../models/request.model";
 import { UserModel } from "../models/user.model";
+import { GoodsModel } from "../models/goods.model";
+import { OrderModel } from "../models/order.model";
+import { PurchaseModel } from "../models/purchase.model";
+import { ExpenseModel } from "../models/expense.model";
+import { CreditModel } from "../models/credit.model";
+import { AcademyModel } from "../models/academy.model";
 import { hashPassword } from "../utils/auth";
 import { SignupSchema } from "../types/auth";
 import { env } from "../config/env";
@@ -98,6 +104,45 @@ export const getGlobalStats = async (_req: Request, res: Response, next: NextFun
       inProgressTickets,
       unsuccessfulTickets,
       totalRevenue,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getModuleStats = async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const [totalUsers, totalTickets, pendingTickets, inProgressTickets, completedTickets, unsuccessfulTickets, totalRevenueResult] = await Promise.all([
+      UserModel.countDocuments(),
+      RequestModel.countDocuments(),
+      RequestModel.countDocuments({ status: "Pending" }),
+      RequestModel.countDocuments({ status: "In-Progress" }),
+      RequestModel.countDocuments({ status: "Completed" }),
+      RequestModel.countDocuments({ status: "Unsuccessful" }),
+      RequestModel.aggregate([{ $group: { _id: null, total: { $sum: "$total_cost" } } }]),
+    ]);
+
+    const totalRevenue = totalRevenueResult[0]?.total || 0;
+
+    const [totalGoods, totalOrders, totalPurchases, totalExpenses, totalCredits, ordersRevenue, purchasesCost, totalCourses, publishedCourses] = await Promise.all([
+      GoodsModel.countDocuments(),
+      OrderModel.countDocuments(),
+      PurchaseModel.countDocuments(),
+      ExpenseModel.countDocuments(),
+      CreditModel.countDocuments(),
+      OrderModel.aggregate([{ $group: { _id: null, total: { $sum: "$total_amount" } } }]),
+      PurchaseModel.aggregate([{ $group: { _id: null, total: { $sum: "$total_amount" } } }]),
+      AcademyModel.countDocuments(),
+      AcademyModel.countDocuments({ status: "published" }),
+    ]);
+
+    const salesRevenue = ordersRevenue[0]?.total || 0;
+    const salesCost = purchasesCost[0]?.total || 0;
+
+    res.json({
+      repairs: { totalTickets, pendingTickets, inProgressTickets, completedTickets, unsuccessfulTickets, totalRevenue },
+      sales: { totalGoods, totalOrders, totalPurchases, totalExpenses, totalCredits, salesRevenue, salesCost },
+      academy: { totalCourses, publishedCourses },
     });
   } catch (err) {
     next(err);

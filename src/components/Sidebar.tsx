@@ -128,8 +128,15 @@ export default function Sidebar() {
         {/* User Info */}
         {user && (
           <div className="px-6 py-4 border-b border-border shrink-0">
-            <p className="text-sm font-medium">{user.name || 'User'}</p>
+            <p className="text-sm font-medium">{user.name || user.email?.split('@')[0] || 'User'}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
+            <div className="flex gap-1 mt-1.5">
+              {userRoles.map((role) => (
+                <span key={role} className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                  {role}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 

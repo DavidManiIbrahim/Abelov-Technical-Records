@@ -10,6 +10,7 @@ router.use(authorize(["admin"]));
 
 router.post("/init", ctrl.initAdmin);
 router.get("/stats", ctrl.getGlobalStats);
+router.get("/module-stats", ctrl.getModuleStats);
 router.get("/users", ctrl.getAllUsers);
 router.post("/users", ctrl.createUser);
 router.delete("/users/:id", ctrl.deleteUser);
