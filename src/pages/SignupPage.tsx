@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
@@ -118,24 +118,17 @@ export default function SignupPage() {
                         />
                     </div>
 
-                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <Label className="text-base font-semibold mb-3 block dark:text-black">Account Type</Label>
-                        <RadioGroup value={userType} onValueChange={(val) => setUserType(val as 'user' | 'admin')}>
-                            <div className="flex items-center space-x-2 mb-3">
-                                <RadioGroupItem value="user" id="user-type" />
-                                <Label htmlFor="user-type" className="font-normal cursor-pointer dark:text-black">
-                                    <span className="font-semibold">Regular User (Technician)</span>
-                                    <p className="text-xs text-muted-foreground mt-1">Manage your own service requests and tickets</p>
-                                </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="admin" id="admin-type" />
-                                <Label htmlFor="admin-type" className="font-normal cursor-pointer dark:text-black">
-                                    <span className="font-semibold">Admin</span>
-                                    <p className="text-xs text-muted-foreground mt-1">Monitor all users and tickets in the system</p>
-                                </Label>
-                            </div>
-                        </RadioGroup>
+                    <div>
+                        <Label className="dark:text-black" htmlFor="account-type">Account Type</Label>
+                        <Select value={userType} onValueChange={(val) => setUserType(val as 'user' | 'admin')}>
+                            <SelectTrigger id="account-type">
+                                <SelectValue placeholder="Select account type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="user">Regular User (Technician)</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <Button type="submit" className="w-full border" disabled={isLoading}>
