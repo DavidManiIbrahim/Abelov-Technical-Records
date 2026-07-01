@@ -218,7 +218,7 @@ export default function ServiceRequestViewPage() {
             {/* Print Header */}
 
             <div className="print-show mb-6 text-center hidden">
-              <h1 className="text-2xl font-bold mb-1">Abelov Technical Records</h1>
+              <h1 className="text-2xl font-bold mb-1">Abelov Records Management System</h1>
               <p className="text-sm text-muted-foreground">Service Request Report</p>
               <hr className="my-4" />
             </div>
@@ -487,7 +487,7 @@ export default function ServiceRequestViewPage() {
           <div className="print-container font-bold text-black">
             <div className="print-header">
               <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10 mx-auto mb-2" />
-              <h1 className="text-lg font-bold text-black">Abelov Technical Records</h1>
+              <h1 className="text-lg font-bold text-black">Abelov Records Management System</h1>
               <h5 className="text-[15px] font-bold text-gray-600 mt-1 uppercase tracking-tight">Service Request Record</h5>
               <h6 className="text-[16px] font-bold font-mono mt-0.5">ID: {request.id}</h6>
               <div className="mt-2 text-center">
@@ -519,7 +519,7 @@ export default function ServiceRequestViewPage() {
           <div className="print-container max-w-[8cm] mx-auto text-black p-4 font-bold">
             <div className="text-center mb-4">
               <img src={abelovLogo} alt="Abelov Logo" className="w-12 h-12 mx-auto mb-2" />
-              <h1 className="text-xl font-bold">Abelov Technical Records</h1>
+              <h1 className="text-xl font-bold">Abelov Records Management System</h1>
               <p className="text-xs uppercase font-bold">Service Receipt</p>
             </div>
 

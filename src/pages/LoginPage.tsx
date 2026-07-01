@@ -63,7 +63,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md p-8 shadow-2xl relative z-10 bg-white/95 backdrop-blur">
         <div className="mb-8 text-center">
           <img src={abelovLogo} alt="Abelov Logo" className="w-20 rounded-3xl h-20 mx-auto mb-4" />
-          <h1 className="text-2xl md:text-3xl font-bold dark:text-black text-primary mb-2">Abelov Technical Records</h1>
+          <h1 className="text-2xl md:text-3xl font-bold dark:text-black text-primary mb-2">Abelov Records Management System</h1>
           <p className="text-muted-foreground">Welcome back</p>
         </div>
 

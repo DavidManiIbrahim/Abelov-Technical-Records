@@ -17,9 +17,9 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'robots.txt'],
       manifest: {
-        name: 'Abelov Technical Records',
-        short_name: 'Abelov',
-        description: 'Technical records management system for Abelov International Ltd',
+        name: 'Abelov Records Management System',
+        short_name: 'Abelov RMS',
+        description: 'Records management system for Abelov International Ltd',
         theme_color: '#ffffff',
         icons: [
           {
