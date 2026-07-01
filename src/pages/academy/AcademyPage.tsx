@@ -4,24 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, BookOpen, Search, Edit, Trash2, Clock, DollarSign, BarChart3, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Plus, BookOpen, Search, Edit, Trash2, Eye, Clock, DollarSign, User, Calendar, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { academyAPI } from '@/lib/api';
 import { AcademyCourse } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
 import AddAcademyModal from '@/components/AddAcademyModal';
-
-const statusColor: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-800 border-gray-300',
-  published: 'bg-green-100 text-green-800 border-green-300',
-  archived: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-};
-
-const levelColor: Record<string, string> = {
-  beginner: 'bg-blue-100 text-blue-800',
-  intermediate: 'bg-purple-100 text-purple-800',
-  advanced: 'bg-red-100 text-red-800',
-};
 
 export default function AcademyPage() {
   const { user } = useAuth();
@@ -31,6 +20,7 @@ export default function AcademyPage() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<AcademyCourse | null>(null);
+  const [viewingItem, setViewingItem] = useState<AcademyCourse | null>(null);
 
   useEffect(() => {
     loadCourses();
@@ -62,17 +52,35 @@ export default function AcademyPage() {
 
   const filtered = courses.filter((c) => {
     const q = searchQuery.toLowerCase();
-    const matchesSearch = !q || c.title.toLowerCase().includes(q) || (c.category || '').toLowerCase().includes(q) || c.instructor.toLowerCase().includes(q);
+    const matchesSearch = !q ||
+      c.title.toLowerCase().includes(q) ||
+      c.id.toLowerCase().includes(q) ||
+      (c.category || '').toLowerCase().includes(q) ||
+      c.instructor.toLowerCase().includes(q);
     const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const stats = {
-    total: courses.length,
-    published: courses.filter((c) => c.status === 'published').length,
-    draft: courses.filter((c) => c.status === 'draft').length,
-    archived: courses.filter((c) => c.status === 'archived').length,
-    totalRevenue: courses.reduce((sum, c) => sum + (c.price || 0), 0),
+  const totalPublished = courses.filter((c) => c.status === 'published').length;
+  const totalRevenue = courses.reduce((sum, c) => sum + (c.price || 0), 0);
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'published':
+        return 'bg-green-100 text-green-800 border-green-300';
+      case 'draft':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch {
+      return dateStr;
+    }
   };
 
   if (loading) {
@@ -85,157 +93,137 @@ export default function AcademyPage() {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-primary mb-2">Academy Courses</h1>
-              <p className="text-muted-foreground">Manage your course catalog</p>
-            </div>
-            <Button onClick={() => setShowAddModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Course
-            </Button>
+      <div className="max-w-6xl mx-auto space-y-6">
+
+        {/* Header / Welcome */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-primary">Abelov IT Academy</h1>
+            <p className="text-muted-foreground mt-1">Manage your course catalog — track, add, and update courses.</p>
           </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          <Card className="p-5 bg-gradient-to-br from-blue-50 to-blue-50 border-blue-200">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-gray-600">Total Courses</p>
-              <BookOpen className="w-5 h-5 text-blue-600" />
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card className="p-5 border-l-4 border-l-blue-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Courses</p>
+                <p className="text-3xl font-bold text-blue-700 mt-1">{courses.length}</p>
+              </div>
+              <BookOpen className="w-10 h-10 text-blue-500/30" />
             </div>
-            <p className="text-3xl font-bold text-blue-700">{stats.total}</p>
           </Card>
-          <Card className="p-5 bg-gradient-to-br from-green-50 to-green-50 border-green-200">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-gray-600">Published</p>
-              <BookOpen className="w-5 h-5 text-green-600" />
+          <Card className="p-5 border-l-4 border-l-green-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Published</p>
+                <p className="text-3xl font-bold text-green-700 mt-1">{totalPublished}</p>
+              </div>
+              <BookOpen className="w-10 h-10 text-green-500/30" />
             </div>
-            <p className="text-3xl font-bold text-green-700">{stats.published}</p>
           </Card>
-          <Card className="p-5 bg-gradient-to-br from-gray-50 to-gray-50 border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-gray-600">Drafts</p>
-              <BookOpen className="w-5 h-5 text-gray-600" />
+          <Card className="p-5 border-l-4 border-l-emerald-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Revenue</p>
+                <p className="text-3xl font-bold text-emerald-700 mt-1">₦{totalRevenue.toLocaleString()}</p>
+              </div>
+              <DollarSign className="w-10 h-10 text-emerald-500/30" />
             </div>
-            <p className="text-3xl font-bold text-gray-700">{stats.draft}</p>
-          </Card>
-          <Card className="p-5 bg-gradient-to-br from-yellow-50 to-yellow-50 border-yellow-200">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-gray-600">Archived</p>
-              <BookOpen className="w-5 h-5 text-yellow-600" />
-            </div>
-            <p className="text-3xl font-bold text-yellow-700">{stats.archived}</p>
-          </Card>
-          <Card className="p-5 bg-gradient-to-br from-emerald-50 to-emerald-50 border-emerald-200">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-gray-600">Total Value</p>
-              <DollarSign className="w-5 h-5 text-emerald-600" />
-            </div>
-            <p className="text-3xl font-bold text-emerald-700">₦{stats.totalRevenue.toLocaleString()}</p>
           </Card>
         </div>
 
-        {/* Search & Filter */}
-        <div className="flex gap-4 mb-8">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        {/* Search & Actions */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              type="text"
-              placeholder="Search by title, category, or instructor..."
+              placeholder="Search by name, ID, category, or instructor..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="draft">Active</SelectItem>
+              <SelectItem value="published">Completed</SelectItem>
               <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
           </Select>
+          <Button onClick={() => setShowAddModal(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Course
+          </Button>
         </div>
 
         {/* Course Cards */}
         {filtered.length === 0 && searchQuery ? (
           <Card className="p-12 text-center">
-            <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No Results Found</h3>
-            <p className="text-muted-foreground mb-6">Try adjusting your search query.</p>
+            <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Results Found</h3>
+            <p className="text-muted-foreground mb-4">Try adjusting your search or filter.</p>
             <Button onClick={() => setSearchQuery('')} variant="outline">Clear Search</Button>
           </Card>
         ) : courses.length === 0 ? (
           <Card className="p-12 text-center">
-            <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No Courses Yet</h3>
-            <p className="text-muted-foreground mb-6">Add your first course to get started.</p>
+            <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Courses Yet</h3>
+            <p className="text-muted-foreground mb-4">Add your first course to the catalog.</p>
             <Button onClick={() => setShowAddModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Course
+              <Plus className="w-4 h-4 mr-2" /> Add Course
             </Button>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filtered.map((course) => (
-              <Card key={course.id} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <BookOpen className="w-5 h-5 text-primary shrink-0" />
-                      <h3 className="font-semibold truncate">{course.title}</h3>
-                    </div>
-                    {course.category && (
-                      <p className="text-xs text-muted-foreground">{course.category}</p>
-                    )}
-                  </div>
-                  <Badge className={statusColor[course.status] || ''}>{course.status}</Badge>
+              <Card key={course.id} className="p-5 hover:shadow-lg transition-shadow">
+                {/* Top Row: ID + Status */}
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-mono text-muted-foreground">ID: {course.id.slice(0, 8)}</p>
+                  <Badge className={getStatusBadge(course.status)}>
+                    {course.status === 'published' ? 'Completed' : course.status === 'draft' ? 'Active' : course.status}
+                  </Badge>
                 </div>
 
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{course.description || 'No description'}</p>
+                {/* Title */}
+                <h3 className="font-semibold text-base mb-3">{course.title}</h3>
 
+                {/* Details */}
                 <div className="space-y-2 text-sm mb-4">
-                  {course.instructor && (
-                    <div className="flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4 text-muted-foreground" />
-                      <span>Instructor: <strong>{course.instructor}</strong></span>
-                    </div>
-                  )}
-                  {course.duration && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                      <span>Duration: <strong>{course.duration}</strong></span>
-                    </div>
-                  )}
-                  {course.price > 0 && (
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-muted-foreground" />
-                      <span>Price: <strong>₦{course.price.toLocaleString()}</strong></span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    <span>{course.instructor || 'No instructor'}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    <span>{formatDate(course.created_at)}</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-border">
+                    <span className="text-muted-foreground">Total Value</span>
+                    <span className="font-bold text-primary">₦{(course.price || 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Balance</span>
+                    <span className="font-bold text-green-600">₦{(course.price || 0).toLocaleString()}</span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 mb-4">
-                  {course.level && (
-                    <Badge variant="outline" className={levelColor[course.level] || ''}>{course.level}</Badge>
-                  )}
-                </div>
-
-                <div className="pt-4 border-t border-border flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => setEditingItem(course)}>
-                    <Edit className="w-3 h-3 mr-1" />
-                    Edit
+                {/* Actions */}
+                <div className="flex gap-2 pt-3 border-t border-border">
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => setViewingItem(course)}>
+                    <Eye className="w-3.5 h-3.5 mr-1" /> View
                   </Button>
-                  <Button variant="destructive" size="sm" className="flex-1" onClick={() => handleDelete(course.id)}>
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    Delete
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => setEditingItem(course)}>
+                    <Edit className="w-3.5 h-3.5 mr-1" /> Edit
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1 text-destructive hover:text-destructive" onClick={() => handleDelete(course.id)}>
+                    <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
                   </Button>
                 </div>
               </Card>
@@ -243,6 +231,7 @@ export default function AcademyPage() {
           </div>
         )}
 
+        {/* Add/Edit Modal */}
         <AddAcademyModal
           open={showAddModal || !!editingItem}
           onOpenChange={(open) => {
@@ -252,6 +241,67 @@ export default function AcademyPage() {
           editItem={editingItem}
           onSuccess={loadCourses}
         />
+
+        {/* View Detail Modal */}
+        <Dialog open={!!viewingItem} onOpenChange={(open) => { if (!open) setViewingItem(null); }}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{viewingItem?.title}</DialogTitle>
+            </DialogHeader>
+            {viewingItem && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Badge className={getStatusBadge(viewingItem.status)}>
+                    {viewingItem.status === 'published' ? 'Completed' : viewingItem.status === 'draft' ? 'Active' : viewingItem.status}
+                  </Badge>
+                  {viewingItem.category && <Badge variant="outline">{viewingItem.category}</Badge>}
+                  {viewingItem.level && <Badge variant="outline">{viewingItem.level}</Badge>}
+                </div>
+
+                {viewingItem.description && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Description</p>
+                    <p className="text-sm">{viewingItem.description}</p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {viewingItem.instructor && (
+                    <div>
+                      <p className="text-muted-foreground">Instructor</p>
+                      <p className="font-medium">{viewingItem.instructor}</p>
+                    </div>
+                  )}
+                  {viewingItem.duration && (
+                    <div>
+                      <p className="text-muted-foreground">Duration</p>
+                      <p className="font-medium">{viewingItem.duration}</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-muted-foreground">Price</p>
+                    <p className="font-medium">₦{(viewingItem.price || 0).toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Created</p>
+                    <p className="font-medium">{formatDate(viewingItem.created_at)}</p>
+                  </div>
+                </div>
+
+                {viewingItem.syllabus && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Syllabus</p>
+                    <p className="text-sm whitespace-pre-wrap">{viewingItem.syllabus}</p>
+                  </div>
+                )}
+
+                <div className="pt-2">
+                  <p className="text-xs font-mono text-muted-foreground">Course ID: {viewingItem.id}</p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
