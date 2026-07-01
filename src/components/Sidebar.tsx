@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import abelovLogo from '@/assets/abelov-logo.png';
 import {
   LayoutDashboard,
@@ -24,7 +30,7 @@ interface NavItem {
   label: string;
   path: string;
   icon: React.ReactNode;
-  section: 'main' | 'sales' | 'admin';
+  section: 'main' | 'sales' | 'admin' | 'academy';
   roles?: string[];
 }
 
@@ -110,8 +116,8 @@ export default function Sidebar() {
         <div className="p-6 border-b border-border shrink-0 flex items-center gap-3">
           <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10 rounded-xl" />
           <div>
-            <h1 className="text-lg font-bold text-primary">Abelov</h1>
-            <p className="text-xs text-muted-foreground">Centralized System</p>
+            <h1 className="text-lg font-bold text-primary">Abelov Record Management System</h1>
+            {/* <p className="text-xs text-muted-foreground">Centralized System</p> */}
           </div>
         </div>
 
@@ -124,108 +130,126 @@ export default function Sidebar() {
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4 min-h-0">
-          {/* Main Section */}
-          <div className="px-4 mb-6">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Main</p>
-            <div className="space-y-2">
-              {navItems
-                .filter((item) => item.section === 'main')
-                .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
-                .map((item) => (
-                  <button
-                    key={item.path}
-                    onClick={() => handleNavigation(item.path)}
-                    className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isActive(item.path)
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-foreground hover:bg-accent'
-                    }`}
-                  >
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </button>
-                ))}
-            </div>
-          </div>
+        <nav className="flex-1 overflow-y-auto py-4 min-h-0 px-4">
+          <Accordion type="multiple" defaultValue={['main', 'academy', 'sales', 'admin']} className="space-y-1">
+            {/* Main Section */}
+            <AccordionItem value="main" className="border-0">
+              <AccordionTrigger className="py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:no-underline">
+                Main
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-1 pt-1">
+                  {navItems
+                    .filter((item) => item.section === 'main')
+                    .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
+                    .map((item) => (
+                      <button
+                        key={item.path}
+                        onClick={() => handleNavigation(item.path)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          isActive(item.path)
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-foreground hover:bg-accent'
+                        }`}
+                      >
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
-          {/* Academy Section */}
-          {navItems.some((item) => item.section === 'academy' && (!item.roles || item.roles.some((r) => userRoles.includes(r)))) && (
-            <div className="px-4 mb-6">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Academy</p>
-              <div className="space-y-2">
-                {navItems
-                  .filter((item) => item.section === 'academy')
-                  .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
-                  .map((item) => (
-                    <button
-                      key={item.path}
-                      onClick={() => handleNavigation(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        isActive(item.path)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-foreground hover:bg-accent'
-                      }`}
-                    >
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-              </div>
-            </div>
-          )}
+            {/* Academy Section */}
+            {navItems.some((item) => item.section === 'academy' && (!item.roles || item.roles.some((r) => userRoles.includes(r)))) && (
+              <AccordionItem value="academy" className="border-0">
+                <AccordionTrigger className="py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:no-underline">
+                  Academy
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-1 pt-1">
+                    {navItems
+                      .filter((item) => item.section === 'academy')
+                      .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
+                      .map((item) => (
+                        <button
+                          key={item.path}
+                          onClick={() => handleNavigation(item.path)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            isActive(item.path)
+                              ? 'bg-primary text-primary-foreground'
+                              : 'text-foreground hover:bg-accent'
+                          }`}
+                        >
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </button>
+                      ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
 
-          {/* Sales & Inventory Section */}
-          {navItems.some((item) => item.section === 'sales' && (!item.roles || item.roles.some((r) => userRoles.includes(r)))) && (
-            <div className="px-4 mb-6">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Sales & Inventory</p>
-              <div className="space-y-2">
-                {navItems
-                  .filter((item) => item.section === 'sales')
-                  .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
-                  .map((item) => (
-                    <button
-                      key={item.path}
-                      onClick={() => handleNavigation(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        isActive(item.path)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-foreground hover:bg-accent'
-                      }`}
-                    >
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-              </div>
-            </div>
-          )}
+            {/* Sales & Inventory Section */}
+            {navItems.some((item) => item.section === 'sales' && (!item.roles || item.roles.some((r) => userRoles.includes(r)))) && (
+              <AccordionItem value="sales" className="border-0">
+                <AccordionTrigger className="py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:no-underline">
+                  Sales & Inventory
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-1 pt-1">
+                    {navItems
+                      .filter((item) => item.section === 'sales')
+                      .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
+                      .map((item) => (
+                        <button
+                          key={item.path}
+                          onClick={() => handleNavigation(item.path)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            isActive(item.path)
+                              ? 'bg-primary text-primary-foreground'
+                              : 'text-foreground hover:bg-accent'
+                          }`}
+                        >
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </button>
+                      ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
 
-          {/* Admin Section */}
-          {navItems.some((item) => item.section === 'admin' && (!item.roles || item.roles.some((r) => userRoles.includes(r)))) && (
-            <div className="px-4 mb-6">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Admin</p>
-              <div className="space-y-2">
-                {navItems
-                  .filter((item) => item.section === 'admin')
-                  .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
-                  .map((item) => (
-                    <button
-                      key={item.path}
-                      onClick={() => handleNavigation(item.path)}
-                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        isActive(item.path)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-foreground hover:bg-accent'
-                      }`}
-                    >
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
-              </div>
-            </div>
-          )}
+            {/* Admin Section */}
+            {navItems.some((item) => item.section === 'admin' && (!item.roles || item.roles.some((r) => userRoles.includes(r)))) && (
+              <AccordionItem value="admin" className="border-0">
+                <AccordionTrigger className="py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:no-underline">
+                  Admin
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-1 pt-1">
+                    {navItems
+                      .filter((item) => item.section === 'admin')
+                      .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
+                      .map((item) => (
+                        <button
+                          key={item.path}
+                          onClick={() => handleNavigation(item.path)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            isActive(item.path)
+                              ? 'bg-primary text-primary-foreground'
+                              : 'text-foreground hover:bg-accent'
+                          }`}
+                        >
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </button>
+                      ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
+          </Accordion>
         </nav>
 
         {/* Footer */}
