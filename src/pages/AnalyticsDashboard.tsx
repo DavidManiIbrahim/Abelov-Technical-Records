@@ -7,8 +7,8 @@ import { serviceRequestAPI, adminAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
 import { ArrowLeft, TrendingUp, DollarSign, Clock, CheckCircle, Loader2 } from 'lucide-react';
 import { AreaChart, Area, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import abelovLogo from '@/assets/abelov-logo.png';
 import ThemeToggle from '@/components/ThemeToggle';
+import Header from '@/components/Header';
 
 const formatCurrencyCompact = (value: number): string => {
   const abs = Math.abs(value);
@@ -203,16 +203,29 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-4">
-              <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10" />
-              <h1 className="text-lg md:text-2xl font-bold text-primary dark:text-black">Analytics Dashboard</h1>
+      {/* <Header>
+        <div className="bg-white border-b shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-4">
+                <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10" />
+                <h1 className="text-lg md:text-2xl font-bold text-primary dark:text-black">Analytics Dashboard</h1>
+              </div>
+              <ThemeToggle />
             </div>
-            <ThemeToggle />
+            <Button className='dark:bg-black hidden md:flex' onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+            <Button className='dark:bg-black md:hidden' onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
           </div>
+        </div>
+      </div> */}
+      <Header title="Analytics Dashboard">
+        <ThemeToggle />
+        <div className="flex gap-2 w-full mt-2">
           <Button className='dark:bg-black hidden md:flex' onClick={() => navigate('/dashboard')} variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
@@ -221,7 +234,7 @@ export default function AnalyticsDashboard() {
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </div>
-      </div>
+      </Header>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
         {/* Quick Stats */}

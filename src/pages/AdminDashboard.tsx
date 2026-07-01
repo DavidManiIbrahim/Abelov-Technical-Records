@@ -19,8 +19,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import abelovLogo from '@/assets/abelov-logo.png';
 import ThemeToggle from '@/components/ThemeToggle';
+import Header from '@/components/Header';
 
 
 interface GlobalStats {
@@ -298,35 +298,53 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <div className="border-b bg-card p-4 md:p-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className='flex items-center gap-4'>
-            <img src={abelovLogo} alt="Abelov Logo" className="w-12 rounded-3xl h-12" />
-            <div>
-              <h1 className="text-xl md:text-3xl font-bold text-primary dark:text-white">Admin Dashboard</h1>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">{user?.email}</p>
+      {/* <Header>
+        <div className="border-b bg-card p-4 md:p-6">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className='flex items-center gap-4'>
+              <img src={abelovLogo} alt="Abelov Logo" className="w-12 rounded-3xl h-12" />
+              <div>
+                <h1 className="text-xl md:text-3xl font-bold text-primary dark:text-white">Admin Dashboard</h1>
+                <p className="text-xs md:text-sm text-muted-foreground mt-1">{user?.email}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <ThemeToggle />
+              <Button onClick={() => navigate('/dashboard')} variant="outline" className="md:flex hidden">
+                <Home className="w-4 h-4 mr-2" />
+                Dashboard
+              </Button>
+              <Button onClick={() => navigate('/dashboard')} variant="outline" className="md:hidden">
+                <Home className="w-4 h-4" />
+              </Button>
+              <Button onClick={handleLogout} variant="outline" className="md:flex hidden">
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+              <Button onClick={handleLogout} variant="outline" className="md:hidden">
+                <LogOut className="w-4 h-4" />
+              </Button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <ThemeToggle />
-            <Button onClick={() => navigate('/dashboard')} variant="outline" className="md:flex hidden">
-              <Home className="w-4 h-4 mr-2" />
-              Dashboard
-            </Button>
-            <Button onClick={() => navigate('/dashboard')} variant="outline" className="md:hidden">
-              <Home className="w-4 h-4" />
-            </Button>
-            <Button onClick={handleLogout} variant="outline" className="md:flex hidden">
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
-            <Button onClick={handleLogout} variant="outline" className="md:hidden">
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
         </div>
-      </div>
+      </div> */}
+      <Header title="Admin Dashboard" showEmail>
+        <ThemeToggle />
+        <Button onClick={() => navigate('/dashboard')} variant="outline" className="md:flex hidden">
+          <Home className="w-4 h-4 mr-2" />
+          Dashboard
+        </Button>
+        <Button onClick={() => navigate('/dashboard')} variant="outline" className="md:hidden">
+          <Home className="w-4 h-4" />
+        </Button>
+        <Button onClick={handleLogout} variant="outline" className="md:flex hidden">
+          <LogOut className="w-4 h-4 mr-2" />
+          Logout
+        </Button>
+        <Button onClick={handleLogout} variant="outline" className="md:hidden">
+          <LogOut className="w-4 h-4" />
+        </Button>
+      </Header>
 
       <div className="flex-1 p-4 md:p-8">
         <div className="max-w-7xl mx-auto space-y-8">

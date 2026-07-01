@@ -18,7 +18,7 @@ import { ServiceRequest } from '@/types/database';
 import { Plus, Search, Edit, Eye, Trash2, BarChart3, Shield } from 'lucide-react';
 import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
-import abelovLogo from '@/assets/abelov-logo.png';
+import Header from '@/components/Header';
 
 const formatCurrencyCompact = (value: number): string => {
   const abs = Math.abs(value);
@@ -204,40 +204,63 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <img src={abelovLogo} alt="Abelov Logo" className="w-12 rounded-3xl h-12" />
-            <div>
-              <h1 className="text-lg md:text-2xl font-bold text-primary dark:text-black">Abelov Records Management System</h1>
-              <p className="text-xs md:text-sm text-muted-foreground">{user?.email}</p>
+      {/* <Header>
+        <div className="bg-white border-b shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <img src={abelovLogo} alt="Abelov Logo" className="w-12 rounded-3xl h-12" />
+              <div>
+                <h1 className="text-lg md:text-2xl font-bold text-primary dark:text-black">Abelov Records Management System</h1>
+                <p className="text-xs md:text-sm text-muted-foreground">{user?.email}</p>
+              </div>
+            </div>
+            <div className="flex gap-2 items-center">
+              <Button onClick={() => navigate('/analytics')} variant="outline" className="md:flex hidden">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Analytics
+              </Button>
+              <Button onClick={() => navigate('/analytics')} variant="outline" className="md:hidden">
+                <BarChart3 className="w-4 h-4" />
+              </Button>
+              {isAdmin && (
+                <>
+                  <Button onClick={() => navigate('/admin')} variant="outline" className="md:flex hidden">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Admin Panel
+                  </Button>
+                  <Button onClick={() => navigate('/admin')} variant="outline" className="md:hidden">
+                    <Shield className="w-4 h-4" />
+                  </Button>
+                </>
+              )}
+              <ThemeToggle />
+              <ProfileMenu />
             </div>
           </div>
-          <div className="flex gap-2 items-center">
-            <Button onClick={() => navigate('/analytics')} variant="outline" className="md:flex hidden">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Analytics
-            </Button>
-            <Button onClick={() => navigate('/analytics')} variant="outline" className="md:hidden">
-              <BarChart3 className="w-4 h-4" />
-            </Button>
-            {isAdmin && (
-              <>
-                <Button onClick={() => navigate('/admin')} variant="outline" className="md:flex hidden">
-                  <Shield className="w-4 h-4 mr-2" />
-                  Admin Panel
-                </Button>
-                <Button onClick={() => navigate('/admin')} variant="outline" className="md:hidden">
-                  <Shield className="w-4 h-4" />
-                </Button>
-              </>
-            )}
-            <ThemeToggle />
-            <ProfileMenu />
-          </div>
         </div>
-      </div>
+      </div> */}
+      <Header title="Abelov Records Management System" showEmail>
+        <Button onClick={() => navigate('/analytics')} variant="outline" className="md:flex hidden">
+          <BarChart3 className="w-4 h-4 mr-2" />
+          Analytics
+        </Button>
+        <Button onClick={() => navigate('/analytics')} variant="outline" className="md:hidden">
+          <BarChart3 className="w-4 h-4" />
+        </Button>
+        {isAdmin && (
+          <>
+            <Button onClick={() => navigate('/admin')} variant="outline" className="md:flex hidden">
+              <Shield className="w-4 h-4 mr-2" />
+              Admin Panel
+            </Button>
+            <Button onClick={() => navigate('/admin')} variant="outline" className="md:hidden">
+              <Shield className="w-4 h-4" />
+            </Button>
+          </>
+        )}
+        <ThemeToggle />
+        <ProfileMenu />
+      </Header>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">

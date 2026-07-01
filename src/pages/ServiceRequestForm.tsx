@@ -15,8 +15,8 @@ import { serviceRequestAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
 import { Loader2, LogOut, Home } from 'lucide-react';
 import { FaStore, FaUser, FaLaptop, FaExclamationTriangle, FaTools, FaMoneyBill, FaCheckCircle } from 'react-icons/fa';
-import abelovLogo from '@/assets/abelov-logo.png';
 import ThemeToggle from '@/components/ThemeToggle';
+import Header from '@/components/Header';
 
 
 
@@ -587,36 +587,54 @@ export default function ServiceRequestForm() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header with User Info and Logout */}
-      <div className="border-b bg-card p-4 md:p-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      {/* <Header>
+        <div className="border-b bg-card p-4 md:p-6">
+          <div className="max-w-4xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-4">
 
-            <img src={abelovLogo} alt="Abelov Logo" className="w-12 rounded-3xl h-12" />
-            <div>
-              <h1 className="text-lg md:text-2xl font-bold text-primary dark:text-black">Abelov Records Management System</h1>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">{user?.email}</p>
+              <img src={abelovLogo} alt="Abelov Logo" className="w-12 rounded-3xl h-12" />
+              <div>
+                <h1 className="text-lg md:text-2xl font-bold text-primary dark:text-black">Abelov Records Management System</h1>
+                <p className="text-xs md:text-sm text-muted-foreground mt-1">{user?.email}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <ThemeToggle />
+              <Button variant="outline" onClick={() => navigate('/dashboard')} className="md:flex hidden">
+                <Home className="w-4 h-4 mr-2" />
+                Home
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/dashboard')} className="md:hidden">
+                <Home className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" onClick={handleLogout} className="md:flex hidden">
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+              <Button variant="outline" onClick={handleLogout} className="md:hidden">
+                <LogOut className="w-4 h-4" />
+              </Button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <ThemeToggle />
-            <Button variant="outline" onClick={() => navigate('/dashboard')} className="md:flex hidden">
-              <Home className="w-4 h-4 mr-2" />
-              Home
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/dashboard')} className="md:hidden">
-              <Home className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" onClick={handleLogout} className="md:flex hidden">
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
-            <Button variant="outline" onClick={handleLogout} className="md:hidden">
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
         </div>
-      </div>
+      </div> */}
+      <Header title="Abelov Records Management System" showEmail>
+        <ThemeToggle />
+        <Button variant="outline" onClick={() => navigate('/dashboard')} className="md:flex hidden">
+          <Home className="w-4 h-4 mr-2" />
+          Home
+        </Button>
+        <Button variant="outline" onClick={() => navigate('/dashboard')} className="md:hidden">
+          <Home className="w-4 h-4" />
+        </Button>
+        <Button variant="outline" onClick={handleLogout} className="md:flex hidden">
+          <LogOut className="w-4 h-4 mr-2" />
+          Logout
+        </Button>
+        <Button variant="outline" onClick={handleLogout} className="md:hidden">
+          <LogOut className="w-4 h-4" />
+        </Button>
+      </Header>
 
       <div className="flex-1 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
