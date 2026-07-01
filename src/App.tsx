@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import AdminProtectedRoute from "@/components/AdminProtectedRoute";
+import MainLayout from "@/components/MainLayout";
 
 // Auth Pages
 import LoginPage from "@/pages/LoginPage";
@@ -49,7 +50,7 @@ const App = () => (
         <HashRouter>
           <AuthProvider>
             <Routes>
-              {/* Auth Routes */}
+              {/* Auth Routes - No Sidebar */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
 
@@ -63,12 +64,26 @@ const App = () => (
                 }
               />
 
+              {/* Protected Routes with Sidebar */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <DashboardPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Service Request Routes */}
               <Route
                 path="/new-request"
                 element={
                   <ProtectedRoute>
-                    <ServiceRequestForm />
+                    <MainLayout>
+                      <ServiceRequestForm />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
@@ -76,19 +91,29 @@ const App = () => (
                 path="/edit/:id"
                 element={
                   <ProtectedRoute>
-                    <ServiceRequestForm />
+                    <MainLayout>
+                      <ServiceRequestForm />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
               <Route
                 path="/view/:id"
-                element={<ServiceRequestViewPage />}
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ServiceRequestViewPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/confirmation/:id"
                 element={
                   <ProtectedRoute>
-                    <ConfirmationPage />
+                    <MainLayout>
+                      <ConfirmationPage />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
@@ -96,25 +121,21 @@ const App = () => (
                 path="/requests"
                 element={
                   <ProtectedRoute>
-                    <RequestsList />
+                    <MainLayout>
+                      <RequestsList />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
 
-              {/* Dashboard Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                }
-              />
+              {/* Analytics Route */}
               <Route
                 path="/analytics"
                 element={
                   <ProtectedRoute>
-                    <AnalyticsDashboard />
+                    <MainLayout>
+                      <AnalyticsDashboard />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
@@ -124,7 +145,9 @@ const App = () => (
                 path="/goods"
                 element={
                   <ProtectedRoute>
-                    <GoodsList />
+                    <MainLayout>
+                      <GoodsList />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
@@ -132,7 +155,9 @@ const App = () => (
                 path="/purchases"
                 element={
                   <ProtectedRoute>
-                    <PurchasesList />
+                    <MainLayout>
+                      <PurchasesList />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
@@ -140,7 +165,9 @@ const App = () => (
                 path="/orders"
                 element={
                   <ProtectedRoute>
-                    <OrdersList />
+                    <MainLayout>
+                      <OrdersList />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
@@ -148,7 +175,9 @@ const App = () => (
                 path="/expenses"
                 element={
                   <ProtectedRoute>
-                    <ExpensesList />
+                    <MainLayout>
+                      <ExpensesList />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
@@ -156,7 +185,9 @@ const App = () => (
                 path="/credits"
                 element={
                   <ProtectedRoute>
-                    <CreditsList />
+                    <MainLayout>
+                      <CreditsList />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
@@ -166,7 +197,9 @@ const App = () => (
                 path="/admin"
                 element={
                   <AdminProtectedRoute>
-                    <AdminDashboard />
+                    <MainLayout>
+                      <AdminDashboard />
+                    </MainLayout>
                   </AdminProtectedRoute>
                 }
               />
