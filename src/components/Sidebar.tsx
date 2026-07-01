@@ -11,6 +11,7 @@ import {
   DollarSign,
   CreditCard,
   BarChart3,
+  Shield,
   Menu,
   X,
   LogOut,
@@ -40,6 +41,9 @@ const navItems: NavItem[] = [
   
   // Analytics Section
   { label: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, section: 'main' },
+
+  // Admin Section
+  { label: 'Admin Panel', path: '/admin', icon: <Shield size={20} />, section: 'admin', roles: ['admin'] },
 ];
 
 export default function Sidebar() {
@@ -144,6 +148,32 @@ export default function Sidebar() {
               <div className="space-y-2">
                 {navItems
                   .filter((item) => item.section === 'sales')
+                  .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
+                  .map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => handleNavigation(item.path)}
+                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        isActive(item.path)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-foreground hover:bg-accent'
+                      }`}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Admin Section */}
+          {navItems.some((item) => item.section === 'admin' && (!item.roles || item.roles.some((r) => userRoles.includes(r)))) && (
+            <div className="px-4 mb-6">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Admin</p>
+              <div className="space-y-2">
+                {navItems
+                  .filter((item) => item.section === 'admin')
                   .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
                   .map((item) => (
                     <button
