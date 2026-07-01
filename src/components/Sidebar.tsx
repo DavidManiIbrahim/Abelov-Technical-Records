@@ -46,7 +46,7 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, userRoles, signOut } = useAuth();
 
   // Don't show sidebar on login/signup pages
   if (location.pathname === '/login' || location.pathname === '/signup') {
