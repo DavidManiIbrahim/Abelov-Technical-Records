@@ -40,7 +40,7 @@ const navItems: NavItem[] = [
   { label: 'Credits', path: '/credits', icon: <CreditCard size={20} />, section: 'sales', roles: ['sales', 'admin'] },
   
   // Academy Section
-  { label: 'Academy', path: '/academy', icon: <BookOpen size={20} />, section: 'main' },
+  { label: 'Academy', path: '/academy', icon: <BookOpen size={20} />, section: 'academy' },
 
   // Analytics Section
   { label: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, section: 'main' },
@@ -143,6 +143,32 @@ export default function Sidebar() {
                 ))}
             </div>
           </div>
+
+          {/* Academy Section */}
+          {navItems.some((item) => item.section === 'academy' && (!item.roles || item.roles.some((r) => userRoles.includes(r)))) && (
+            <div className="px-4 mb-6">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Academy</p>
+              <div className="space-y-2">
+                {navItems
+                  .filter((item) => item.section === 'academy')
+                  .filter((item) => !item.roles || item.roles.some((r) => userRoles.includes(r)))
+                  .map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => handleNavigation(item.path)}
+                      className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        isActive(item.path)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-foreground hover:bg-accent'
+                      }`}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+              </div>
+            </div>
+          )}
 
           {/* Sales & Inventory Section */}
           {navItems.some((item) => item.section === 'sales' && (!item.roles || item.roles.some((r) => userRoles.includes(r)))) && (
