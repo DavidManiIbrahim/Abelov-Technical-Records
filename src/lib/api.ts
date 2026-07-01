@@ -1,4 +1,4 @@
-import { ServiceRequest } from '@/types/database';
+import { ServiceRequest, Goods, Purchase, Expense, Credit, Order } from '@/types/database';
 import { getCache, setCache, invalidateCache } from '@/utils/storage';
 
 // Memory cache keys (in-memory cache only, no persistence)
@@ -342,5 +342,171 @@ export const authAPI = {
       body: JSON.stringify(data),
     });
     return res?.user || res;
+  },
+};
+
+// Goods API - Inventory management
+export const goodsAPI = {
+  async getAll(userId: string) {
+    const res = await apiFetch(`/goods?user_id=${userId}`);
+    const list = (res?.data || res) as Goods[];
+    return list;
+  },
+
+  async getById(id: string) {
+    const res = await apiFetch(`/goods/${id}`);
+    return (res?.data || res) as Goods;
+  },
+
+  async create(goods: Omit<Goods, 'id' | 'created_at' | 'updated_at'>) {
+    const res = await apiFetch('/goods', {
+      method: 'POST',
+      body: JSON.stringify(goods),
+    });
+    return (res?.data || res) as Goods;
+  },
+
+  async update(id: string, updates: Partial<Goods>) {
+    const res = await apiFetch(`/goods/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    return (res?.data || res) as Goods;
+  },
+
+  async delete(id: string) {
+    await apiFetch(`/goods/${id}`, { method: 'DELETE' });
+  },
+};
+
+// Purchases API
+export const purchasesAPI = {
+  async getAll(userId: string) {
+    const res = await apiFetch(`/purchases?user_id=${userId}`);
+    return (res?.data || res) as Purchase[];
+  },
+
+  async getById(id: string) {
+    const res = await apiFetch(`/purchases/${id}`);
+    return (res?.data || res) as Purchase;
+  },
+
+  async create(purchase: Omit<Purchase, 'id' | 'created_at' | 'updated_at'>) {
+    const res = await apiFetch('/purchases', {
+      method: 'POST',
+      body: JSON.stringify(purchase),
+    });
+    return (res?.data || res) as Purchase;
+  },
+
+  async update(id: string, updates: Partial<Purchase>) {
+    const res = await apiFetch(`/purchases/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    return (res?.data || res) as Purchase;
+  },
+
+  async delete(id: string) {
+    await apiFetch(`/purchases/${id}`, { method: 'DELETE' });
+  },
+};
+
+// Expenses API
+export const expensesAPI = {
+  async getAll(userId: string) {
+    const res = await apiFetch(`/expenses?user_id=${userId}`);
+    return (res?.data || res) as Expense[];
+  },
+
+  async getById(id: string) {
+    const res = await apiFetch(`/expenses/${id}`);
+    return (res?.data || res) as Expense;
+  },
+
+  async create(expense: Omit<Expense, 'id' | 'created_at' | 'updated_at'>) {
+    const res = await apiFetch('/expenses', {
+      method: 'POST',
+      body: JSON.stringify(expense),
+    });
+    return (res?.data || res) as Expense;
+  },
+
+  async update(id: string, updates: Partial<Expense>) {
+    const res = await apiFetch(`/expenses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    return (res?.data || res) as Expense;
+  },
+
+  async delete(id: string) {
+    await apiFetch(`/expenses/${id}`, { method: 'DELETE' });
+  },
+};
+
+// Credits API
+export const creditsAPI = {
+  async getAll(userId: string) {
+    const res = await apiFetch(`/credits?user_id=${userId}`);
+    return (res?.data || res) as Credit[];
+  },
+
+  async getById(id: string) {
+    const res = await apiFetch(`/credits/${id}`);
+    return (res?.data || res) as Credit;
+  },
+
+  async create(credit: Omit<Credit, 'id' | 'created_at' | 'updated_at'>) {
+    const res = await apiFetch('/credits', {
+      method: 'POST',
+      body: JSON.stringify(credit),
+    });
+    return (res?.data || res) as Credit;
+  },
+
+  async update(id: string, updates: Partial<Credit>) {
+    const res = await apiFetch(`/credits/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    return (res?.data || res) as Credit;
+  },
+
+  async delete(id: string) {
+    await apiFetch(`/credits/${id}`, { method: 'DELETE' });
+  },
+};
+
+// Orders API
+export const ordersAPI = {
+  async getAll(userId: string) {
+    const res = await apiFetch(`/orders?user_id=${userId}`);
+    return (res?.data || res) as Order[];
+  },
+
+  async getById(id: string) {
+    const res = await apiFetch(`/orders/${id}`);
+    return (res?.data || res) as Order;
+  },
+
+  async create(order: Omit<Order, 'id' | 'created_at' | 'updated_at'>) {
+    const res = await apiFetch('/orders', {
+      method: 'POST',
+      body: JSON.stringify(order),
+    });
+    return (res?.data || res) as Order;
+  },
+
+  async update(id: string, updates: Partial<Order>) {
+    const res = await apiFetch(`/orders/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    return (res?.data || res) as Order;
+  },
+
+  async delete(id: string) {
+    await apiFetch(`/orders/${id}`, { method: 'DELETE' });
   },
 };

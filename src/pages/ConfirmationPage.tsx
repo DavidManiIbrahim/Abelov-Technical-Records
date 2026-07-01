@@ -2,8 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ServiceRequest } from "@/types/serviceRequest";
-import { getServiceRequestById } from "@/utils/storage";
+import { serviceRequestAPI } from "@/lib/api";
+import { ServiceRequest } from "@/types/database";
 import { CheckCircle, FileText, ArrowLeft, Printer, Download } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -17,8 +17,11 @@ export default function ConfirmationPage() {
 
   useEffect(() => {
     if (id) {
-      const foundRequest = getServiceRequestById(id);
-      setRequest(foundRequest || null);
+      serviceRequestAPI.getById(id).then((foundRequest) => {
+        setRequest(foundRequest || null);
+      }).catch(() => {
+        setRequest(null);
+      });
     }
   }, [id]);
 

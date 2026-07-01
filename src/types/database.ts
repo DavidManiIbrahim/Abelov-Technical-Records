@@ -47,6 +47,77 @@ export interface ServiceRequest {
   updated_at: string;
 }
 
+export interface Goods {
+  id: string;
+  user_id: string;
+  name: string;
+  sku: string;
+  description: string;
+  price: number;
+  quantity: number;
+  category?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrderItem {
+  goods_id: string;
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+export interface Order {
+  id: string;
+  user_id: string;
+  customer_name: string;
+  status: string;
+  total_amount: number;
+  items: OrderItem[];
+  payment_status: string;
+  order_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Purchase {
+  id: string;
+  user_id: string;
+  supplier: string;
+  status: string;
+  total_amount: number;
+  items: OrderItem[];
+  purchase_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Expense {
+  id: string;
+  user_id: string;
+  category: string;
+  description: string;
+  amount: number;
+  vendor?: string;
+  date: string;
+  is_recurring?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Credit {
+  id: string;
+  user_id: string;
+  customer_name: string;
+  status: string;
+  amount: number;
+  used_amount: number;
+  issued_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface User {
   id: string;
   email: string;
