@@ -15,25 +15,27 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'robots.txt'],
+      includeAssets: ['favicon-32x32.png', 'apple-touch-icon.png', 'robots.txt'],
       manifest: {
         name: 'Abelov Records Management System',
         short_name: 'Abelov RMS',
         description: 'Records management system for Abelov International Ltd',
         theme_color: '#ffffff',
+        background_color: '#ffffff',
+        display: 'standalone',
         icons: [
           {
-            src: 'abelov-logo.png',
+            src: 'icon-192x192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'abelov-logo.png',
+            src: 'icon-512x512.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'abelov-logo.png',
+            src: 'icon-maskable-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
