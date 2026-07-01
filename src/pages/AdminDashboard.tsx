@@ -587,25 +587,31 @@ export default function AdminDashboard() {
               <Card className="p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-semibold text-primary">System Users</h3>
-                  <Button onClick={() => setIsCreatingUser(!isCreatingUser)} variant={isCreatingUser ? "ghost" : "default"}>
-                    {isCreatingUser ? "Cancel" : "Add New User"}
+                   <Button onClick={() => setIsCreatingUser(true)} variant="default">
+                    Add New User
                   </Button>
                 </div>
 
-                {isCreatingUser && (
-                  <Card className="p-4 mb-6 border-primary/20 bg-muted/30">
-                    <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <Dialog open={isCreatingUser} onOpenChange={setIsCreatingUser}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add New User</DialogTitle>
+                      <DialogDescription>
+                        Create a new user account with an @abelov.ng email address.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleCreateUser} className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Email Address (@abelov.ng required)</label>
+                        <label className="text-sm font-medium">Email Address</label>
                         <Input
-                          placeholder="e.g. staff@abelov.ng"
+                          placeholder="staff@abelov.ng"
                           value={newUserEmail}
                           onChange={(e) => setNewUserEmail(e.target.value)}
                           required
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Initial Password</label>
+                        <label className="text-sm font-medium">Initial Password</label>
                         <Input
                           type="password"
                           placeholder="Min 12 characters"
@@ -615,7 +621,7 @@ export default function AdminDashboard() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">User Role</label>
+                        <label className="text-sm font-medium">User Role</label>
                         <Select value={newUserRole} onValueChange={setNewUserRole}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Role" />
@@ -626,12 +632,17 @@ export default function AdminDashboard() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button type="submit" disabled={loading} className="w-full">
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create User Account"}
-                      </Button>
+                      <DialogFooter>
+                        <Button variant="outline" type="button" onClick={() => setIsCreatingUser(false)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={loading}>
+                          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create User Account"}
+                        </Button>
+                      </DialogFooter>
                     </form>
-                  </Card>
-                )}
+                  </DialogContent>
+                </Dialog>
 
                 {loading && !users.length ? (
 
