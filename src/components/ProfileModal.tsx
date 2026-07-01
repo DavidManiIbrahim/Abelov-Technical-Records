@@ -1,16 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Card } from '@/components/ui/card';
-import { ArrowLeft, Upload, LogOut } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Upload, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
-export default function ProfilePage() {
+interface ProfileModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export default function ProfileModal({ open, onOpenChange }: ProfileModalProps) {
   const { user, signOut, updateUser } = useAuth();
-  const navigate = useNavigate();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [username, setUsername] = useState<string>('');
@@ -68,14 +71,14 @@ export default function ProfilePage() {
       setOriginalUsername(username);
       setHasChanges(false);
       toast({ title: 'Success', description: 'Profile updated successfully' });
-    } catch (error) {
+    } catch {
       toast({ title: 'Error', description: 'Failed to update profile', variant: 'destructive' });
     }
   };
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/login');
+    onOpenChange(false);
   };
 
   useEffect(() => {
@@ -89,17 +92,14 @@ export default function ProfilePage() {
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-lg mx-auto space-y-6">
-        <Button variant="ghost" onClick={() => navigate(-1)} size="sm">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
-        </Button>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Profile</DialogTitle>
+        </DialogHeader>
 
-        <Card className="p-6">
-          <h1 className="text-2xl font-bold mb-6">Profile</h1>
-
-          <div className="flex flex-col items-center gap-4 mb-6 pb-6 border-b">
+        <div className="space-y-6">
+          <div className="flex flex-col items-center gap-4 pb-6 border-b">
             <div className="relative">
               <Avatar
                 className="h-24 w-24 cursor-pointer hover:opacity-80 transition-opacity"
@@ -149,21 +149,21 @@ export default function ProfilePage() {
           </div>
 
           {hasChanges && (
-            <Button onClick={handleSaveChanges} className="w-full mt-6" disabled={isUploading}>
+            <Button onClick={handleSaveChanges} className="w-full" disabled={isUploading}>
               {isUploading ? 'Uploading...' : 'Save Changes'}
             </Button>
           )}
-        </Card>
 
-        <Button
-          variant="outline"
-          className="w-full text-destructive hover:text-destructive"
-          onClick={handleLogout}
-        >
-          <LogOut size={16} className="mr-2" />
-          Logout
-        </Button>
-      </div>
-    </div>
+          <Button
+            variant="outline"
+            className="w-full text-destructive hover:text-destructive"
+            onClick={handleLogout}
+          >
+            <LogOut size={16} className="mr-2" />
+            Logout
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

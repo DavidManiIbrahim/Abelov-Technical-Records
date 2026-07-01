@@ -38,9 +38,6 @@ import CreditsList from "@/pages/sales/CreditsList";
 // Academy Page
 import AcademyPage from "@/pages/academy/AcademyPage";
 
-// Profile Page
-import ProfilePage from "@/pages/ProfilePage";
-
 // Error Pages
 import NotFound from "@/pages/NotFound";
 
@@ -251,18 +248,6 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <AcademyPage />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Profile Route */}
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <ProfilePage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

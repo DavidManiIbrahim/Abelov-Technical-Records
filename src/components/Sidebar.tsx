@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import ProfileModal from '@/components/ProfileModal';
 import {
   Accordion,
   AccordionContent,
@@ -63,6 +64,7 @@ const navItems: NavItem[] = [
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, userRoles, signOut } = useAuth();
@@ -269,7 +271,7 @@ export default function Sidebar() {
             variant="outline"
             size="sm"
             className="w-full justify-start"
-            onClick={() => navigate('/profile')}
+            onClick={() => setShowProfileModal(true)}
           >
             <User size={16} className="mr-2" />
             Profile
@@ -285,6 +287,8 @@ export default function Sidebar() {
           </Button>
         </div>
       </aside>
+
+      <ProfileModal open={showProfileModal} onOpenChange={setShowProfileModal} />
     </>
   );
 }
