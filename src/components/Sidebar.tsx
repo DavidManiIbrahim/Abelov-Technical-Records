@@ -12,6 +12,7 @@ import {
   CreditCard,
   BarChart3,
   Shield,
+  BookOpen,
   Menu,
   X,
   LogOut,
@@ -39,6 +40,9 @@ const navItems: NavItem[] = [
   { label: 'Expenses', path: '/expenses', icon: <DollarSign size={20} />, section: 'sales', roles: ['sales', 'admin'] },
   { label: 'Credits', path: '/credits', icon: <CreditCard size={20} />, section: 'sales', roles: ['sales', 'admin'] },
   
+  // Academy Section
+  { label: 'Academy', path: '/academy', icon: <BookOpen size={20} />, section: 'main' },
+
   // Analytics Section
   { label: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, section: 'main' },
 
@@ -97,26 +101,26 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-background border-r border-border transition-transform duration-300 z-40 ${
+        className={`fixed left-0 top-0 h-screen w-64 bg-background border-r border-border transition-transform duration-300 z-40 flex flex-col overflow-hidden ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
         {/* Header */}
-        <div className="p-6 border-b border-border">
+        <div className="p-6 border-b border-border shrink-0">
           <h1 className="text-xl font-bold text-primary">Abelov</h1>
           <p className="text-xs text-muted-foreground">Centralized System</p>
         </div>
 
         {/* User Info */}
         {user && (
-          <div className="px-6 py-4 border-b border-border">
+          <div className="px-6 py-4 border-b border-border shrink-0">
             <p className="text-sm font-medium">{user.name || 'User'}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4">
+        <nav className="flex-1 overflow-y-auto py-4 min-h-0">
           {/* Main Section */}
           <div className="px-4 mb-6">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Main</p>
@@ -195,7 +199,7 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-border space-y-2">
+        <div className="p-4 border-t border-border space-y-2 shrink-0">
           <Button
             variant="outline"
             size="sm"

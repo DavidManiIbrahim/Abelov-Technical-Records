@@ -31,6 +31,9 @@ import OrdersList from "@/pages/sales/OrdersList";
 import ExpensesList from "@/pages/sales/ExpensesList";
 import CreditsList from "@/pages/sales/CreditsList";
 
+// Academy Page
+import AcademyPage from "@/pages/academy/AcademyPage";
+
 // Error Pages
 import NotFound from "@/pages/NotFound";
 
@@ -201,6 +204,18 @@ const App = () => (
                       <AdminDashboard />
                     </MainLayout>
                   </AdminProtectedRoute>
+                }
+              />
+
+              {/* Academy Route */}
+              <Route
+                path="/academy"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <AcademyPage />
+                    </MainLayout>
+                  </ProtectedRoute>
                 }
               />
 
