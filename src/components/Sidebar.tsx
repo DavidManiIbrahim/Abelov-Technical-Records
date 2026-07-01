@@ -258,7 +258,7 @@ export default function Sidebar() {
             variant="outline"
             size="sm"
             className="w-full justify-start"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/profile')}
           >
             <User size={16} className="mr-2" />
             Profile
