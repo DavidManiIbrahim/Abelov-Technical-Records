@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import abelovLogo from '@/assets/abelov-logo.png';
 import {
   LayoutDashboard,
   FileText,
@@ -16,6 +17,7 @@ import {
   Menu,
   X,
   LogOut,
+  User,
 } from 'lucide-react';
 
 interface NavItem {
@@ -105,9 +107,12 @@ export default function Sidebar() {
         }`}
       >
         {/* Header */}
-        <div className="p-6 border-b border-border shrink-0">
-          <h1 className="text-xl font-bold text-primary">Abelov</h1>
-          <p className="text-xs text-muted-foreground">Centralized System</p>
+        <div className="p-6 border-b border-border shrink-0 flex items-center gap-3">
+          <img src={abelovLogo} alt="Abelov Logo" className="w-10 h-10 rounded-xl" />
+          <div>
+            <h1 className="text-lg font-bold text-primary">Abelov</h1>
+            <p className="text-xs text-muted-foreground">Centralized System</p>
+          </div>
         </div>
 
         {/* User Info */}
@@ -225,6 +230,15 @@ export default function Sidebar() {
 
         {/* Footer */}
         <div className="p-4 border-t border-border space-y-2 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start"
+            onClick={() => navigate('/dashboard')}
+          >
+            <User size={16} className="mr-2" />
+            Profile
+          </Button>
           <Button
             variant="outline"
             size="sm"

@@ -1,4 +1,4 @@
-import { ServiceRequest, Goods, Purchase, Expense, Credit, Order } from '@/types/database';
+import { ServiceRequest, Goods, Purchase, Expense, Credit, Order, AcademyCourse } from '@/types/database';
 import { getCache, setCache, invalidateCache } from '@/utils/storage';
 
 // Memory cache keys (in-memory cache only, no persistence)
@@ -508,5 +508,38 @@ export const ordersAPI = {
 
   async delete(id: string) {
     await apiFetch(`/orders/${id}`, { method: 'DELETE' });
+  },
+};
+
+// Academy API
+export const academyAPI = {
+  async getAll(userId: string) {
+    const res = await apiFetch(`/academy?user_id=${userId}`);
+    return (res?.data || res) as AcademyCourse[];
+  },
+
+  async getById(id: string) {
+    const res = await apiFetch(`/academy/${id}`);
+    return (res?.data || res) as AcademyCourse;
+  },
+
+  async create(course: Omit<AcademyCourse, 'id' | 'created_at' | 'updated_at'>) {
+    const res = await apiFetch('/academy', {
+      method: 'POST',
+      body: JSON.stringify(course),
+    });
+    return (res?.data || res) as AcademyCourse;
+  },
+
+  async update(id: string, updates: Partial<AcademyCourse>) {
+    const res = await apiFetch(`/academy/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    return (res?.data || res) as AcademyCourse;
+  },
+
+  async delete(id: string) {
+    await apiFetch(`/academy/${id}`, { method: 'DELETE' });
   },
 };

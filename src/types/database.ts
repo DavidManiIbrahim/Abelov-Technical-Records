@@ -118,6 +118,18 @@ export interface Credit {
   updated_at: string;
 }
 
+export interface AcademyCourse {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  category: string | null;
+  instructor: string;
+  status: "draft" | "published" | "archived";
+  created_at: string;
+  updated_at: string;
+}
+
 export interface User {
   id: string;
   email: string;
