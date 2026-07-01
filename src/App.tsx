@@ -7,14 +7,31 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import AdminProtectedRoute from "@/components/AdminProtectedRoute";
+import MainLayout from "@/components/MainLayout";
+
+// Auth Pages
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
+
+// Service Request Pages
 import ServiceRequestForm from "@/pages/ServiceRequestForm";
 import ServiceRequestViewPage from "@/pages/ServiceRequestViewPage";
+import RequestsList from "@/pages/RequestsList";
+import ConfirmationPage from "@/pages/ConfirmationPage";
+
+// Dashboard & Analytics
 import DashboardPage from "@/pages/DashboardPage";
 import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
-import RequestsList from "@/pages/RequestsList";
+
+// Sales & Inventory Module Pages
+import GoodsList from "@/pages/sales/GoodsList";
+import PurchasesList from "@/pages/sales/PurchasesList";
+import OrdersList from "@/pages/sales/OrdersList";
+import ExpensesList from "@/pages/sales/ExpensesList";
+import CreditsList from "@/pages/sales/CreditsList";
+
+// Error Pages
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,8 +50,11 @@ const App = () => (
         <HashRouter>
           <AuthProvider>
             <Routes>
+              {/* Auth Routes - No Sidebar */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+
+              {/* Home Route */}
               <Route
                 path="/"
                 element={
@@ -43,11 +63,27 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+
+              {/* Protected Routes with Sidebar */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <DashboardPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Service Request Routes */}
               <Route
                 path="/new-request"
                 element={
                   <ProtectedRoute>
-                    <ServiceRequestForm />
+                    <MainLayout>
+                      <ServiceRequestForm />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
@@ -55,27 +91,29 @@ const App = () => (
                 path="/edit/:id"
                 element={
                   <ProtectedRoute>
-                    <ServiceRequestForm />
+                    <MainLayout>
+                      <ServiceRequestForm />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
               <Route
                 path="/view/:id"
-                element={<ServiceRequestViewPage />}
-              />
-              <Route
-                path="/dashboard"
                 element={
                   <ProtectedRoute>
-                    <DashboardPage />
+                    <MainLayout>
+                      <ServiceRequestViewPage />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/analytics"
+                path="/confirmation/:id"
                 element={
                   <ProtectedRoute>
-                    <AnalyticsDashboard />
+                    <MainLayout>
+                      <ConfirmationPage />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
@@ -83,19 +121,90 @@ const App = () => (
                 path="/requests"
                 element={
                   <ProtectedRoute>
-                    <RequestsList />
+                    <MainLayout>
+                      <RequestsList />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Analytics Route */}
+              <Route
+                path="/analytics"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <AnalyticsDashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Sales & Inventory Module Routes */}
+              <Route
+                path="/goods"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <GoodsList />
+                    </MainLayout>
                   </ProtectedRoute>
                 }
               />
               <Route
+                path="/purchases"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <PurchasesList />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <OrdersList />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/expenses"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ExpensesList />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/credits"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <CreditsList />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Admin Route */}
+              <Route
                 path="/admin"
                 element={
                   <AdminProtectedRoute>
-                    <AdminDashboard />
+                    <MainLayout>
+                      <AdminDashboard />
+                    </MainLayout>
                   </AdminProtectedRoute>
                 }
               />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+              {/* Error Route - MUST BE LAST */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AuthProvider>
