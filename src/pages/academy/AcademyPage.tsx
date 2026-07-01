@@ -11,6 +11,9 @@ import { academyAPI } from '@/lib/api';
 import { AcademyCourse } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
 import AddAcademyModal from '@/components/AddAcademyModal';
+import SelectRequestTypeModal from '@/components/SelectRequestTypeModal';
+import StudentRegistrationModal from '@/components/StudentRegistrationModal';
+import InternetUserModal from '@/components/InternetUserModal';
 
 export default function AcademyPage() {
   const { user } = useAuth();
@@ -21,6 +24,9 @@ export default function AcademyPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<AcademyCourse | null>(null);
   const [viewingItem, setViewingItem] = useState<AcademyCourse | null>(null);
+  const [showSelectType, setShowSelectType] = useState(false);
+  const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showInternetModal, setShowInternetModal] = useState(false);
 
   useEffect(() => {
     loadCourses();
@@ -48,6 +54,13 @@ export default function AcademyPage() {
     } catch {
       toast({ title: 'Error', description: 'Failed to delete course', variant: 'destructive' });
     }
+  };
+
+  const handleAddClick = () => setShowSelectType(true);
+
+  const handleSelectType = (type: 'student' | 'internet') => {
+    if (type === 'student') setShowStudentModal(true);
+    else setShowInternetModal(true);
   };
 
   const filtered = courses.filter((c) => {
@@ -156,9 +169,9 @@ export default function AcademyPage() {
               <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={() => setShowAddModal(true)}>
+          <Button onClick={handleAddClick}>
             <Plus className="w-4 h-4 mr-2" />
-            Add Course
+            Add Request
           </Button>
         </div>
 
@@ -175,8 +188,8 @@ export default function AcademyPage() {
             <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Courses Yet</h3>
             <p className="text-muted-foreground mb-4">Add your first course to the catalog.</p>
-            <Button onClick={() => setShowAddModal(true)}>
-              <Plus className="w-4 h-4 mr-2" /> Add Course
+            <Button onClick={handleAddClick}>
+              <Plus className="w-4 h-4 mr-2" /> Add Request
             </Button>
           </Card>
         ) : (
@@ -302,6 +315,21 @@ export default function AcademyPage() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Request Type Selection & Forms */}
+        <SelectRequestTypeModal
+          open={showSelectType}
+          onOpenChange={setShowSelectType}
+          onSelect={handleSelectType}
+        />
+        <StudentRegistrationModal
+          open={showStudentModal}
+          onOpenChange={setShowStudentModal}
+        />
+        <InternetUserModal
+          open={showInternetModal}
+          onOpenChange={setShowInternetModal}
+        />
       </div>
     </div>
   );
