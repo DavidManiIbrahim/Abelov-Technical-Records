@@ -125,6 +125,10 @@ export interface AcademyCourse {
   description: string;
   category: string | null;
   instructor: string;
+  duration: string;
+  price: number;
+  level: string;
+  syllabus: string;
   status: "draft" | "published" | "archived";
   created_at: string;
   updated_at: string;
