@@ -28,6 +28,19 @@ export default function AdminAnalyticsPage() {
     }
   };
 
+  const formatCurrencyCompact = (value: number): string => {
+    const abs = Math.abs(value);
+    if (abs >= 1_000_000) {
+      const num = value / 1_000_000;
+      return `${Number.isInteger(num) ? num.toFixed(0) : num.toFixed(1)}M`;
+    }
+    if (abs >= 1_000) {
+      const num = value / 1_000;
+      return `${Number.isInteger(num) ? num.toFixed(0) : num.toFixed(1)}k`;
+    }
+    return value.toLocaleString();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -91,7 +104,7 @@ export default function AdminAnalyticsPage() {
           <StatCard label="In Progress" value={stats.repairs.inProgressTickets} icon={Loader2} color="cyan" />
           <StatCard label="Completed" value={stats.repairs.completedTickets} icon={CheckCircle} color="green" subtitle={stats.repairs.totalTickets > 0 ? `${Math.round((stats.repairs.completedTickets / stats.repairs.totalTickets) * 100)}% completion` : undefined} />
           <StatCard label="Unsuccessful" value={stats.repairs.unsuccessfulTickets} icon={Activity} color="red" />
-          <StatCard label="Revenue" value={`₦${(stats.repairs.totalRevenue || 0).toLocaleString()}`} icon={TrendingUp} color="emerald" />
+          <StatCard label="Revenue" value={`₦${formatCurrencyCompact(stats.repairs.totalRevenue || 0)}`} icon={TrendingUp} color="emerald" />
         </div>
       </section>
 
@@ -113,7 +126,7 @@ export default function AdminAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Sales Revenue</p>
-                <p className="text-3xl font-bold text-emerald-700 mt-1">₦{(stats.sales.salesRevenue || 0).toLocaleString()}</p>
+                <p className="text-3xl font-bold text-emerald-700 mt-1">₦{formatCurrencyCompact(stats.sales.salesRevenue || 0)}</p>
               </div>
               <TrendingUp className="w-10 h-10 text-emerald-600" />
             </div>
@@ -122,7 +135,7 @@ export default function AdminAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Purchase Cost</p>
-                <p className="text-3xl font-bold text-orange-700 mt-1">₦{(stats.sales.salesCost || 0).toLocaleString()}</p>
+                <p className="text-3xl font-bold text-orange-700 mt-1">₦{formatCurrencyCompact(stats.sales.salesCost || 0)}</p>
               </div>
               <ShoppingCart className="w-10 h-10 text-orange-600" />
             </div>
