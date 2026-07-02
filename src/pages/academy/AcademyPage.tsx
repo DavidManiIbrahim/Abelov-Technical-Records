@@ -14,6 +14,7 @@ import AddAcademyModal from '@/components/AddAcademyModal';
 import SelectRequestTypeModal from '@/components/SelectRequestTypeModal';
 import StudentRegistrationModal from '@/components/StudentRegistrationModal';
 import InternetUserModal from '@/components/InternetUserModal';
+import WebDevelopmentProjectModal from '@/components/WebDevelopmentProjectModal';
 
 export default function AcademyPage() {
   const { user } = useAuth();
@@ -27,6 +28,7 @@ export default function AcademyPage() {
   const [showSelectType, setShowSelectType] = useState(false);
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [showInternetModal, setShowInternetModal] = useState(false);
+  const [showWebDevModal, setShowWebDevModal] = useState(false);
 
   useEffect(() => {
     loadCourses();
@@ -58,9 +60,10 @@ export default function AcademyPage() {
 
   const handleAddClick = () => setShowSelectType(true);
 
-  const handleSelectType = (type: 'student' | 'internet') => {
+  const handleSelectType = (type: 'student' | 'internet' | 'webdev') => {
     if (type === 'student') setShowStudentModal(true);
-    else setShowInternetModal(true);
+    else if (type === 'internet') setShowInternetModal(true);
+    else setShowWebDevModal(true);
   };
 
   const filtered = courses.filter((c) => {
@@ -329,6 +332,10 @@ export default function AcademyPage() {
         <InternetUserModal
           open={showInternetModal}
           onOpenChange={setShowInternetModal}
+        />
+        <WebDevelopmentProjectModal
+          open={showWebDevModal}
+          onOpenChange={setShowWebDevModal}
         />
       </div>
     </div>

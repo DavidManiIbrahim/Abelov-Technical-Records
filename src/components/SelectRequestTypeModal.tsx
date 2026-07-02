@@ -1,11 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
-import { GraduationCap, Wifi } from 'lucide-react';
+import { GraduationCap, Wifi, Code2 } from 'lucide-react';
 
 interface SelectRequestTypeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelect: (type: 'student' | 'internet') => void;
+  onSelect: (type: 'student' | 'internet' | 'webdev') => void;
 }
 
 export default function SelectRequestTypeModal({ open, onOpenChange, onSelect }: SelectRequestTypeModalProps) {
@@ -39,6 +39,18 @@ export default function SelectRequestTypeModal({ open, onOpenChange, onSelect }:
             <div>
               <p className="font-semibold">Internet User</p>
               <p className="text-sm text-muted-foreground">Track internet usage time</p>
+            </div>
+          </Card>
+          <Card
+            className="p-5 flex items-center gap-4 cursor-pointer hover:bg-accent hover:border-primary transition-all"
+            onClick={() => { onSelect('webdev'); onOpenChange(false); }}
+          >
+            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+              <Code2 className="w-6 h-6 text-green-600" />
+            </div>
+            <div>
+              <p className="font-semibold">Web Development Project</p>
+              <p className="text-sm text-muted-foreground">Track web development projects</p>
             </div>
           </Card>
         </div>

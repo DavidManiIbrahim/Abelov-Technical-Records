@@ -20,6 +20,8 @@ import {
   CreditCard,
   BarChart3,
   BookOpen,
+  Wifi,
+  Code2,
   Menu,
   X,
   LogOut,
@@ -52,6 +54,9 @@ const navItems: NavItem[] = [
 
   // Academy Section
   { label: 'Academy', path: '/academy', icon: <BookOpen size={20} />, section: 'academy', roles: ['academy', 'admin'] },
+  { label: 'Students', path: '/academy/students', icon: <BookOpen size={20} />, section: 'academy', roles: ['academy', 'admin'] },
+  { label: 'Internet Users', path: '/academy/internet', icon: <Wifi size={20} />, section: 'academy', roles: ['academy', 'admin'] },
+  { label: 'Web Projects', path: '/academy/webdev', icon: <Code2 size={20} />, section: 'academy', roles: ['academy', 'admin'] },
 
   // Attendance Section
   { label: 'My Attendance', path: '/attendance/my', icon: <Clock size={20} />, section: 'attendance', roles: ['secretary', 'admin', 'technician', 'sales', 'academy'] },
