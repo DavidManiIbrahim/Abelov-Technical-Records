@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Loader2, Users, Ticket, TrendingUp, Activity, Package, ShoppingCart, Truck, DollarSign, CreditCard, BookOpen, CheckCircle, Wrench } from 'lucide-react';
+import { Loader2, Ticket, TrendingUp, Activity, Package, ShoppingCart, Truck, DollarSign, CreditCard, BookOpen, CheckCircle, Wrench } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 
 interface ModuleStats {

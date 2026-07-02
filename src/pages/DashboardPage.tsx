@@ -15,10 +15,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { serviceRequestAPI, adminAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { Plus, Search, Edit, Eye, Trash2, BarChart3, Shield } from 'lucide-react';
-import ProfileMenu from '@/components/ProfileMenu';
-import ThemeToggle from '@/components/ThemeToggle';
-import Header from '@/components/Header';
+import { Plus, Search, Edit, Eye, Trash2 } from 'lucide-react';
+
 
 const formatCurrencyCompact = (value: number): string => {
   const abs = Math.abs(value);
@@ -35,7 +33,8 @@ const formatCurrencyCompact = (value: number): string => {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+  const { user, userRoles, isAdmin } = useAuth();
+  const isTechnician = userRoles.includes('technician');
 
   const getUsername = () => {
     return user?.username || localStorage.getItem('userUsername') || '';
@@ -270,7 +269,7 @@ export default function DashboardPage() {
             Welcome back{getUsername() ? `, ${getUsername()}` : ''}!
           </h1>
           <p className="text-muted-foreground">
-            Here's an overview of your service requests and business metrics.
+            {isTechnician ? "Here's an overview of your assigned jobs and metrics." : "Here's an overview of your service requests and business metrics."}
           </p>
         </div>
 
@@ -376,9 +375,14 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <p className="text-xs text-muted-foreground">Payment Status</p>
-                    <Badge variant="outline" className={request.payment_completed ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}>
-                      {request.payment_completed ? 'Paid' : 'Unpaid'}
+                    <p className="text-xs text-muted-foreground">Payment</p>
+                    <Badge variant="outline" className={
+                      request.payment_status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' :
+                      request.payment_status === 'partial' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                      'bg-red-50 text-red-700 border-red-200'
+                    }>
+                      {request.payment_status === 'paid' ? 'Paid' :
+                       request.payment_status === 'partial' ? 'Partial' : 'Unpaid'}
                     </Badge>
                   </div>
                 </div>

@@ -30,7 +30,7 @@ export default function AddCreditsModal({
       });
       onOpenChange(false);
       onSuccess();
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to save credit',

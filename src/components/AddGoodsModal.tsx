@@ -30,7 +30,7 @@ export default function AddGoodsModal({
       });
       onOpenChange(false);
       onSuccess();
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to save goods',

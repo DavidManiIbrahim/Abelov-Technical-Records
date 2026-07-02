@@ -57,7 +57,7 @@ export default function TicketManagementPage() {
       const results = await adminAPI.getAllServiceRequests(20, 0, true);
       setRequests(results.requests || []);
       setTotalRequests(results.total || 0);
-    } catch (error) {
+    } catch {
       toast({ title: 'Error', description: 'Failed to load tickets', variant: 'destructive' });
     } finally {
       setLoading(false);

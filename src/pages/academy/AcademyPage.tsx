@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, BookOpen, Search, Edit, Trash2, Eye, Clock, DollarSign, User, Calendar, Loader2 } from 'lucide-react';
+import { Plus, BookOpen, Search, Edit, Trash2, Eye, DollarSign, User, Calendar, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { academyAPI } from '@/lib/api';
 import { AcademyCourse } from '@/types/database';

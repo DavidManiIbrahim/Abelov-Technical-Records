@@ -12,20 +12,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function RequestsList() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, userRoles } = useAuth();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value);
-  };
+  const isTechnician = userRoles.includes('technician');
 
   useEffect(() => {
     const fetchRequests = async () => {
       if (user) {
         try {
-          const data = await serviceRequestAPI.getByUserId(user.id);
+          const data = await serviceRequestAPI.getAll(true);
           setRequests(data.reverse());
         } catch (error) {
           console.error('Failed to fetch requests:', error);
@@ -46,6 +44,11 @@ export default function RequestsList() {
       request.status.toLowerCase().includes(query)
     );
     const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
+
+    if (isTechnician) {
+      return matchesSearch && matchesStatus && request.assigned_to === user.id;
+    }
+
     return matchesSearch && matchesStatus;
   });
 
@@ -57,10 +60,18 @@ export default function RequestsList() {
         return "bg-yellow-100 text-yellow-800 border-yellow-300";
       case "In-Progress":
         return "bg-blue-100 text-blue-800 border-blue-300";
-      case "On-Hold":
-        return "bg-red-100 text-red-800 border-red-300";
+      case "Unsuccessful":
+        return "bg-gray-200 text-gray-800 border-gray-300";
       default:
         return "bg-gray-100 text-gray-800 border-gray-300";
+    }
+  };
+
+  const getPaymentBadge = (status: string) => {
+    switch (status) {
+      case "paid": return <Badge className="bg-green-100 text-green-800">Paid</Badge>;
+      case "partial": return <Badge className="bg-yellow-100 text-yellow-800">Partial</Badge>;
+      default: return <Badge className="bg-red-100 text-red-800">Unpaid</Badge>;
     }
   };
 
@@ -71,7 +82,9 @@ export default function RequestsList() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-4xl font-bold text-primary mb-2">Service Requests</h1>
-              <p className="text-muted-foreground">View and manage all service requests</p>
+              <p className="text-muted-foreground">
+                {isTechnician ? "Jobs assigned to you" : "View and manage all service requests"}
+              </p>
             </div>
             <Button onClick={() => navigate("/new-request")}>
               <Plus className="w-4 h-4 mr-2" />
@@ -89,7 +102,7 @@ export default function RequestsList() {
                 className="pl-10"
               />
             </div>
-            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
@@ -98,7 +111,7 @@ export default function RequestsList() {
                 <SelectItem value="Pending">Pending</SelectItem>
                 <SelectItem value="In-Progress">In-Progress</SelectItem>
                 <SelectItem value="Completed">Completed</SelectItem>
-                <SelectItem value="On-Hold">Unsuccessful</SelectItem>
+                <SelectItem value="Unsuccessful">Unsuccessful</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -164,8 +177,8 @@ export default function RequestsList() {
                       <p className="font-bold text-primary">₦{request.total_cost.toLocaleString()}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-muted-foreground">Balance</p>
-                      <p className="font-bold text-destructive">₦{request.balance.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">Payment</p>
+                      <div>{getPaymentBadge(request.payment_status)}</div>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -176,10 +189,10 @@ export default function RequestsList() {
                       className="flex-1"
                     >
                       <Edit className="w-3 h-3 mr-1" />
-                      Edit
+                      {isTechnician ? 'Work on Job' : 'Edit'}
                     </Button>
                     <Button
-                      onClick={() => navigate(`/confirmation/${request.id}`)}
+                      onClick={() => navigate(`/view/${request.id}`)}
                       variant="default"
                       size="sm"
                       className="flex-1"

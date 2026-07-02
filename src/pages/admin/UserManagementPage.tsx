@@ -21,7 +21,23 @@ interface UserData {
   completedTickets: number;
   lastActivityDate: string | null;
   roles?: string[];
+  department?: string;
 }
+
+const DEPARTMENTS = [
+  { value: '', label: 'None' },
+  { value: 'engineering', label: 'Engineering' },
+  { value: 'sales', label: 'Sales' },
+  { value: 'it_academy', label: 'IT Academy' },
+];
+
+const ROLES = [
+  { value: 'secretary', label: 'Secretary' },
+  { value: 'technician', label: 'Technician' },
+  { value: 'sales', label: 'Sales' },
+  { value: 'academy', label: 'Academy' },
+  { value: 'admin', label: 'Administrator' },
+];
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<UserData[]>([]);
@@ -29,7 +45,8 @@ export default function UserManagementPage() {
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
-  const [newUserRole, setNewUserRole] = useState('user');
+  const [newUserRole, setNewUserRole] = useState('secretary');
+  const [newUserDept, setNewUserDept] = useState('');
 
   useEffect(() => {
     loadUsers();
@@ -40,7 +57,7 @@ export default function UserManagementPage() {
     try {
       const usersData = await adminAPI.getAllUsersWithStats();
       setUsers((usersData as any[]).map((u) => ({ ...u } as UserData)));
-    } catch (error) {
+    } catch {
       toast({ title: 'Error', description: 'Failed to load users', variant: 'destructive' });
     } finally {
       setLoading(false);
@@ -51,11 +68,13 @@ export default function UserManagementPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await adminAPI.createUser({ email: newUserEmail, password: newUserPassword, roles: [newUserRole] });
+      await adminAPI.createUser({ email: newUserEmail, password: newUserPassword, roles: [newUserRole], department: newUserDept });
       toast({ title: 'Success', description: 'User created successfully' });
       setIsCreatingUser(false);
       setNewUserEmail('');
       setNewUserPassword('');
+      setNewUserRole('secretary');
+      setNewUserDept('');
       loadUsers();
     } catch (error: any) {
       toast({ title: 'Error', description: error.message || 'Failed to create user', variant: 'destructive' });
@@ -91,6 +110,11 @@ export default function UserManagementPage() {
     }
   };
 
+  const deptLabel = (val: string) => {
+    const d = DEPARTMENTS.find(d => d.value === val);
+    return d ? d.label : val || '-';
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -114,6 +138,7 @@ export default function UserManagementPage() {
                   <TableHead className="text-xs font-semibold">Email</TableHead>
                   <TableHead className="text-xs font-semibold">Username</TableHead>
                   <TableHead className="text-xs font-semibold">Role</TableHead>
+                  <TableHead className="text-xs font-semibold">Department</TableHead>
                   <TableHead className="text-xs font-semibold">Tickets</TableHead>
                   <TableHead className="text-xs font-semibold">Revenue</TableHead>
                   <TableHead className="text-xs font-semibold">Status</TableHead>
@@ -123,27 +148,29 @@ export default function UserManagementPage() {
               <TableBody>
                 {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No users found</TableCell>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No users found</TableCell>
                   </TableRow>
                 ) : (
                   users.map((u) => {
                     const nameFromEmail = u.email.split('@')[0];
-                    const primaryRole = (u.roles && u.roles.length > 0 ? u.roles[0] : 'user') || 'user';
+                    const primaryRole = (u.roles && u.roles.length > 0 ? u.roles[0] : 'secretary') || 'secretary';
                     return (
                       <TableRow key={u.id} className="hover:bg-muted/50 transition-colors">
                         <TableCell className="text-sm">{u.email}</TableCell>
                         <TableCell className="text-sm font-medium">{nameFromEmail}</TableCell>
                         <TableCell className="text-sm capitalize">
                           <Select value={primaryRole} onValueChange={(val) => handleRoleChange(u.id, val)} disabled={loading}>
-                            <SelectTrigger className="w-32 h-8 text-xs">
+                            <SelectTrigger className="w-36 h-8 text-xs">
                               <SelectValue placeholder="Role" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="user">User</SelectItem>
-                              <SelectItem value="admin">Admin</SelectItem>
+                              {ROLES.map(r => (
+                                <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </TableCell>
+                        <TableCell className="text-sm">{deptLabel(u.department || '')}</TableCell>
                         <TableCell className="text-sm font-semibold">{u.ticketCount}</TableCell>
                         <TableCell className="text-sm font-semibold">₦{u.totalRevenue?.toLocaleString()}</TableCell>
                         <TableCell>
@@ -187,8 +214,22 @@ export default function UserManagementPage() {
                   <SelectValue placeholder="Select Role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">User (Staff/Technician)</SelectItem>
-                  <SelectItem value="admin">Administrator</SelectItem>
+                  {ROLES.map(r => (
+                    <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Department</label>
+              <Select value={newUserDept} onValueChange={setNewUserDept}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Department" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DEPARTMENTS.map(d => (
+                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

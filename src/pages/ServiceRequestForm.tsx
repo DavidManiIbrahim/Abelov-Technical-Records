@@ -13,11 +13,8 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { serviceRequestAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { Loader2, LogOut, Home } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { FaStore, FaUser, FaLaptop, FaExclamationTriangle, FaTools, FaMoneyBill, FaCheckCircle } from 'react-icons/fa';
-import ThemeToggle from '@/components/ThemeToggle';
-import Header from '@/components/Header';
-
 
 
 const FORM_STEPS = [
@@ -33,7 +30,7 @@ const FORM_STEPS = [
 export default function ServiceRequestForm() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const isEditMode = !!id;
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
@@ -71,6 +68,8 @@ export default function ServiceRequestForm() {
     deposit_paid: 0,
     balance: 0,
     payment_completed: false,
+    payment_status: 'unpaid' as const,
+    department: '',
     customer_confirmation: {
       customer_collected: false,
       technician: '',
@@ -172,7 +171,8 @@ export default function ServiceRequestForm() {
           deposit_paid: formData.deposit_paid || 0,
           balance: formData.balance || 0,
           payment_completed: formData.payment_completed || false,
-          repair_timeline: [],
+          payment_status: (formData.payment_status as string) || 'unpaid',
+          department: formData.department || '',
         };
         await serviceRequestAPI.create(newRequest as unknown as Omit<ServiceRequest, 'id' | 'created_at' | 'updated_at'>);
         toast({
@@ -230,15 +230,6 @@ export default function ServiceRequestForm() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -271,6 +262,22 @@ export default function ServiceRequestForm() {
                   value={formData.request_date}
                   onChange={(e) => updateField('request_date', e.target.value)}
                 />
+              </div>
+              <div>
+                <Label htmlFor="department">Department</Label>
+                <Select
+                  value={formData.department || ''}
+                  onValueChange={(value) => updateField('department', value)}
+                >
+                  <SelectTrigger id="department">
+                    <SelectValue placeholder="Select Department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="engineering">Engineering</SelectItem>
+                    <SelectItem value="sales">Sales</SelectItem>
+                    <SelectItem value="it_academy">IT Academy</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </Card>

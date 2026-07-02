@@ -1,15 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { serviceRequestAPI, adminAPI } from '@/lib/api';
+import { serviceRequestAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { ArrowLeft, TrendingUp, DollarSign, Clock, CheckCircle, Loader2 } from 'lucide-react';
-import { AreaChart, Area, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import ThemeToggle from '@/components/ThemeToggle';
-import Header from '@/components/Header';
-
+import { TrendingUp, DollarSign, Clock, CheckCircle, Loader2 } from 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 const formatCurrencyCompact = (value: number): string => {
   const abs = Math.abs(value);
   if (abs >= 1_000_000) {
@@ -41,8 +35,6 @@ const TechnicianTick = ({ x, y, payload }: any) => {
 };
 
 export default function AnalyticsDashboard() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -22,7 +22,6 @@ import ConfirmationPage from "@/pages/ConfirmationPage";
 // Dashboard & Analytics
 import DashboardPage from "@/pages/DashboardPage";
 import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
-import AdminDashboard from "@/pages/AdminDashboard";
 import AdminAnalyticsPage from "@/pages/admin/AdminAnalyticsPage";
 import TicketManagementPage from "@/pages/admin/TicketManagementPage";
 import UserManagementPage from "@/pages/admin/UserManagementPage";
@@ -37,6 +36,14 @@ import CreditsList from "@/pages/sales/CreditsList";
 
 // Academy Page
 import AcademyPage from "@/pages/academy/AcademyPage";
+
+// Attendance Pages
+import MyAttendancePage from "@/pages/attendance/MyAttendancePage";
+import StaffAttendancePage from "@/pages/attendance/StaffAttendancePage";
+import AttendanceReportsPage from "@/pages/attendance/AttendanceReportsPage";
+
+// Payment Analytics
+import PaymentAnalyticsPage from "@/pages/PaymentAnalyticsPage";
 
 // Error Pages
 import NotFound from "@/pages/NotFound";
@@ -238,6 +245,50 @@ const App = () => (
                       <ActivityLogPage />
                     </MainLayout>
                   </AdminProtectedRoute>
+                }
+              />
+
+              {/* Attendance Routes */}
+              <Route
+                path="/attendance/my"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <MyAttendancePage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/attendance/manage"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <StaffAttendancePage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/attendance/reports"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <AttendanceReportsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Payment Analytics */}
+              <Route
+                path="/payment-analytics"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <PaymentAnalyticsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
                 }
               />
 

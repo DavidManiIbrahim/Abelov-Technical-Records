@@ -35,7 +35,7 @@ const apiFetch = async (path: string, init?: RequestInit) => {
   // Add Authorization header if token exists in localStorage (read freshly on each request)
   const token = localStorage.getItem('auth_token');
   if (token) {
-    // @ts-ignore
+    // @ts-expect-error - adding dynamic property to headers
     headers['Authorization'] = `Bearer ${token}`;
     // console.log('Attached auth token:', token.substring(0, 10) + '...');
   } else {
@@ -529,6 +529,89 @@ export const ordersAPI = {
 
   async delete(id: string) {
     await apiFetch(`/orders/${id}`, { method: 'DELETE' });
+  },
+};
+
+// Attendance API
+export const attendanceAPI = {
+  async clockIn() {
+    const res = await apiFetch('/attendance/clock-in', { method: 'POST' });
+    return res?.data || res;
+  },
+
+  async clockOut() {
+    const res = await apiFetch('/attendance/clock-out', { method: 'POST' });
+    return res?.data || res;
+  },
+
+  async getMyAttendance(from?: string, to?: string) {
+    let path = '/attendance/me';
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    const qs = params.toString();
+    if (qs) path += `?${qs}`;
+    const res = await apiFetch(path);
+    return { data: res?.data || [], total: res?.total || 0 };
+  },
+
+  async getAllAttendance(from?: string, to?: string, userId?: string) {
+    let path = '/attendance/all';
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    if (userId) params.set('user_id', userId);
+    const qs = params.toString();
+    if (qs) path += `?${qs}`;
+    const res = await apiFetch(path);
+    return { data: res?.data || [], total: res?.total || 0 };
+  },
+
+  async getAttendanceStats() {
+    const res = await apiFetch('/attendance/stats');
+    return res;
+  },
+
+  async updateAttendance(id: string, updates: Partial<{ status: string; notes: string; clock_in: string; clock_out: string }>) {
+    const res = await apiFetch(`/attendance/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+    return res?.data || res;
+  },
+};
+
+// Technician job API
+export const technicianAPI = {
+  async acceptJob(id: string) {
+    const res = await apiFetch(`/requests/${id}/accept`, { method: 'PATCH' });
+    return res?.data || res;
+  },
+
+  async updateProgress(id: string, updates: Partial<{ status: string; technician_notes: string; fault_found: string; parts_used: string; repair_action: string }>) {
+    const res = await apiFetch(`/requests/${id}/progress`, {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    });
+    return res?.data || res;
+  },
+
+  async markDelivered(id: string) {
+    const res = await apiFetch(`/requests/${id}/deliver`, { method: 'PATCH' });
+    return res?.data || res;
+  },
+
+  async assignTechnician(id: string, technician_id: string) {
+    const res = await apiFetch(`/requests/${id}/assign`, {
+      method: 'PATCH',
+      body: JSON.stringify({ technician_id }),
+    });
+    return res?.data || res;
+  },
+
+  async getPaymentAnalytics() {
+    const res = await apiFetch('/requests/analytics/payments');
+    return res;
   },
 };
 

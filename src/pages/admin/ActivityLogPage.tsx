@@ -41,7 +41,7 @@ export default function ActivityLogPage() {
       const data = await adminAPI.getActivityLogs(50, 0);
       setLogs(data.logs as ActivityLog[]);
       setTotalLogs(data.total);
-    } catch (error) {
+    } catch {
       toast({ title: 'Error', description: 'Failed to load activity logs', variant: 'destructive' });
     } finally {
       setLoading(false);

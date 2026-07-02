@@ -7,8 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, LogOut, Home, Users, Ticket, Activity, TrendingUp, Trash2, Eye } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Loader2, Users, Ticket, Activity, TrendingUp, Trash2, Eye } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -19,9 +18,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import ThemeToggle from '@/components/ThemeToggle';
-import Header from '@/components/Header';
-
 
 interface GlobalStats {
   totalUsers: number;
@@ -77,7 +73,6 @@ interface ActivityLog {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
   const [loading, setLoading] = useState(true);
   const [globalStats, setGlobalStats] = useState<GlobalStats | null>(null);
   const [users, setUsers] = useState<UserData[]>([]);
@@ -87,7 +82,6 @@ export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalRequests, setTotalRequests] = useState(0);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
-  const [totalLogs, setTotalLogs] = useState(0);
   const [previewRequest, setPreviewRequest] = useState<RequestData | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
@@ -110,7 +104,6 @@ export default function AdminDashboard() {
       setRequests((requestsData.requests || []) as RequestData[]);
       setTotalRequests(requestsData.total || 0);
       setActivityLogs(logsData.logs as ActivityLog[]);
-      setTotalLogs(logsData.total);
     } catch (error) {
       console.error('Failed to load admin data:', error);
       toast({
@@ -261,15 +254,6 @@ export default function AdminDashboard() {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
     }
   };
 
