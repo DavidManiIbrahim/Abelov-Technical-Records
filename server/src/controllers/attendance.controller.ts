@@ -89,25 +89,34 @@ export const getAllAttendance = async (req: Request, res: Response, next: NextFu
       if (to) filter.date.$lte = to;
     }
 
-    const total = await AttendanceModel.countDocuments(filter);
-    const records = await AttendanceModel.find(filter)
-      .sort({ date: -1 })
-      .limit(Math.min(parseInt(limit as string) || 50, 1000))
-      .skip(parseInt(offset as string) || 0);
-
-    const enriched = await Promise.all(
-      records.map(async (r: any) => {
-        const u = await UserModel.findById(r.user_id).select("email username roles department");
-        const obj = r.toJSON();
-        obj.user_email = u?.email || "Unknown";
-        obj.user_name = u?.username || u?.email?.split("@")[0] || "Unknown";
-        obj.user_roles = u?.roles || [];
-        obj.user_department = u?.department || "";
-        return obj;
-      })
+    // Fetch all non-admin active users, merged with attendance records for the date
+    const targetDate = from || new Date().toISOString().slice(0, 10);
+    const allUsers = await UserModel.find(
+      { roles: { $nin: ["admin"] }, is_active: true },
+      "id email username roles department"
     );
 
-    res.json({ data: enriched, total });
+    const records = await AttendanceModel.find({ date: targetDate });
+    const recordMap = new Map(records.map((r: any) => [r.user_id, r.toJSON()]));
+
+    const merged = allUsers.map((u: any) => {
+      const record = recordMap.get(u.id);
+      return {
+        id: record?._id || null,
+        user_id: u.id,
+        user_email: u.email,
+        user_name: u.username || u.email?.split("@")[0] || "Unknown",
+        user_roles: u.roles || [],
+        user_department: u.department || "",
+        date: targetDate,
+        clock_in: record?.clock_in || null,
+        clock_out: record?.clock_out || null,
+        status: record?.status || null,
+        notes: record?.notes || "",
+      };
+    });
+
+    res.json({ data: merged, total: merged.length });
   } catch (err) {
     next(err);
   }
@@ -137,6 +146,45 @@ export const getAttendanceStats = async (_req: Request, res: Response, next: Nex
       month: { total: totalMonth, present: presentMonth, late: lateMonth, absent: absentMonth },
       totalUsers,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const markAttendance = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { user_id, date, status, clock_in, clock_out } = req.body;
+
+    if (!user_id || !date || !status) {
+      throw new ApiError(400, "user_id, date, and status are required");
+    }
+
+    const targetUser = await UserModel.findById(user_id).select("roles");
+    if (!targetUser) throw new ApiError(404, "User not found");
+    if (targetUser.roles.includes("admin")) {
+      throw new ApiError(400, "Cannot mark attendance for admin users");
+    }
+
+    const validStatuses = ["present", "late", "absent", "half_day"];
+    if (!validStatuses.includes(status)) {
+      throw new ApiError(400, `Invalid status. Must be one of: ${validStatuses.join(", ")}`);
+    }
+
+    const record = await AttendanceModel.findOneAndUpdate(
+      { user_id, date },
+      {
+        $set: {
+          user_id,
+          date,
+          status,
+          ...(clock_in !== undefined && { clock_in }),
+          ...(clock_out !== undefined && { clock_out }),
+        },
+      },
+      { upsert: true, new: true }
+    );
+
+    res.json({ data: (record as any).toJSON() });
   } catch (err) {
     next(err);
   }

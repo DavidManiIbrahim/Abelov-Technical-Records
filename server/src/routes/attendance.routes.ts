@@ -14,6 +14,7 @@ router.get("/me", ctrl.getMyAttendance);
 // Secretary/Admin management
 router.get("/all", authorize(["secretary", "admin"]), ctrl.getAllAttendance);
 router.get("/stats", authorize(["secretary", "admin"]), ctrl.getAttendanceStats);
+router.post("/mark", authorize(["secretary", "admin"]), ctrl.markAttendance);
 router.put("/:id", authorize(["secretary", "admin"]), ctrl.updateAttendance);
 
 export default router;

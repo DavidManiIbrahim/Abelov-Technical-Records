@@ -5,12 +5,25 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { attendanceAPI } from '@/lib/api';
-import { Attendance } from '@/types/database';
 import { Loader2, Search } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
+interface StaffRecord {
+  id: string | null;
+  user_id: string;
+  user_email: string;
+  user_name: string;
+  user_roles: string[];
+  user_department: string;
+  date: string;
+  clock_in: string | null;
+  clock_out: string | null;
+  status: string | null;
+  notes: string;
+}
+
 export default function StaffAttendancePage() {
-  const [records, setRecords] = useState<Attendance[]>([]);
+  const [records, setRecords] = useState<StaffRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchDate, setSearchDate] = useState(new Date().toISOString().slice(0, 10));
   const [statusFilter, setStatusFilter] = useState('all');
@@ -35,10 +48,14 @@ export default function StaffAttendancePage() {
     loadRecords();
   };
 
-  const handleUpdateStatus = async (id: string, status: string) => {
+  const handleMark = async (record: StaffRecord, status: string) => {
     try {
-      await attendanceAPI.updateAttendance(id, { status });
-      toast({ title: 'Success', description: 'Attendance updated' });
+      if (record.id) {
+        await attendanceAPI.updateAttendance(record.id, { status });
+      } else {
+        await attendanceAPI.markAttendance(record.user_id, searchDate, status);
+      }
+      toast({ title: 'Success', description: `Marked ${record.user_name} as ${status}` });
       loadRecords();
     } catch (err: any) {
       toast({ title: 'Error', description: err.message || 'Failed to update', variant: 'destructive' });
@@ -50,14 +67,14 @@ export default function StaffAttendancePage() {
     return r.status === statusFilter;
   });
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null) => {
     const variants: Record<string, string> = {
       present: 'bg-green-100 text-green-800',
       late: 'bg-yellow-100 text-yellow-800',
       absent: 'bg-red-100 text-red-800',
       half_day: 'bg-blue-100 text-blue-800',
     };
-    return variants[status] || 'bg-gray-100 text-gray-800';
+    return status ? variants[status] || 'bg-gray-100 text-gray-800' : 'bg-gray-100 text-gray-800';
   };
 
   return (
@@ -73,7 +90,7 @@ export default function StaffAttendancePage() {
             <Input type="date" value={searchDate} onChange={(e) => setSearchDate(e.target.value)} />
           </div>
           <div className="w-full md:w-48">
-            <label className="text-sm font-medium mb-1 block">Status</label>
+            <label className="text-sm font-medium mb-1 block">Filter</label>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger>
                 <SelectValue />
@@ -98,7 +115,7 @@ export default function StaffAttendancePage() {
         {loading ? (
           <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
         ) : filteredRecords.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">No attendance records found for this date.</p>
+          <p className="text-muted-foreground text-center py-8">No staff found for this date.</p>
         ) : (
           <div className="border rounded-lg overflow-x-auto">
             <table className="w-full">
@@ -110,24 +127,28 @@ export default function StaffAttendancePage() {
                   <th className="text-left p-3 text-xs font-semibold">Clock In</th>
                   <th className="text-left p-3 text-xs font-semibold">Clock Out</th>
                   <th className="text-left p-3 text-xs font-semibold">Status</th>
-                  <th className="text-left p-3 text-xs font-semibold">Action</th>
+                  <th className="text-left p-3 text-xs font-semibold">Mark</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRecords.map((r) => (
-                  <tr key={r.id} className="border-t hover:bg-muted/50">
+                  <tr key={r.user_id} className="border-t hover:bg-muted/50">
                     <td className="p-3 text-sm font-medium">{r.user_name || r.user_email}</td>
                     <td className="p-3 text-sm capitalize">{r.user_department || '-'}</td>
                     <td className="p-3 text-sm">{(r.user_roles || []).join(', ')}</td>
                     <td className="p-3 text-sm">{r.clock_in ? new Date(r.clock_in).toLocaleTimeString() : '-'}</td>
                     <td className="p-3 text-sm">{r.clock_out ? new Date(r.clock_out).toLocaleTimeString() : '-'}</td>
                     <td className="p-3">
-                      <Badge className={getStatusBadge(r.status)}>{r.status}</Badge>
+                      {r.status ? (
+                        <Badge className={getStatusBadge(r.status)}>{r.status}</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">Not marked</span>
+                      )}
                     </td>
                     <td className="p-3">
-                      <Select value={r.status} onValueChange={(val) => handleUpdateStatus(r.id, val)}>
+                      <Select value={r.status || ''} onValueChange={(val) => handleMark(r, val)}>
                         <SelectTrigger className="w-28 h-8 text-xs">
-                          <SelectValue />
+                          <SelectValue placeholder="Mark..." />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="present">Present</SelectItem>

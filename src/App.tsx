@@ -41,7 +41,6 @@ import InternetUsersPage from "@/pages/academy/InternetUsersPage";
 import WebDevProjectsPage from "@/pages/academy/WebDevProjectsPage";
 
 // Attendance Pages
-import MyAttendancePage from "@/pages/attendance/MyAttendancePage";
 import StaffAttendancePage from "@/pages/attendance/StaffAttendancePage";
 import AttendanceReportsPage from "@/pages/attendance/AttendanceReportsPage";
 
@@ -252,16 +251,6 @@ const App = () => (
               />
 
               {/* Attendance Routes */}
-              <Route
-                path="/attendance/my"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <MyAttendancePage />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
               <Route
                 path="/attendance/manage"
                 element={

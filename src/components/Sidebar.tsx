@@ -59,7 +59,6 @@ const navItems: NavItem[] = [
   { label: 'Web Projects', path: '/academy/webdev', icon: <Code2 size={20} />, section: 'academy', roles: ['academy', 'admin'] },
 
   // Attendance Section
-  { label: 'My Attendance', path: '/attendance/my', icon: <Clock size={20} />, section: 'attendance', roles: ['secretary', 'admin', 'technician', 'sales', 'academy'] },
   { label: 'Staff Attendance', path: '/attendance/manage', icon: <Users size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
   { label: 'Attendance Reports', path: '/attendance/reports', icon: <BarChart3 size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
 
