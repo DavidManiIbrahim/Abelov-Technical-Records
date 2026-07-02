@@ -27,7 +27,16 @@ const RequestSchema = new Schema(
     deposit_paid: { type: Number },
     balance: { type: Number },
     payment_completed: { type: Boolean },
+    payment_status: { type: String, enum: ["unpaid", "partial", "paid"], default: "unpaid" },
+    department: { type: String, default: "" },
     user_id: { type: String, index: true },
+    assigned_to: { type: String, index: true, default: null },
+    assigned_by: { type: String, default: null },
+    assigned_at: { type: String, default: null },
+    accepted_at: { type: String, default: null },
+    delivered_at: { type: String, default: null },
+    delivered: { type: Boolean, default: false },
+    technician_notes: { type: String, default: "" },
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );

@@ -95,9 +95,8 @@ export const recordPayment = async (req: Request, res: Response, next: NextFunct
     const existing = await RequestModel.findById(id);
     if (!existing) return next(new ApiError(404, "Request not found"));
 
-    // If authenticated, check ownership. If public, we allow it (for QR code payments).
     if (user) {
-      const isAdmin = user.roles.includes("admin");
+      const isAdmin = user.roles.includes("admin") || user.roles.includes("secretary") || user.roles.includes("technician");
       if (!isAdmin && existing.user_id !== user.id.toString()) {
         return next(new ApiError(403, "Forbidden - Access denied"));
       }
@@ -114,6 +113,7 @@ export const recordPayment = async (req: Request, res: Response, next: NextFunct
     existing.set("deposit_paid", newDeposit);
     existing.set("balance", newBalance);
     existing.set("payment_completed", paymentCompleted);
+    existing.set("payment_status", paymentCompleted ? "paid" : newDeposit > 0 ? "partial" : "unpaid");
 
     await existing.save();
 
@@ -148,6 +148,138 @@ export const getStats = async (req: Request, res: Response, next: NextFunction) 
  * Public Get By ID - For QR code access
  * Does NOT require authentication
  */
+export const assignTechnician = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const user = (req as any).user;
+    const { technician_id } = req.body;
+
+    if (!technician_id) return next(new ApiError(400, "technician_id is required"));
+
+    const existing = await RequestModel.findById(id);
+    if (!existing) return next(new ApiError(404, "Request not found"));
+
+    existing.set("assigned_to", technician_id);
+    existing.set("assigned_by", user.id);
+    existing.set("assigned_at", new Date().toISOString());
+    existing.set("status", "Pending");
+
+    await existing.save();
+    res.json({ data: (existing as any).toJSON() });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const acceptJob = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const user = (req as any).user;
+
+    const existing = await RequestModel.findById(id);
+    if (!existing) return next(new ApiError(404, "Request not found"));
+
+    if (existing.assigned_to !== user.id.toString()) {
+      return next(new ApiError(403, "Forbidden - This job is not assigned to you"));
+    }
+
+    existing.set("accepted_at", new Date().toISOString());
+    existing.set("status", "In-Progress");
+
+    await existing.save();
+    res.json({ data: (existing as any).toJSON() });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateProgress = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const user = (req as any).user;
+    const { status, technician_notes, fault_found, parts_used, repair_action } = req.body;
+
+    const existing = await RequestModel.findById(id);
+    if (!existing) return next(new ApiError(404, "Request not found"));
+
+    if (existing.assigned_to !== user.id.toString()) {
+      return next(new ApiError(403, "Forbidden - This job is not assigned to you"));
+    }
+
+    if (status) existing.set("status", status);
+    if (technician_notes !== undefined) existing.set("technician_notes", technician_notes);
+    if (fault_found !== undefined) existing.set("fault_found", fault_found);
+    if (parts_used !== undefined) existing.set("parts_used", parts_used);
+    if (repair_action !== undefined) existing.set("repair_action", repair_action);
+
+    await existing.save();
+    res.json({ data: (existing as any).toJSON() });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const markDelivered = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const user = (req as any).user;
+
+    const existing = await RequestModel.findById(id);
+    if (!existing) return next(new ApiError(404, "Request not found"));
+
+    if (existing.assigned_to !== user.id.toString()) {
+      return next(new ApiError(403, "Forbidden - This job is not assigned to you"));
+    }
+
+    existing.set("delivered", true);
+    existing.set("delivered_at", new Date().toISOString());
+    existing.set("status", "Completed");
+
+    await existing.save();
+    res.json({ data: (existing as any).toJSON() });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getPaymentAnalytics = async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const all = await RequestModel.find({});
+
+    const totalRequests = all.length;
+    const paid = all.filter((r: any) => r.payment_status === "paid").length;
+    const partial = all.filter((r: any) => r.payment_status === "partial").length;
+    const unpaid = all.filter((r: any) => r.payment_status === "unpaid").length;
+
+    const totalRevenue = all.reduce((sum: number, r: any) => sum + (r.total_cost || 0), 0);
+    const totalCollected = all.reduce((sum: number, r: any) => sum + (r.deposit_paid || 0), 0);
+    const totalOutstanding = all.reduce((sum: number, r: any) => sum + (r.balance || 0), 0);
+
+    const byDepartment = await RequestModel.aggregate([
+      { $group: { _id: "$department", count: { $sum: 1 }, revenue: { $sum: "$total_cost" }, collected: { $sum: "$deposit_paid" } } }
+    ]);
+
+    const byStatus = await RequestModel.aggregate([
+      { $group: { _id: "$payment_status", count: { $sum: 1 }, amount: { $sum: "$balance" } } }
+    ]);
+
+    res.json({
+      totalRequests,
+      paid,
+      partial,
+      unpaid,
+      totalRevenue,
+      totalCollected,
+      totalOutstanding,
+      collectionRate: totalRevenue > 0 ? ((totalCollected / totalRevenue) * 100).toFixed(1) : "0.0",
+      byDepartment,
+      byStatus,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const getPublicById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;

@@ -152,16 +152,17 @@ export const getModuleStats = async (_req: Request, res: Response, next: NextFun
 export const getAllUsers = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     // Get ALL users from the User model - no role filtering
-    const users = await UserModel.find({}, 'id email roles is_active created_at');
+    const users = await UserModel.find({}, 'id email roles department is_active created_at');
 
     const userStats = await Promise.all(
       users.map(async (user: any) => ({
         id: user.id,
         email: user.email,
-        full_name: null, // Not stored in user model currently
-        company_name: null, // Not stored in user model currently
+        full_name: null,
+        company_name: null,
         is_active: user.is_active,
         roles: user.roles || [],
+        department: user.department || "",
         created_at: user.created_at,
         ticketCount: await RequestModel.countDocuments({ user_id: user.id }),
         totalRevenue: await RequestModel.aggregate([
@@ -182,9 +183,8 @@ export const getAllUsers = async (_req: Request, res: Response, next: NextFuncti
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password, roles } = req.body;
+    const { email, password, roles, department } = req.body;
 
-    // Validate input using SignupSchema (handles domain and password rules)
     SignupSchema.parse({ email, password });
 
     const exists = await UserModel.findOne({ email });
@@ -195,7 +195,8 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
       email,
       password_hash: hash,
       password_salt: salt,
-      roles: roles || ["user"],
+      roles: roles || ["secretary"],
+      department: department || "",
       is_active: true
     } as any);
 

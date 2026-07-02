@@ -1,10 +1,11 @@
 import { Router } from "express";
 import * as ctrl from "../controllers/academy.controller";
-import { authenticate } from "../middlewares/auth";
+import { authenticate, authorize } from "../middlewares/auth";
 
 const router = Router();
 
 router.use(authenticate);
+router.use(authorize(["academy", "admin"]));
 
 router.get("/", ctrl.academyGetAll);
 router.get("/:id", ctrl.academyGetById);

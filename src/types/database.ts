@@ -1,18 +1,6 @@
 export type DeviceModel = "Laptop" | "Desktop" | "Other";
 export type RequestStatus = "Pending" | "In-Progress" | "Completed" | "Unsuccessful";
 
-export interface RepairTimelineStep {
-  step: string;
-  date: string;
-  note: string;
-  status: string;
-}
-
-export interface CustomerConfirmation {
-  customer_collected: boolean;
-  technician: string;
-}
-
 export interface ServiceRequest {
   id: string;
   user_id: string;
@@ -41,8 +29,15 @@ export interface ServiceRequest {
   deposit_paid: number;
   balance: number;
   payment_completed: boolean;
-  repair_timeline: RepairTimelineStep[];
-  customer_confirmation: CustomerConfirmation;
+  payment_status: "unpaid" | "partial" | "paid";
+  department: string;
+  assigned_to: string | null;
+  assigned_by: string | null;
+  assigned_at: string | null;
+  accepted_at: string | null;
+  delivered_at: string | null;
+  delivered: boolean;
+  technician_notes: string;
   created_at: string;
   updated_at: string;
 }
@@ -132,6 +127,22 @@ export interface AcademyCourse {
   status: "draft" | "published" | "archived";
   created_at: string;
   updated_at: string;
+}
+
+export interface Attendance {
+  id: string;
+  user_id: string;
+  date: string;
+  clock_in: string | null;
+  clock_out: string | null;
+  status: "present" | "late" | "absent" | "half_day";
+  notes: string;
+  created_at: string;
+  updated_at: string;
+  user_email?: string;
+  user_name?: string;
+  user_roles?: string[];
+  user_department?: string;
 }
 
 export interface User {

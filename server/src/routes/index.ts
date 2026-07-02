@@ -4,6 +4,7 @@ import admin from "./admin.routes";
 import auth from "./auth.routes";
 import sales from "./sales.routes";
 import academy from "./academy.routes";
+import attendance from "./attendance.routes";
 
 const api = Router();
 
@@ -12,5 +13,6 @@ api.use("/admin", admin);
 api.use("/auth", auth);
 api.use("/", sales);
 api.use("/academy", academy);
+api.use("/attendance", attendance);
 
 export default api;

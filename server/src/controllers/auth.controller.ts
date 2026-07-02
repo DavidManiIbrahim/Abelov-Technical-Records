@@ -16,7 +16,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
     const { salt, hash } = hashPassword(password);
     const doc = await UserModel.create({
       email,
-      roles: ['user'], // Strictly force user role
+      roles: ['secretary'], // Strictly force secretary role
       is_active: true,
       password_hash: hash,
       password_salt: salt
