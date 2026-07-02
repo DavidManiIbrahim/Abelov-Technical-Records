@@ -97,7 +97,6 @@ export default function Sidebar() {
 
   const isActive = (path: string) => {
     if (path === '/requests' && location.pathname.includes('/view')) return true;
-    if (path === '/new-request' && (location.pathname === '/new-request' || location.pathname.includes('/edit'))) return true;
     return location.pathname === path;
   };
 
