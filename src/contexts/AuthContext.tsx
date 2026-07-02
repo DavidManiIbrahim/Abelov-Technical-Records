@@ -17,7 +17,7 @@ interface AuthContextType {
   loading: boolean;
   userRoles: string[];
   isAdmin: boolean;
-  signUp: (email: string, password: string, userType?: 'user' | 'admin') => Promise<void>;
+  signUp: (email: string, password: string, role?: string, department?: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateUser: (updates: Partial<NonNullable<User>>) => void;
@@ -180,8 +180,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []); // Empty dependency array - this effect should only run once on mount
 
-  const signUp = async (email: string, password: string, userType: 'user' | 'admin' = 'user') => {
-    const user = await authAPI.signup(email, password, userType);
+  const signUp = async (email: string, password: string, role: string = 'secretary', department: string = '') => {
+    const user = await authAPI.signup(email, password, role, department);
     // After signup, user must login separately
     return user;
   };

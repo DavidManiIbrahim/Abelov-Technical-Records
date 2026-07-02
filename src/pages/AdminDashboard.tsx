@@ -45,6 +45,7 @@ interface UserData {
   lastActivityDate: string | null;
   // Optional roles array coming from backend (`roles` on user document)
   roles?: string[];
+  department?: string;
 }
 
 interface RequestData {
@@ -192,7 +193,8 @@ export default function AdminDashboard() {
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
-  const [newUserRole, setNewUserRole] = useState('user');
+  const [newUserRole, setNewUserRole] = useState('secretary');
+  const [newUserDept, setNewUserDept] = useState('');
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,7 +203,8 @@ export default function AdminDashboard() {
       await adminAPI.createUser({
         email: newUserEmail,
         password: newUserPassword,
-        roles: [newUserRole]
+        roles: [newUserRole],
+        department: newUserDept
       });
       toast({ title: 'Success', description: 'User created successfully' });
       setIsCreatingUser(false);
@@ -629,8 +632,26 @@ export default function AdminDashboard() {
                             <SelectValue placeholder="Select Role" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="user">User (Staff/Technician)</SelectItem>
+                            <SelectItem value="secretary">Secretary</SelectItem>
+                            <SelectItem value="technician">Technician</SelectItem>
+                            <SelectItem value="sales">Sales</SelectItem>
+                            <SelectItem value="academy">Academy</SelectItem>
                             <SelectItem value="admin">Administrator</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Department</label>
+                        <Select value={newUserDept} onValueChange={setNewUserDept}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Department" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">None</SelectItem>
+                            <SelectItem value="secretary">Secretary</SelectItem>
+                            <SelectItem value="technician">Technician</SelectItem>
+                            <SelectItem value="sales">Sales</SelectItem>
+                            <SelectItem value="academy">Academy</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -659,6 +680,7 @@ export default function AdminDashboard() {
                           <TableHead className="text-xs font-semibold">Email</TableHead>
                           <TableHead className="text-xs font-semibold">Username</TableHead>
                           <TableHead className="text-xs font-semibold">Role</TableHead>
+                          <TableHead className="text-xs font-semibold">Department</TableHead>
                           <TableHead className="text-xs font-semibold">Tickets</TableHead>
                           <TableHead className="text-xs font-semibold">Revenue</TableHead>
                           <TableHead className="text-xs font-semibold">Status</TableHead>
@@ -668,14 +690,14 @@ export default function AdminDashboard() {
                       <TableBody>
                         {users.length === 0 ? (
                           <TableRow>
-                            <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                            <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                               No users found
                             </TableCell>
                           </TableRow>
                         ) : (
                           users.map((u: UserData) => {
                             const nameFromEmail = u.email.split('@')[0];
-                            const primaryRole = (u.roles && u.roles.length > 0 ? u.roles[0] : 'user') || 'user';
+                            const primaryRole = (u.roles && u.roles.length > 0 ? u.roles[0] : 'secretary') || 'secretary';
                             return (
                               <TableRow key={u.id} className="hover:bg-muted/50 transition-colors">
                                 <TableCell className="text-sm">{u.email}</TableCell>
@@ -690,11 +712,15 @@ export default function AdminDashboard() {
                                       <SelectValue placeholder="Role" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="user">User</SelectItem>
-                                      <SelectItem value="admin">Admin</SelectItem>
+                                      <SelectItem value="secretary">Secretary</SelectItem>
+                                      <SelectItem value="technician">Technician</SelectItem>
+                                      <SelectItem value="sales">Sales</SelectItem>
+                                      <SelectItem value="academy">Academy</SelectItem>
+                                      <SelectItem value="admin">Administrator</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </TableCell>
+                                <TableCell className="text-sm capitalize">{u.department || '-'}</TableCell>
                                 <TableCell className="text-sm font-semibold">{u.ticketCount}</TableCell>
                                 <TableCell className="text-sm font-semibold">₦{u.totalRevenue?.toLocaleString()}</TableCell>
                                 <TableCell>

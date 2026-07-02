@@ -273,9 +273,10 @@ export default function ServiceRequestForm() {
                     <SelectValue placeholder="Select Department" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="secretary">Secretary</SelectItem>
                     <SelectItem value="technician">Technician</SelectItem>
                     <SelectItem value="sales">Sales</SelectItem>
-                    <SelectItem value="it_academy">IT Academy</SelectItem>
+                    <SelectItem value="academy">Academy</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

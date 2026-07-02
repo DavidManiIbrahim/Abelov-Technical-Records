@@ -15,7 +15,8 @@ export default function SignupPage() {
     const navigate = useNavigate();
     const { signUp } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
-    const [userType, setUserType] = useState<'user' | 'admin'>('user');
+    const [role, setRole] = useState('secretary');
+    const [department, setDepartment] = useState('');
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -48,11 +49,10 @@ export default function SignupPage() {
                 return;
             }
 
-            // Sign up the user (assign selected role)
-            await signUp(formData.email, formData.password, userType);
+            await signUp(formData.email, formData.password, role, department);
             toast({
                 title: 'Success',
-                description: `Account created as ${userType}. You can now log in.`,
+                description: `Account created as ${role}. You can now log in.`,
             });
             navigate('/login');
         } catch (error: Error | unknown) {
@@ -77,7 +77,7 @@ export default function SignupPage() {
             <Card className="w-full max-w-md p-8 shadow-2xl relative z-10 bg-white/95 backdrop-blur">
                 <div className="mb-8 text-center">
                     <img src={abelovLogo} alt="Abelov Logo" className="w-20 rounded-3xl h-20 mx-auto mb-4" />
-                    <h1 className="text-2xl md:text-3xl font-bold dark:text-black text-primary mb-2">Abelov Records Management System</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold dark:text-black text-primary mb-2">Abelov<br />Records Management System</h1>
                     <p className="text-muted-foreground">Create your account</p>
                 </div>
 
@@ -119,14 +119,31 @@ export default function SignupPage() {
                     </div>
 
                     <div>
-                        <Label className="dark:text-black" htmlFor="account-type">Account Type</Label>
-                        <Select value={userType} onValueChange={(val) => setUserType(val as 'user' | 'admin')}>
-                            <SelectTrigger id="account-type">
-                                <SelectValue placeholder="Select account type" />
+                        <Label className="dark:text-black" htmlFor="role">Role</Label>
+                        <Select value={role} onValueChange={setRole}>
+                            <SelectTrigger id="role">
+                                <SelectValue placeholder="Select role" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="user">Regular User (Technician)</SelectItem>
-                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="secretary">Secretary</SelectItem>
+                                <SelectItem value="technician">Technician</SelectItem>
+                                <SelectItem value="sales">Sales</SelectItem>
+                                <SelectItem value="academy">Academy</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div>
+                        <Label className="dark:text-black" htmlFor="department">Department</Label>
+                        <Select value={department} onValueChange={setDepartment}>
+                            <SelectTrigger id="department">
+                                <SelectValue placeholder="Select department" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="">None</SelectItem>
+                                <SelectItem value="secretary">Secretary</SelectItem>
+                                <SelectItem value="technician">Technician</SelectItem>
+                                <SelectItem value="sales">Sales</SelectItem>
+                                <SelectItem value="academy">Academy</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

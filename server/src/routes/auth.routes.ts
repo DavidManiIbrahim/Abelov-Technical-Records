@@ -58,8 +58,7 @@ const corsOptions = {
 
 router.use(cors(corsOptions));
 
-// Registration is now handled by admin only
-// router.post("/register", ctrl.signup);
+router.post("/signup", ctrl.signup);
 router.post("/login", ctrl.login);
 router.post("/logout", ctrl.logout);
 

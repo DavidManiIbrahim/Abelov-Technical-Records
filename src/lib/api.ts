@@ -323,10 +323,10 @@ export const adminAPI = {
 
 // Auth API - all calls go to backend, token cached after success
 export const authAPI = {
-  async signup(email: string, password: string, role?: 'user' | 'admin') {
+  async signup(email: string, password: string, role: string = 'secretary', department: string = '') {
     const res = await apiFetch('/auth/signup', {
       method: 'POST',
-      body: JSON.stringify({ email, password, role }),
+      body: JSON.stringify({ email, password, role, department }),
     });
     const user = res?.user || res;
     return user;
