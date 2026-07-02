@@ -8,7 +8,6 @@ import { PurchaseModel } from "../models/purchase.model";
 import { ExpenseModel } from "../models/expense.model";
 import { CreditModel } from "../models/credit.model";
 import { AcademyModel } from "../models/academy.model";
-import { getCache, setCache, delCachePattern } from "../utils/cache";
 import { hashPassword } from "../utils/auth";
 import { SignupSchema } from "../types/auth";
 import { env } from "../config/env";
@@ -81,14 +80,9 @@ export const initAdmin = async (_req: Request, res: Response) => {
   });
 };
 
-export const getGlobalStats = async (req: Request, res: Response, next: NextFunction) => {
+export const getGlobalStats = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const forceRefresh = req.query.forceRefresh === "true";
-    if (!forceRefresh) {
-      const cached = await getCache<any>("admin:global_stats");
-      if (cached) return res.json(cached);
-    }
-
+    // Get total users from User model
     const totalUsers = await UserModel.countDocuments();
 
     const totalTickets = await RequestModel.countDocuments();
@@ -102,7 +96,7 @@ export const getGlobalStats = async (req: Request, res: Response, next: NextFunc
     ]);
     const totalRevenue = totalRevenueResult[0]?.total || 0;
 
-    const result = {
+    res.json({
       totalUsers,
       totalTickets,
       pendingTickets,
@@ -110,22 +104,14 @@ export const getGlobalStats = async (req: Request, res: Response, next: NextFunc
       inProgressTickets,
       unsuccessfulTickets,
       totalRevenue,
-    };
-    await setCache("admin:global_stats", result, 60);
-    res.json(result);
+    });
   } catch (err) {
     next(err);
   }
 };
 
-export const getModuleStats = async (req: Request, res: Response, next: NextFunction) => {
+export const getModuleStats = async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const forceRefresh = req.query.forceRefresh === "true";
-    if (!forceRefresh) {
-      const cached = await getCache<any>("admin:module_stats");
-      if (cached) return res.json(cached);
-    }
-
     const [totalUsers, totalTickets, pendingTickets, inProgressTickets, completedTickets, unsuccessfulTickets, totalRevenueResult] = await Promise.all([
       UserModel.countDocuments(),
       RequestModel.countDocuments(),
@@ -153,13 +139,11 @@ export const getModuleStats = async (req: Request, res: Response, next: NextFunc
     const salesRevenue = ordersRevenue[0]?.total || 0;
     const salesCost = purchasesCost[0]?.total || 0;
 
-    const result = {
+    res.json({
       repairs: { totalTickets, pendingTickets, inProgressTickets, completedTickets, unsuccessfulTickets, totalRevenue },
       sales: { totalGoods, totalOrders, totalPurchases, totalExpenses, totalCredits, salesRevenue, salesCost },
       academy: { totalCourses, publishedCourses },
-    };
-    await setCache("admin:module_stats", result, 60);
-    res.json(result);
+    });
   } catch (err) {
     next(err);
   }
@@ -216,8 +200,6 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
       is_active: true
     } as any);
 
-    await delCachePattern("admin:*");
-
     res.status(201).json({
       message: "User created successfully",
       data: user.toJSON()
@@ -242,7 +224,8 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 
     await UserModel.findByIdAndDelete(id);
 
-    await delCachePattern("admin:*");
+    // Also cleanup requests associated with this user? 
+    // Usually better to keep them or reassign, but I'll leave them for now unless asked.
 
     res.json({ message: "User deleted successfully" });
   } catch (err) {

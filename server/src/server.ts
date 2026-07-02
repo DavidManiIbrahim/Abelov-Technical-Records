@@ -2,7 +2,6 @@ import { createApp } from "./app";
 import { env } from "./config/env";
 import { logger } from "./middlewares/logger";
 import { connectMongo } from "./db/mongo";
-import { initCache } from "./utils/cache";
 
 const app = createApp();
 const port = Number(process.env.PORT) || env.PORT || 4000;
@@ -11,7 +10,6 @@ const port = Number(process.env.PORT) || env.PORT || 4000;
 const start = async () => {
   try {
     await connectMongo();
-    await initCache(env.REDIS_URL);
 
     logger.info("Database connected successfully");
 
