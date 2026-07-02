@@ -11,6 +11,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -19,6 +20,7 @@
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
+    "ioredis": "^5.11.1",
     "mongoose": "^8.8.1",
     "pino": "^9.4.0",
     "pino-http": "^9.0.0",
@@ -26,11 +28,13 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "uuid": "^9.0.1",
-    "zod": "^3.25.76",
-    "bcryptjs": "^2.4.3"
+    "zod": "^3.25.76"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "mongodb-memory-server"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "mongodb-memory-server"
+    ]
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

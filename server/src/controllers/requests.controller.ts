@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { ApiError } from "../middlewares/error";
 import { RequestSchema, RequestUpdateSchema } from "../types/request";
 import { RequestModel } from "../models/request.model";
+import { getCache, setCache, delCachePattern } from "../utils/cache";
 
 export const getAll = async (req: Request, res: Response) => {
   const user = (req as any).user;
@@ -37,6 +38,7 @@ export const create = async (req: Request, res: Response, next: NextFunction) =>
       user_id: user.id
     });
     await entity.save();
+    await delCachePattern("requests:*");
 
     res.status(201).json({ data: (entity as any).toJSON() });
   } catch (err) {
@@ -64,6 +66,7 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
       { $set: parsed },
       { new: true, runValidators: true }
     );
+    await delCachePattern("requests:*");
 
     res.json({ data: (entity as any).toJSON() });
   } catch (err) {
@@ -84,6 +87,7 @@ export const remove = async (req: Request, res: Response, next: NextFunction) =>
   if (!existing) return next(new ApiError(404, "Request not found"));
 
   await RequestModel.findByIdAndDelete(id);
+  await delCachePattern("requests:*");
   res.status(204).send();
 };
 
@@ -116,6 +120,7 @@ export const recordPayment = async (req: Request, res: Response, next: NextFunct
     existing.set("payment_status", paymentCompleted ? "paid" : newDeposit > 0 ? "partial" : "unpaid");
 
     await existing.save();
+    await delCachePattern("requests:*");
 
     res.json({ data: (existing as any).toJSON() });
   } catch (err) {
@@ -127,6 +132,13 @@ export const recordPayment = async (req: Request, res: Response, next: NextFunct
 export const getStats = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.params;
+    const cacheKey = `requests:stats:${userId}`;
+    const forceRefresh = req.query.forceRefresh === "true";
+    if (!forceRefresh) {
+      const cached = await getCache<any>(cacheKey);
+      if (cached) return res.json(cached);
+    }
+
     const requests = await RequestModel.find({ user_id: userId });
 
     const stats = {
@@ -138,6 +150,7 @@ export const getStats = async (req: Request, res: Response, next: NextFunction) 
       totalRevenue: requests.reduce((sum: number, r: any) => sum + (r.total_cost || 0), 0),
     };
 
+    await setCache(cacheKey, stats, 30);
     res.json({ data: stats });
   } catch (err) {
     next(err);
@@ -242,8 +255,13 @@ export const markDelivered = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const getPaymentAnalytics = async (_req: Request, res: Response, next: NextFunction) => {
+export const getPaymentAnalytics = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const forceRefresh = req.query.forceRefresh === "true";
+    if (!forceRefresh) {
+      const cached = await getCache<any>("requests:payment_analytics");
+      if (cached) return res.json(cached);
+    }
     const all = await RequestModel.find({});
 
     const totalRequests = all.length;
@@ -263,7 +281,7 @@ export const getPaymentAnalytics = async (_req: Request, res: Response, next: Ne
       { $group: { _id: "$payment_status", count: { $sum: 1 }, amount: { $sum: "$balance" } } }
     ]);
 
-    res.json({
+    const result = {
       totalRequests,
       paid,
       partial,
@@ -274,7 +292,9 @@ export const getPaymentAnalytics = async (_req: Request, res: Response, next: Ne
       collectionRate: totalRevenue > 0 ? ((totalCollected / totalRevenue) * 100).toFixed(1) : "0.0",
       byDepartment,
       byStatus,
-    });
+    };
+    await setCache("requests:payment_analytics", result, 60);
+    res.json(result);
   } catch (err) {
     next(err);
   }

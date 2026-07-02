@@ -25,7 +25,8 @@ const EnvSchema = z.object({
   FIELD_ENCRYPTION_KEY: z.string().min(32).optional(),
   ADMIN_EMAIL: z.string().email().optional(),
   ADMIN_PASSWORD: z.string().min(6).optional(),
-  AUTH_SECRET: z.string().min(16).optional()
+  AUTH_SECRET: z.string().min(16).optional(),
+  REDIS_URL: z.string().optional()
 });
 
 const parsed = EnvSchema.safeParse(process.env);

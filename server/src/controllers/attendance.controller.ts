@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { ApiError } from "../middlewares/error";
 import { AttendanceModel } from "../models/attendance.model";
 import { UserModel } from "../models/user.model";
+import { getCache, setCache, delCachePattern } from "../utils/cache";
 
 export const clockIn = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -21,9 +22,10 @@ export const clockIn = async (req: Request, res: Response, next: NextFunction) =
       user_id: user.id,
       date: today,
       clock_in: now,
-      status,
-    });
+      status
+    } as any);
 
+    await delCachePattern("attendance:*");
     res.status(201).json({ data: (record as any).toJSON() });
   } catch (err) {
     next(err);
@@ -46,7 +48,7 @@ export const clockOut = async (req: Request, res: Response, next: NextFunction) 
 
     record.clock_out = now;
     await record.save();
-
+    await delCachePattern("attendance:*");
     res.json({ data: (record as any).toJSON() });
   } catch (err) {
     next(err);
@@ -80,6 +82,13 @@ export const getMyAttendance = async (req: Request, res: Response, next: NextFun
 export const getAllAttendance = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { from, to, user_id, limit = 50, offset = 0 } = req.query;
+    const cacheKey = `attendance:all:${from || ""}:${to || ""}:${user_id || ""}:${limit}:${offset}`;
+
+    const forceRefresh = req.query.forceRefresh === "true";
+    if (!forceRefresh) {
+      const cached = await getCache<any>(cacheKey);
+      if (cached) return res.json(cached);
+    }
 
     const filter: any = {};
     if (user_id) filter.user_id = user_id;
@@ -107,14 +116,22 @@ export const getAllAttendance = async (req: Request, res: Response, next: NextFu
       })
     );
 
-    res.json({ data: enriched, total });
+    const result = { data: enriched, total };
+    await setCache(cacheKey, result, 30);
+    res.json(result);
   } catch (err) {
     next(err);
   }
 };
 
-export const getAttendanceStats = async (_req: Request, res: Response, next: NextFunction) => {
+export const getAttendanceStats = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const forceRefresh = req.query.forceRefresh === "true";
+    if (!forceRefresh) {
+      const cached = await getCache<any>("attendance:stats");
+      if (cached) return res.json(cached);
+    }
+
     const today = new Date().toISOString().slice(0, 10);
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
@@ -132,11 +149,13 @@ export const getAttendanceStats = async (_req: Request, res: Response, next: Nex
 
     const totalUsers = await UserModel.countDocuments({ is_active: true });
 
-    res.json({
+    const result = {
       today: { total: totalToday, present: presentToday, late: lateToday, absent: totalToday - presentToday - lateToday },
       month: { total: totalMonth, present: presentMonth, late: lateMonth, absent: absentMonth },
       totalUsers,
-    });
+    };
+    await setCache("attendance:stats", result, 30);
+    res.json(result);
   } catch (err) {
     next(err);
   }
@@ -156,6 +175,7 @@ export const updateAttendance = async (req: Request, res: Response, next: NextFu
     if (clock_out) record.set("clock_out", clock_out);
 
     await record.save();
+    await delCachePattern("attendance:*");
     res.json({ data: (record as any).toJSON() });
   } catch (err) {
     next(err);

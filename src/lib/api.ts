@@ -229,7 +229,7 @@ export const adminAPI = {
       if (cached) return cached;
     }
 
-    const res = await apiFetch('/admin/module-stats');
+    const res = await apiFetch(`/admin/module-stats${forceRefresh ? '?forceRefresh=true' : ''}`);
     const stats = res as {
       repairs: { totalTickets: number; pendingTickets: number; inProgressTickets: number; completedTickets: number; unsuccessfulTickets: number; totalRevenue: number };
       sales: { totalGoods: number; totalOrders: number; totalPurchases: number; totalExpenses: number; totalCredits: number; salesRevenue: number; salesCost: number };
@@ -254,7 +254,7 @@ export const adminAPI = {
       if (cached) return cached;
     }
 
-    const res = await apiFetch('/admin/stats');
+    const res = await apiFetch(`/admin/stats${forceRefresh ? '?forceRefresh=true' : ''}`);
     const stats = res as {
       totalUsers: number;
       totalTickets: number;
