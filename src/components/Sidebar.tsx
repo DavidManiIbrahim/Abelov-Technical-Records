@@ -43,7 +43,7 @@ const navItems: NavItem[] = [
   // Main Section
   { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} />, section: 'main' },
   { label: 'Service Requests', path: '/requests', icon: <FileText size={20} />, section: 'main' },
-  { label: 'New Request', path: '/new-request', icon: <FileText size={20} />, section: 'main' },
+  // { label: 'New Request', path: '/new-request', icon: <FileText size={20} />, section: 'main' },
 
   // Sales & Inventory Section
   { label: 'Goods Inventory', path: '/goods', icon: <Package size={20} />, section: 'sales', roles: ['sales', 'admin'] },

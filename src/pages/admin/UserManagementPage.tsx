@@ -26,7 +26,7 @@ interface UserData {
 
 const DEPARTMENTS = [
   { value: '', label: 'None' },
-  { value: 'engineering', label: 'Engineering' },
+  { value: 'technician', label: 'Technician' },
   { value: 'sales', label: 'Sales' },
   { value: 'it_academy', label: 'IT Academy' },
 ];
