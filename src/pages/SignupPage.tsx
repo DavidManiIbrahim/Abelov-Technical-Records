@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import loginBackground from '@/assets/login-background.jpg';
 import abelovLogo from '@/assets/abelov-logo.png';
 
@@ -15,6 +15,8 @@ export default function SignupPage() {
     const navigate = useNavigate();
     const { signUp } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [role, setRole] = useState('secretary');
     const [department, setDepartment] = useState('none');
     const [formData, setFormData] = useState({
@@ -39,10 +41,10 @@ export default function SignupPage() {
             }
 
             // Validate password strength (must match server requirements)
-            if (formData.password.length < 12) {
+            if (formData.password.length < 8) {
                 toast({
                     title: 'Error',
-                    description: 'Password must be at least 12 characters',
+                    description: 'Password must be at least 8 characters',
                     variant: 'destructive',
                 });
                 setIsLoading(false);
@@ -132,26 +134,46 @@ export default function SignupPage() {
 
                     <div>
                         <Label className="dark:text-black" htmlFor="password">Password</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            placeholder="••••••••"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            required
-                        />
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                placeholder="••••••••"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                required
+                                className="pr-10"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                        </div>
                     </div>
 
                     <div>
                         <Label className="dark:text-black" htmlFor="confirmPassword">Confirm Password</Label>
-                        <Input
-                            id="confirmPassword"
-                            type="password"
-                            placeholder="••••••••"
-                            value={formData.confirmPassword}
-                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                            required
-                        />
+                        <div className="relative">
+                            <Input
+                                id="confirmPassword"
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                placeholder="••••••••"
+                                value={formData.confirmPassword}
+                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                required
+                                className="pr-10"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            >
+                                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                        </div>
                     </div>
 
                     <div>
@@ -176,10 +198,9 @@ export default function SignupPage() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="none">None</SelectItem>
-                                <SelectItem value="secretary">Secretary</SelectItem>
-                                <SelectItem value="technician">Technician</SelectItem>
+                                <SelectItem value="engineering">Engineering</SelectItem>
                                 <SelectItem value="sales">Sales</SelectItem>
-                                <SelectItem value="academy">Academy</SelectItem>
+                                <SelectItem value="it_academy">IT Academy</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

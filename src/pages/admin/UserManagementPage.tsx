@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Loader2, Trash2, Plus } from 'lucide-react';
+import { Loader2, Trash2, Plus, Eye, EyeOff } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
@@ -26,10 +26,9 @@ interface UserData {
 
 const DEPARTMENTS = [
   { value: 'none', label: 'None' },
-  { value: 'secretary', label: 'Secretary' },
-  { value: 'technician', label: 'Technician' },
+  { value: 'engineering', label: 'Engineering' },
   { value: 'sales', label: 'Sales' },
-  { value: 'academy', label: 'Academy' },
+  { value: 'it_academy', label: 'IT Academy' },
 ];
 
 const ROLES = [
@@ -48,6 +47,7 @@ export default function UserManagementPage() {
   const [newUserPassword, setNewUserPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState('secretary');
   const [newUserDept, setNewUserDept] = useState('none');
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -207,7 +207,12 @@ export default function UserManagementPage() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Initial Password</label>
-              <Input type="password" placeholder="Min 12 characters" value={newUserPassword} onChange={(e) => setNewUserPassword(e.target.value)} required />
+              <div className="relative">
+                <Input type={showPassword ? 'text' : 'password'} placeholder="Min 8 characters" value={newUserPassword} onChange={(e) => setNewUserPassword(e.target.value)} required className="pr-10" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">User Role</label>

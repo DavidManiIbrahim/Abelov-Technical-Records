@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, Users, Ticket, Activity, TrendingUp, Trash2, Eye } from 'lucide-react';
+import { Loader2, Users, Ticket, Activity, TrendingUp, Trash2, Eye, EyeOff } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import {
@@ -194,7 +194,8 @@ export default function AdminDashboard() {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState('secretary');
-  const [newUserDept, setNewUserDept] = useState('');
+  const [newUserDept, setNewUserDept] = useState('none');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,12 +205,13 @@ export default function AdminDashboard() {
         email: newUserEmail,
         password: newUserPassword,
         roles: [newUserRole],
-        department: newUserDept
+        department: newUserDept === 'none' ? '' : newUserDept
       });
       toast({ title: 'Success', description: 'User created successfully' });
       setIsCreatingUser(false);
       setNewUserEmail('');
       setNewUserPassword('');
+      setNewUserDept('none');
       loadData();
     } catch (error: any) {
       toast({
@@ -617,13 +619,23 @@ export default function AdminDashboard() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Initial Password</label>
-                        <Input
-                          type="password"
-                          placeholder="Min 12 characters"
-                          value={newUserPassword}
-                          onChange={(e) => setNewUserPassword(e.target.value)}
-                          required
-                        />
+                        <div className="relative">
+                          <Input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Min 8 characters"
+                            value={newUserPassword}
+                            onChange={(e) => setNewUserPassword(e.target.value)}
+                            required
+                            className="pr-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">User Role</label>
@@ -647,11 +659,10 @@ export default function AdminDashboard() {
                             <SelectValue placeholder="Select Department" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">None</SelectItem>
-                            <SelectItem value="secretary">Secretary</SelectItem>
-                            <SelectItem value="technician">Technician</SelectItem>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="engineering">Engineering</SelectItem>
                             <SelectItem value="sales">Sales</SelectItem>
-                            <SelectItem value="academy">Academy</SelectItem>
+                            <SelectItem value="it_academy">IT Academy</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

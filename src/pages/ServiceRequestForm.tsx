@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { serviceRequestAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { FaStore, FaUser, FaLaptop, FaExclamationTriangle, FaTools, FaMoneyBill, FaCheckCircle } from 'react-icons/fa';
 
 
@@ -76,7 +76,7 @@ export default function ServiceRequestForm() {
     balance: 0,
     payment_completed: false,
     payment_status: 'unpaid' as const,
-    department: '',
+    department: 'none',
     customer_confirmation: {
       customer_collected: false,
       technician: '',
@@ -179,7 +179,7 @@ export default function ServiceRequestForm() {
           balance: formData.balance || 0,
           payment_completed: formData.payment_completed || false,
           payment_status: (formData.payment_status as string) || 'unpaid',
-          department: formData.department || '',
+          department: formData.department === 'none' ? '' : formData.department,
         };
         await serviceRequestAPI.create(newRequest as unknown as Omit<ServiceRequest, 'id' | 'created_at' | 'updated_at'>);
         toast({
@@ -273,17 +273,17 @@ export default function ServiceRequestForm() {
               <div>
                 <Label htmlFor="department">Department</Label>
                 <Select
-                  value={formData.department || ''}
+                  value={formData.department || 'none'}
                   onValueChange={(value) => updateField('department', value)}
                 >
                   <SelectTrigger id="department">
                     <SelectValue placeholder="Select Department" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="secretary">Secretary</SelectItem>
-                    <SelectItem value="technician">Technician</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="engineering">Engineering</SelectItem>
                     <SelectItem value="sales">Sales</SelectItem>
-                    <SelectItem value="academy">Academy</SelectItem>
+                    <SelectItem value="it_academy">IT Academy</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
