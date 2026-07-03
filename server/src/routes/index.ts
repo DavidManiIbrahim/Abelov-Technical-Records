@@ -11,8 +11,8 @@ const api = Router();
 api.use("/requests", requests);
 api.use("/admin", admin);
 api.use("/auth", auth);
-api.use("/", sales);
 api.use("/academy", academy);
 api.use("/attendance", attendance);
+api.use("/", sales);
 
 export default api;
