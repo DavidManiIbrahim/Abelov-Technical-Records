@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Loader2, Ticket, TrendingUp, Activity, Package, ShoppingCart, Truck, DollarSign, CreditCard, BookOpen, CheckCircle, Wrench, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
+import { Loader2, Ticket, TrendingUp, Activity, Package, ShoppingCart, Truck, DollarSign, CreditCard, BookOpen, CheckCircle, Wrench, BarChart3, Users, Clock } from 'lucide-react';
 import { adminAPI, serviceRequestAPI } from '@/lib/api';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -8,6 +8,8 @@ interface ModuleStats {
   repairs: { totalTickets: number; pendingTickets: number; inProgressTickets: number; completedTickets: number; unsuccessfulTickets: number; totalRevenue: number };
   sales: { totalGoods: number; totalOrders: number; totalPurchases: number; totalExpenses: number; totalCredits: number; salesRevenue: number; salesCost: number };
   academy: { totalCourses: number; publishedCourses: number };
+  attendance: { totalToday: number; totalMonth: number };
+  users: { total: number; byRole: Record<string, number> };
 }
 
 interface ServiceRequest {
@@ -220,6 +222,36 @@ export default function AdminAnalyticsPage() {
           <StatCard label="Total Courses" value={stats.academy.totalCourses} icon={BookOpen} color="purple" />
           <StatCard label="Published" value={stats.academy.publishedCourses} icon={CheckCircle} color="green" subtitle={stats.academy.totalCourses > 0 ? `${Math.round((stats.academy.publishedCourses / stats.academy.totalCourses) * 100)}% published` : undefined} />
           <StatCard label="Drafts" value={stats.academy.totalCourses - stats.academy.publishedCourses} icon={Activity} color="yellow" />
+        </div>
+      </section>
+
+      {/* Attendance Section */}
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <Clock className="w-5 h-5 text-cyan-600" />
+          <h2 className="text-xl font-semibold">Attendance</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <StatCard label="Today's Records" value={stats.attendance.totalToday} icon={Clock} color="cyan" subtitle={`out of ${stats.users.total} users`} />
+          <StatCard label="This Month" value={stats.attendance.totalMonth} icon={Activity} color="blue" />
+          <StatCard label="Active Users" value={stats.users.total} icon={Users} color="indigo" />
+        </div>
+      </section>
+
+      {/* Users by Role Section */}
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <Users className="w-5 h-5 text-indigo-600" />
+          <h2 className="text-xl font-semibold">Users by Role</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {Object.entries(stats.users.byRole).map(([role, count], i) => {
+            const colors = ['blue', 'purple', 'green', 'yellow', 'red', 'cyan'];
+            const color = colors[i % colors.length];
+            return (
+              <StatCard key={role} label={role.charAt(0).toUpperCase() + role.slice(1)} value={count} icon={Users} color={color} />
+            );
+          })}
         </div>
       </section>
 

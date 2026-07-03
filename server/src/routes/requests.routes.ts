@@ -22,12 +22,12 @@ router.patch("/:id/deliver", authorize(["admin", "secretary", "technician"]), ct
 // Secretary/Admin endpoints
 router.patch("/:id/assign", authorize(["admin", "secretary"]), ctrl.assignTechnician);
 
-// General CRUD - accessible by admin, secretary, technician
+// General CRUD
 router.get("/", authorize(["admin", "secretary", "technician"]), ctrl.getAll);
-router.post("/", authorize(["admin", "secretary", "technician"]), ctrl.create);
+router.post("/", authorize(["admin", "secretary"]), ctrl.create);
 router.get("/stats/:userId", authorize(["admin", "secretary", "technician"]), ctrl.getStats);
 router.get("/:id", authorize(["admin", "secretary", "technician"]), ctrl.getById);
-router.put("/:id", authorize(["admin", "secretary", "technician"]), ctrl.update);
+router.put("/:id", authorize(["admin", "secretary"]), ctrl.update);
 router.post("/:id/payment", authorize(["admin", "secretary", "technician"]), ctrl.recordPayment);
 router.delete("/:id", ctrl.remove); // remove handles admin check internally
 

@@ -38,11 +38,47 @@ export default function SignupPage() {
                 return;
             }
 
-            // Validate password strength
-            if (formData.password.length < 6) {
+            // Validate password strength (must match server requirements)
+            if (formData.password.length < 12) {
                 toast({
                     title: 'Error',
-                    description: 'Password must be at least 6 characters',
+                    description: 'Password must be at least 12 characters',
+                    variant: 'destructive',
+                });
+                setIsLoading(false);
+                return;
+            }
+            if (!/[A-Z]/.test(formData.password)) {
+                toast({
+                    title: 'Error',
+                    description: 'Password must contain at least one uppercase letter',
+                    variant: 'destructive',
+                });
+                setIsLoading(false);
+                return;
+            }
+            if (!/[a-z]/.test(formData.password)) {
+                toast({
+                    title: 'Error',
+                    description: 'Password must contain at least one lowercase letter',
+                    variant: 'destructive',
+                });
+                setIsLoading(false);
+                return;
+            }
+            if (!/[0-9]/.test(formData.password)) {
+                toast({
+                    title: 'Error',
+                    description: 'Password must contain at least one number',
+                    variant: 'destructive',
+                });
+                setIsLoading(false);
+                return;
+            }
+            if (!/[^A-Za-z0-9]/.test(formData.password)) {
+                toast({
+                    title: 'Error',
+                    description: 'Password must contain at least one special character',
                     variant: 'destructive',
                 });
                 setIsLoading(false);

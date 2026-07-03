@@ -27,7 +27,6 @@ import {
   LogOut,
   User,
   Activity,
-  Clock,
   Users,
 } from 'lucide-react';
 

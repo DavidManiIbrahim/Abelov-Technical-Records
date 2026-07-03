@@ -86,10 +86,12 @@ export default function RequestsList() {
                 {isTechnician ? "Jobs assigned to you" : "View and manage all service requests"}
               </p>
             </div>
-            <Button onClick={() => navigate("/new-request")}>
-              <Plus className="w-4 h-4 mr-2" />
-              New Request
-            </Button>
+            {!isTechnician && (
+              <Button onClick={() => navigate("/new-request")}>
+                <Plus className="w-4 h-4 mr-2" />
+                New Request
+              </Button>
+            )}
           </div>
           <div className="flex gap-4">
             <div className="relative flex-1 max-w-md">
@@ -131,10 +133,12 @@ export default function RequestsList() {
             <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No Service Requests Yet</h3>
             <p className="text-muted-foreground mb-6">Create your first service request to get started.</p>
-            <Button onClick={() => navigate("/new-request")}>
-              <Plus className="w-4 h-4 mr-2" />
-              Create Service Request
-            </Button>
+            {!isTechnician && (
+              <Button onClick={() => navigate("/new-request")}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Service Request
+              </Button>
+            )}
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

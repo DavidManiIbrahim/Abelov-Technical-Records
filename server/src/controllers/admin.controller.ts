@@ -8,6 +8,7 @@ import { PurchaseModel } from "../models/purchase.model";
 import { ExpenseModel } from "../models/expense.model";
 import { CreditModel } from "../models/credit.model";
 import { AcademyModel } from "../models/academy.model";
+import { AttendanceModel } from "../models/attendance.model";
 import { hashPassword } from "../utils/auth";
 import { SignupSchema } from "../types/auth";
 import { env } from "../config/env";
@@ -112,6 +113,11 @@ export const getGlobalStats = async (_req: Request, res: Response, next: NextFun
 
 export const getModuleStats = async (_req: Request, res: Response, next: NextFunction) => {
   try {
+    const today = new Date().toISOString().slice(0, 10);
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    const monthStart = startOfMonth.toISOString().slice(0, 10);
+
     const [totalUsers, totalTickets, pendingTickets, inProgressTickets, completedTickets, unsuccessfulTickets, totalRevenueResult] = await Promise.all([
       UserModel.countDocuments(),
       RequestModel.countDocuments(),
@@ -124,7 +130,7 @@ export const getModuleStats = async (_req: Request, res: Response, next: NextFun
 
     const totalRevenue = totalRevenueResult[0]?.total || 0;
 
-    const [totalGoods, totalOrders, totalPurchases, totalExpenses, totalCredits, ordersRevenue, purchasesCost, totalCourses, publishedCourses] = await Promise.all([
+    const [totalGoods, totalOrders, totalPurchases, totalExpenses, totalCredits, ordersRevenue, purchasesCost, totalCourses, publishedCourses, attendanceToday, attendanceMonth, usersByRole] = await Promise.all([
       GoodsModel.countDocuments(),
       OrderModel.countDocuments(),
       PurchaseModel.countDocuments(),
@@ -134,15 +140,28 @@ export const getModuleStats = async (_req: Request, res: Response, next: NextFun
       PurchaseModel.aggregate([{ $group: { _id: null, total: { $sum: "$total_amount" } } }]),
       AcademyModel.countDocuments(),
       AcademyModel.countDocuments({ status: "published" }),
+      AttendanceModel.countDocuments({ date: today }),
+      AttendanceModel.countDocuments({ date: { $gte: monthStart, $lte: today } }),
+      UserModel.aggregate([
+        { $unwind: "$roles" },
+        { $group: { _id: "$roles", count: { $sum: 1 } } },
+      ]),
     ]);
 
     const salesRevenue = ordersRevenue[0]?.total || 0;
     const salesCost = purchasesCost[0]?.total || 0;
 
+    const usersByRoleMap: Record<string, number> = {};
+    usersByRole.forEach((r: { _id: string; count: number }) => {
+      usersByRoleMap[r._id] = r.count;
+    });
+
     res.json({
       repairs: { totalTickets, pendingTickets, inProgressTickets, completedTickets, unsuccessfulTickets, totalRevenue },
       sales: { totalGoods, totalOrders, totalPurchases, totalExpenses, totalCredits, salesRevenue, salesCost },
       academy: { totalCourses, publishedCourses },
+      attendance: { totalToday: attendanceToday, totalMonth: attendanceMonth },
+      users: { total: totalUsers, byRole: usersByRoleMap },
     });
   } catch (err) {
     next(err);

@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { serviceRequestAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import { FaStore, FaUser, FaLaptop, FaExclamationTriangle, FaTools, FaMoneyBill, FaCheckCircle } from 'react-icons/fa';
 
 
@@ -30,10 +30,17 @@ const FORM_STEPS = [
 export default function ServiceRequestForm() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, userRoles } = useAuth();
   const isEditMode = !!id;
+  const isTechnician = userRoles.includes('technician');
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isTechnician && !isEditMode) {
+      navigate('/requests', { replace: true });
+    }
+  }, [isTechnician, isEditMode, navigate]);
 
   // Persistent state for form progress (only for new forms, not edits)
   const [currentStep, setCurrentStep] = usePersistentFormState(

@@ -225,6 +225,8 @@ export const adminAPI = {
         repairs: { totalTickets: number; pendingTickets: number; inProgressTickets: number; completedTickets: number; unsuccessfulTickets: number; totalRevenue: number };
         sales: { totalGoods: number; totalOrders: number; totalPurchases: number; totalExpenses: number; totalCredits: number; salesRevenue: number; salesCost: number };
         academy: { totalCourses: number; publishedCourses: number };
+        attendance: { totalToday: number; totalMonth: number };
+        users: { total: number; byRole: Record<string, number> };
       }>(key);
       if (cached) return cached;
     }
@@ -234,6 +236,8 @@ export const adminAPI = {
       repairs: { totalTickets: number; pendingTickets: number; inProgressTickets: number; completedTickets: number; unsuccessfulTickets: number; totalRevenue: number };
       sales: { totalGoods: number; totalOrders: number; totalPurchases: number; totalExpenses: number; totalCredits: number; salesRevenue: number; salesCost: number };
       academy: { totalCourses: number; publishedCourses: number };
+      attendance: { totalToday: number; totalMonth: number };
+      users: { total: number; byRole: Record<string, number> };
     };
     setCache(key, stats);
     return stats;
