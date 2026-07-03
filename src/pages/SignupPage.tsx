@@ -16,7 +16,7 @@ export default function SignupPage() {
     const { signUp } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [role, setRole] = useState('secretary');
-    const [department, setDepartment] = useState('');
+    const [department, setDepartment] = useState('none');
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -85,7 +85,7 @@ export default function SignupPage() {
                 return;
             }
 
-            await signUp(formData.email, formData.password, role, department);
+            await signUp(formData.email, formData.password, role, department === 'none' ? '' : department);
             toast({
                 title: 'Success',
                 description: `Account created as ${role}. You can now log in.`,
@@ -175,7 +175,7 @@ export default function SignupPage() {
                                 <SelectValue placeholder="Select department" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="">None</SelectItem>
+                                <SelectItem value="none">None</SelectItem>
                                 <SelectItem value="secretary">Secretary</SelectItem>
                                 <SelectItem value="technician">Technician</SelectItem>
                                 <SelectItem value="sales">Sales</SelectItem>

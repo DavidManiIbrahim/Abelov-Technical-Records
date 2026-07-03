@@ -25,7 +25,7 @@ interface UserData {
 }
 
 const DEPARTMENTS = [
-  { value: '', label: 'None' },
+  { value: 'none', label: 'None' },
   { value: 'secretary', label: 'Secretary' },
   { value: 'technician', label: 'Technician' },
   { value: 'sales', label: 'Sales' },
@@ -47,7 +47,7 @@ export default function UserManagementPage() {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState('secretary');
-  const [newUserDept, setNewUserDept] = useState('');
+  const [newUserDept, setNewUserDept] = useState('none');
 
   useEffect(() => {
     loadUsers();
@@ -69,13 +69,13 @@ export default function UserManagementPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await adminAPI.createUser({ email: newUserEmail, password: newUserPassword, roles: [newUserRole], department: newUserDept });
+      await adminAPI.createUser({ email: newUserEmail, password: newUserPassword, roles: [newUserRole], department: newUserDept === 'none' ? '' : newUserDept });
       toast({ title: 'Success', description: 'User created successfully' });
       setIsCreatingUser(false);
       setNewUserEmail('');
       setNewUserPassword('');
       setNewUserRole('secretary');
-      setNewUserDept('');
+      setNewUserDept('none');
       loadUsers();
     } catch (error: any) {
       toast({ title: 'Error', description: error.message || 'Failed to create user', variant: 'destructive' });
@@ -112,7 +112,8 @@ export default function UserManagementPage() {
   };
 
   const deptLabel = (val: string) => {
-    const d = DEPARTMENTS.find(d => d.value === val);
+    const lookup = val || 'none';
+    const d = DEPARTMENTS.find(d => d.value === lookup);
     return d ? d.label : val || '-';
   };
 
