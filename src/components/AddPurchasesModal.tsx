@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { purchasesAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
 interface AddPurchasesModalProps {
@@ -18,24 +19,32 @@ export default function AddPurchasesModal({
   editItem,
   onSuccess,
 }: AddPurchasesModalProps) {
+  const [supplier, setSupplier] = useState('');
+  const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setSupplier(editItem?.supplier || '');
+      setAmount(editItem?.total_amount?.toString() || '');
+    }
+  }, [open, editItem]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      toast({
-        title: 'Success',
-        description: editItem ? 'Purchase updated successfully' : 'Purchase added successfully',
-      });
+      const payload = { supplier, total_amount: parseFloat(amount), items: [] };
+      if (editItem) {
+        await purchasesAPI.update(editItem.id, payload);
+      } else {
+        await purchasesAPI.create(payload as any);
+      }
+      toast({ title: 'Success', description: editItem ? 'Purchase updated successfully' : 'Purchase added successfully' });
       onOpenChange(false);
       onSuccess();
     } catch {
-      toast({
-        title: 'Error',
-        description: 'Failed to save purchase',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to save purchase', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -50,14 +59,14 @@ export default function AddPurchasesModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="supplier">Supplier</Label>
-            <Input id="supplier" placeholder="Enter supplier name" defaultValue={editItem?.supplier || ''} />
+            <Input id="supplier" placeholder="Enter supplier name" value={supplier} onChange={(e) => setSupplier(e.target.value)} required />
           </div>
           <div>
             <Label htmlFor="amount">Amount</Label>
-            <Input id="amount" type="number" placeholder="Enter amount" defaultValue={editItem?.total_amount || ''} />
+            <Input id="amount" type="number" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
           </div>
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

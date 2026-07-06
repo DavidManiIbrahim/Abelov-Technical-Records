@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { expensesAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
 interface AddExpensesModalProps {
@@ -18,24 +19,32 @@ export default function AddExpensesModal({
   editItem,
   onSuccess,
 }: AddExpensesModalProps) {
+  const [category, setCategory] = useState('');
+  const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setCategory(editItem?.category || '');
+      setAmount(editItem?.amount?.toString() || '');
+    }
+  }, [open, editItem]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      toast({
-        title: 'Success',
-        description: editItem ? 'Expense updated successfully' : 'Expense added successfully',
-      });
+      const payload = { category, amount: parseFloat(amount), description: '' };
+      if (editItem) {
+        await expensesAPI.update(editItem.id, payload);
+      } else {
+        await expensesAPI.create(payload as any);
+      }
+      toast({ title: 'Success', description: editItem ? 'Expense updated successfully' : 'Expense added successfully' });
       onOpenChange(false);
       onSuccess();
     } catch {
-      toast({
-        title: 'Error',
-        description: 'Failed to save expense',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to save expense', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -50,14 +59,14 @@ export default function AddExpensesModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="category">Category</Label>
-            <Input id="category" placeholder="Enter category" defaultValue={editItem?.category || ''} />
+            <Input id="category" placeholder="Enter category" value={category} onChange={(e) => setCategory(e.target.value)} required />
           </div>
           <div>
             <Label htmlFor="amount">Amount</Label>
-            <Input id="amount" type="number" placeholder="Enter amount" defaultValue={editItem?.amount || ''} />
+            <Input id="amount" type="number" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
           </div>
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

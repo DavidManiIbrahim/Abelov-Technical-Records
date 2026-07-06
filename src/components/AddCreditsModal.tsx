@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { creditsAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
 interface AddCreditsModalProps {
@@ -18,24 +19,32 @@ export default function AddCreditsModal({
   editItem,
   onSuccess,
 }: AddCreditsModalProps) {
+  const [customer, setCustomer] = useState('');
+  const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setCustomer(editItem?.customer_name || '');
+      setAmount(editItem?.amount?.toString() || '');
+    }
+  }, [open, editItem]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      toast({
-        title: 'Success',
-        description: editItem ? 'Credit updated successfully' : 'Credit added successfully',
-      });
+      const payload = { customer_name: customer, amount: parseFloat(amount), status: 'active' };
+      if (editItem) {
+        await creditsAPI.update(editItem.id, payload);
+      } else {
+        await creditsAPI.create(payload as any);
+      }
+      toast({ title: 'Success', description: editItem ? 'Credit updated successfully' : 'Credit added successfully' });
       onOpenChange(false);
       onSuccess();
     } catch {
-      toast({
-        title: 'Error',
-        description: 'Failed to save credit',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to save credit', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -50,14 +59,14 @@ export default function AddCreditsModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="customer">Customer Name</Label>
-            <Input id="customer" placeholder="Enter customer name" defaultValue={editItem?.customer_name || ''} />
+            <Input id="customer" placeholder="Enter customer name" value={customer} onChange={(e) => setCustomer(e.target.value)} required />
           </div>
           <div>
             <Label htmlFor="amount">Amount</Label>
-            <Input id="amount" type="number" placeholder="Enter amount" defaultValue={editItem?.amount || ''} />
+            <Input id="amount" type="number" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
           </div>
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

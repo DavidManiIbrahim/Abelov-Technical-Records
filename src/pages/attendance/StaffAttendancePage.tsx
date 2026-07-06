@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { attendanceAPI } from '@/lib/api';
-import { Loader2, Search } from 'lucide-react';
+import { Loader2, Search, LogIn, LogOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface StaffRecord {
@@ -25,8 +25,10 @@ interface StaffRecord {
 export default function StaffAttendancePage() {
   const [records, setRecords] = useState<StaffRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchDate, setSearchDate] = useState(new Date().toISOString().slice(0, 10));
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const [searchDate, setSearchDate] = useState(todayStr);
   const [statusFilter, setStatusFilter] = useState('all');
+  const isPastDate = searchDate < todayStr;
 
   const loadRecords = async () => {
     setLoading(true);
@@ -48,28 +50,36 @@ export default function StaffAttendancePage() {
     loadRecords();
   };
 
-  const handleMark = async (record: StaffRecord, status: string) => {
+  const handleClockIn = async (record: StaffRecord) => {
     try {
       const now = new Date().toISOString();
-      const clockInStatuses = ['present', 'late'];
+      const hour = new Date().getHours();
+      const status = hour >= 9 ? 'late' : 'present';
 
       if (record.id) {
-        const updates: any = { status };
-        if (clockInStatuses.includes(status) && !record.clock_in) {
-          updates.clock_in = now;
-        }
-        if (record.clock_in && !record.clock_out && status === 'absent') {
-          updates.clock_out = now;
-        }
-        await attendanceAPI.updateAttendance(record.id, updates);
+        await attendanceAPI.updateAttendance(record.id, { status, clock_in: now });
       } else {
-        const clock_in = clockInStatuses.includes(status) ? now : undefined;
-        await attendanceAPI.markAttendance(record.user_id, searchDate, status, clock_in);
+        await attendanceAPI.markAttendance(record.user_id, searchDate, status, now);
       }
-      toast({ title: 'Success', description: `Marked ${record.user_name} as ${status}` });
+      toast({ title: 'Success', description: `${record.user_name} clocked in as ${status}` });
       loadRecords();
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message || 'Failed to update', variant: 'destructive' });
+      toast({ title: 'Error', description: err.message || 'Failed to clock in', variant: 'destructive' });
+    }
+  };
+
+  const handleClockOut = async (record: StaffRecord) => {
+    try {
+      const now = new Date().toISOString();
+      if (record.id) {
+        await attendanceAPI.updateAttendance(record.id, { clock_out: now });
+      } else {
+        await attendanceAPI.markAttendance(record.user_id, searchDate, 'present', undefined, now);
+      }
+      toast({ title: 'Success', description: `${record.user_name} clocked out` });
+      loadRecords();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Failed to clock out', variant: 'destructive' });
     }
   };
 
@@ -138,7 +148,7 @@ export default function StaffAttendancePage() {
                   <th className="text-left p-3 text-xs font-semibold">Clock In</th>
                   <th className="text-left p-3 text-xs font-semibold">Clock Out</th>
                   <th className="text-left p-3 text-xs font-semibold">Status</th>
-                  <th className="text-left p-3 text-xs font-semibold">Mark</th>
+                  <th className="text-left p-3 text-xs font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -157,17 +167,26 @@ export default function StaffAttendancePage() {
                       )}
                     </td>
                     <td className="p-3">
-                      <Select value={r.status || ''} onValueChange={(val) => handleMark(r, val)}>
-                        <SelectTrigger className="w-28 h-8 text-xs">
-                          <SelectValue placeholder="Mark..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="present">Present</SelectItem>
-                          <SelectItem value="late">Late</SelectItem>
-                          <SelectItem value="absent">Absent</SelectItem>
-                          <SelectItem value="half_day">Half Day</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="flex gap-1.5">
+                        {!r.clock_in ? (
+                          <Button onClick={() => handleClockIn(r)} size="sm" variant="default" className="h-8 text-xs" disabled={isPastDate} title={isPastDate ? 'Cannot edit past attendance' : ''}>
+                            <LogIn className="w-3 h-3 mr-1" />
+                            Clock In
+                          </Button>
+                        ) : null}
+                        {r.clock_in && !r.clock_out ? (
+                          <Button onClick={() => handleClockOut(r)} size="sm" variant="outline" className="h-8 text-xs" disabled={isPastDate} title={isPastDate ? 'Cannot edit past attendance' : ''}>
+                            <LogOut className="w-3 h-3 mr-1" />
+                            Clock Out
+                          </Button>
+                        ) : null}
+                        {r.clock_in && r.clock_out ? (
+                          <span className="text-xs text-muted-foreground italic">Complete</span>
+                        ) : null}
+                        {!r.clock_in && !r.clock_out && isPastDate ? (
+                          <span className="text-xs text-muted-foreground italic">Read only</span>
+                        ) : null}
+                      </div>
                     </td>
                   </tr>
                 ))}
