@@ -10,10 +10,10 @@ import {
   CreditCard,
   Search,
   Edit,
-  Loader2,
   BarChart3,
   ArrowLeft,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
@@ -62,8 +62,14 @@ export default function CreditsList() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="container mx-auto p-6">
+        <Skeleton className="h-9 w-56 mb-6" />
+        <Skeleton className="h-10 w-full mb-6 rounded-lg" />
+        <div className="grid gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-xl" />
+          ))}
+        </div>
       </div>
     );
   }

@@ -9,6 +9,7 @@ type User = {
   roles?: string[];
   username?: string;
   profile_image?: string;
+  department?: string;
 } | null;
 
 interface AuthContextType {
@@ -117,7 +118,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               email: me.email, 
               roles,
               username: me.username,
-              profile_image: me.profile_image
+              profile_image: me.profile_image,
+              department: me.department
             };
 
             setSession(sessionData);
@@ -199,7 +201,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: result.email, 
         roles,
         username: result.username,
-        profile_image: result.profile_image
+        profile_image: result.profile_image,
+        department: result.department
       };
 
       setSession(sessionData);

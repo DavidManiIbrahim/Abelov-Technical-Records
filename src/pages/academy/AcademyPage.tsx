@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, BookOpen, Search, Edit, Trash2, Eye, DollarSign, User, Calendar, Loader2 } from 'lucide-react';
+import { Plus, BookOpen, Search, Edit, Trash2, Eye, DollarSign, User, Calendar } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { academyAPI } from '@/lib/api';
 import { AcademyCourse } from '@/types/database';
@@ -101,8 +102,26 @@ export default function AcademyPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background p-4 md:p-8">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-5 w-96" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Skeleton className="h-28 rounded-xl" />
+            <Skeleton className="h-28 rounded-xl" />
+            <Skeleton className="h-28 rounded-xl" />
+          </div>
+          <div className="flex gap-3">
+            <Skeleton className="h-10 flex-1 rounded-md" />
+            <Skeleton className="h-10 w-40 rounded-md" />
+            <Skeleton className="h-10 w-36 rounded-md" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-56 rounded-xl" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

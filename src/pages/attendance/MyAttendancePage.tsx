@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { attendanceAPI } from '@/lib/api';
 import { Attendance } from '@/types/database';
 import { Clock, Clock9, Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 
 export default function MyAttendancePage() {
@@ -112,7 +113,19 @@ export default function MyAttendancePage() {
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">This Month's Records</h2>
         {loading ? (
-          <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+          <div className="space-y-3">
+            <div className="border rounded-lg overflow-hidden">
+              <div className="bg-muted/50 p-3"><Skeleton className="h-4 w-full" /></div>
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="border-t p-3 flex gap-4">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </div>
         ) : records.length === 0 ? (
           <p className="text-muted-foreground text-center py-8">No attendance records this month.</p>
         ) : (

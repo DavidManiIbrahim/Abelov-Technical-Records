@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { attendanceAPI } from '@/lib/api';
-import { Loader2, Search, LogIn, LogOut } from 'lucide-react';
+import { Search, LogIn, LogOut } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 
 interface StaffRecord {
@@ -134,7 +135,22 @@ export default function StaffAttendancePage() {
 
       <Card className="p-6">
         {loading ? (
-          <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+          <div className="space-y-3">
+            <div className="border rounded-lg overflow-hidden">
+              <div className="bg-muted/50 p-3 grid grid-cols-7 gap-4"><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /></div>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="border-t p-3 grid grid-cols-7 gap-4">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-5 w-full rounded-full" />
+                  <Skeleton className="h-8 w-24 rounded-md" />
+                </div>
+              ))}
+            </div>
+          </div>
         ) : filteredRecords.length === 0 ? (
           <p className="text-muted-foreground text-center py-8">No staff found for this date.</p>
         ) : (

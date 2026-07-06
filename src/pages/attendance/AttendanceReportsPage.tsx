@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { attendanceAPI } from '@/lib/api';
-import { Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 
 export default function AttendanceReportsPage() {
@@ -65,8 +65,30 @@ export default function AttendanceReportsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+      <div className="container mx-auto p-6 space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid grid-cols-1 gap-6">
+          <div className="p-6 rounded-xl border">
+            <Skeleton className="h-6 w-24 mb-4" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Skeleton className="h-24 rounded-lg" />
+              <Skeleton className="h-24 rounded-lg" />
+              <Skeleton className="h-24 rounded-lg" />
+              <Skeleton className="h-24 rounded-lg" />
+            </div>
+            <Skeleton className="h-4 w-full mt-4" />
+          </div>
+          <div className="p-6 rounded-xl border">
+            <Skeleton className="h-6 w-24 mb-4" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Skeleton className="h-24 rounded-lg" />
+              <Skeleton className="h-24 rounded-lg" />
+              <Skeleton className="h-24 rounded-lg" />
+              <Skeleton className="h-24 rounded-lg" />
+            </div>
+            <Skeleton className="h-4 w-full mt-4" />
+          </div>
+        </div>
       </div>
     );
   }
