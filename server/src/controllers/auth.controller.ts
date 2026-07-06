@@ -1,33 +1,36 @@
 import type { Request, Response, NextFunction } from "express";
-import { SignupSchema, LoginSchema } from "../types/auth";
+// Signup disabled — schema import commented out to prevent self-registration.
+// import { SignupSchema } from "../types/auth";
+import { LoginSchema } from "../types/auth";
 import { UserModel } from "../models/user.model";
 import { ApiError } from "../middlewares/error";
 import { hashPassword, verifyPassword, createToken, verifyToken } from "../utils/auth";
 
-/**
- * Signup - Create new user account
- * RULE: Never save auth tokens to storage; client must login separately
- */
-export const signup = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { email, password, role, department } = SignupSchema.parse(req.body);
-    const exists = await UserModel.findOne({ email });
-    if (exists) throw new ApiError(409, "Email already registered");
-    const { salt, hash } = hashPassword(password);
-    const doc = await UserModel.create({
-      email,
-      roles: [role],
-      department,
-      is_active: true,
-      password_hash: hash,
-      password_salt: salt
-    } as any);
-    const user = doc.toJSON() as any;
-    res.status(201).json({ user });
-  } catch (err) {
-    next(err);
-  }
-};
+// Signup disabled — handler commented out to prevent self-registration.
+// /**
+//  * Signup - Create new user account
+//  * RULE: Never save auth tokens to storage; client must login separately
+//  */
+// export const signup = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const { email, password, role, department } = SignupSchema.parse(req.body);
+//     const exists = await UserModel.findOne({ email });
+//     if (exists) throw new ApiError(409, "Email already registered");
+//     const { salt, hash } = hashPassword(password);
+//     const doc = await UserModel.create({
+//       email,
+//       roles: [role],
+//       department,
+//       is_active: true,
+//       password_hash: hash,
+//       password_salt: salt
+//     } as any);
+//     const user = doc.toJSON() as any;
+//     res.status(201).json({ user });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 /**
  * Login - Authenticate user and return HTTP-only cookie with JWT

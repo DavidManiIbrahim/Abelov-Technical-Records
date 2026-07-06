@@ -12,10 +12,6 @@ import { academyAPI } from '@/lib/api';
 import { AcademyCourse } from '@/types/database';
 import { toast } from '@/hooks/use-toast';
 import AddAcademyModal from '@/components/AddAcademyModal';
-import SelectRequestTypeModal from '@/components/SelectRequestTypeModal';
-import StudentRegistrationModal from '@/components/StudentRegistrationModal';
-import InternetUserModal from '@/components/InternetUserModal';
-import WebDevelopmentProjectModal from '@/components/WebDevelopmentProjectModal';
 
 export default function AcademyPage() {
   const { user } = useAuth();
@@ -26,10 +22,6 @@ export default function AcademyPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<AcademyCourse | null>(null);
   const [viewingItem, setViewingItem] = useState<AcademyCourse | null>(null);
-  const [showSelectType, setShowSelectType] = useState(false);
-  const [showStudentModal, setShowStudentModal] = useState(false);
-  const [showInternetModal, setShowInternetModal] = useState(false);
-  const [showWebDevModal, setShowWebDevModal] = useState(false);
 
   useEffect(() => {
     loadCourses();
@@ -49,23 +41,6 @@ export default function AcademyPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this course?')) return;
-    try {
-      await academyAPI.delete(id);
-      toast({ title: 'Success', description: 'Course deleted' });
-      loadCourses();
-    } catch {
-      toast({ title: 'Error', description: 'Failed to delete course', variant: 'destructive' });
-    }
-  };
-
-  const handleAddClick = () => setShowSelectType(true);
-
-  const handleSelectType = (type: 'student' | 'internet' | 'webdev') => {
-    if (type === 'student') setShowStudentModal(true);
-    else if (type === 'internet') setShowInternetModal(true);
-    else setShowWebDevModal(true);
-  };
 
   const filtered = courses.filter((c) => {
     const q = searchQuery.toLowerCase();
@@ -206,9 +181,9 @@ export default function AcademyPage() {
               <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={handleAddClick}>
+          <Button onClick={() => setShowAddModal(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Add Request
+            Add Course
           </Button>
         </div>
 
@@ -352,25 +327,6 @@ export default function AcademyPage() {
             )}
           </DialogContent>
         </Dialog>
-
-        {/* Request Type Selection & Forms */}
-        <SelectRequestTypeModal
-          open={showSelectType}
-          onOpenChange={setShowSelectType}
-          onSelect={handleSelectType}
-        />
-        <StudentRegistrationModal
-          open={showStudentModal}
-          onOpenChange={setShowStudentModal}
-        />
-        <InternetUserModal
-          open={showInternetModal}
-          onOpenChange={setShowInternetModal}
-        />
-        <WebDevelopmentProjectModal
-          open={showWebDevModal}
-          onOpenChange={setShowWebDevModal}
-        />
       </div>
     </div>
   );

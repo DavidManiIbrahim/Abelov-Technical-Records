@@ -11,7 +11,8 @@ import MainLayout from "@/components/MainLayout";
 
 // Auth Pages
 import LoginPage from "@/pages/LoginPage";
-import SignupPage from "@/pages/SignupPage";
+// Signup disabled — import commented out to prevent self-registration.
+// import SignupPage from "@/pages/SignupPage";
 
 // Service Request Pages
 import ServiceRequestForm from "@/pages/ServiceRequestForm";
@@ -24,10 +25,12 @@ import DashboardPage from "@/pages/DashboardPage";
 import RepairsDashboard from "@/pages/RepairsDashboard";
 import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
 import AdminAnalyticsPage from "@/pages/admin/AdminAnalyticsPage";
+import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
 import TicketManagementPage from "@/pages/admin/TicketManagementPage";
 import UserManagementPage from "@/pages/admin/UserManagementPage";
 import ActivityLogPage from "@/pages/admin/ActivityLogPage";
 import TechnicianDashboard from "@/pages/TechnicianDashboard";
+import TechnicianAnalyticsPage from "@/pages/TechnicianAnalyticsPage";
 
 // Sales & Inventory Module Pages
 import SalesDashboard from "@/pages/sales/SalesDashboard";
@@ -72,7 +75,9 @@ const App = () => (
             <Routes>
               {/* Auth Routes - No Sidebar */}
               <Route path="/login" element={<LoginPage />} />
+              {/* Signup disabled — route commented out to prevent self-registration.
               <Route path="/signup" element={<SignupPage />} />
+              */}
 
               {/* Home Route */}
               <Route
@@ -111,6 +116,16 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <TechnicianDashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/technician-analytics"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <TechnicianAnalyticsPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }
@@ -255,6 +270,16 @@ const App = () => (
               {/* Admin Routes */}
               <Route
                 path="/admin"
+                element={
+                  <AdminProtectedRoute>
+                    <MainLayout>
+                      <AdminDashboardPage />
+                    </MainLayout>
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/analytics"
                 element={
                   <AdminProtectedRoute>
                     <MainLayout>

@@ -1,14 +1,34 @@
 # Abelov Technical Records
 
-A comprehensive technical service request management application for tracking device repairs and service operations with **full CRUD functionality**, **secure REST API**, and a **Node.js + Express + MongoDB backend**.
+A comprehensive **multi-module operations platform** for tracking device repairs, inventory & sales, an in-house academy, staff attendance, and technician performance — with **role-based dashboards**, **secure REST API**, and a **Node.js + Express + MongoDB backend**.
+
+The frontend is built around **six dedicated modules** (Repairs, Sales & Inventory, Academy, Attendance, Admin, plus a dedicated Technician workflow), each with its own dashboard and analytics view.
 
 ## Key Features
 
 ### Authentication & User Management
-- **Simple Login/Signup (Local)** for development
-- **Protected Routes** in frontend
-- **Session Persistence** via `localStorage`
-- Backend-ready for JWT/RBAC (can be enabled later)
+- **JWT Login/Signup** against MongoDB-backed users (httpOnly-safe, token in `localStorage` for the SPA)
+- **Role-based access control (RBAC)**: `admin`, `secretary`, `technician`, `sales`, `academy`
+- **Department mapping**: `engineering`, `sales`, `it_academy` for secretaries/technicians and beyond
+- **Protected Routes** in frontend (`ProtectedRoute` + `AdminProtectedRoute`)
+- **Session Persistence** via `localStorage` + bearer token on every API call
+
+### Role-Based Dashboards
+Every role gets a tailored home view:
+- **Repairs Dashboard** (`/repairs-dashboard`) — aggregate tickets, revenue, balance for admin/secretary/academy
+- **Technician Dashboard** (`/technician-dashboard`) — your assigned jobs & status mix
+- **Sales Dashboard** (`/sales-dashboard`) — goods, purchases, orders, expenses, credits
+- **Academy Dashboard** (`/academy-dashboard`) — courses, drafts, revenue
+- **Attendance Dashboard** (`/attendance-dashboard`) — present today, late, absent, half-day
+- **Admin Dashboard** (`/admin`) — cross-module global stats + recent tickets & activity
+
+### Dedicated Analytics Pages
+- **Admin Analytics** (`/admin/analytics`) — module-level stats (repairs, sales, academy, attendance, users-by-role) + revenue/trend charts
+- **Technician Analytics** (`/technician-analytics`) — personal KPIs (completion rate, avg resolution time, monthly revenue trend, top device brands)
+- **Academy Analytics** (`/academy/analytics`) — course status, category, level, monthly creation
+- **Sales Analytics** (`/sales-analytics`)
+- **Attendance Analytics** (`/attendance/reports`)
+- **Technician Payment Analytics** (`/payment-analytics`)
 
 ### Service Request Management
 - **Create**: Add new service requests with comprehensive details
@@ -70,15 +90,54 @@ A comprehensive technical service request management application for tracking de
 - **State Management**: React Query (TanStack Query)
 - **Validation**: Zod (backend) + TypeScript types
 
+## Tech Stack
+
+- **Frontend**: React + TypeScript
+- **Styling**: Tailwind CSS + shadcn-ui components
+- **Routing**: React Router v6 (hash router)
+- **Charts**: Recharts (area, bar, pie, line)
+- **Backend**: Node.js + Express + MongoDB (Mongoose)
+- **Auth**: JWT bearer tokens with hashed passwords (`scrypt`) + RBAC middleware
+- **Build Tool**: Vite (frontend), `tsc` (backend)
+- **UI Components**: shadcn-ui
+- **Icons**: Lucide React
+- **State Management**: TanStack Query (server cache) + in-memory SPA cache (`utils/storage.ts`)
+- **Validation**: Zod (backend) + TypeScript types (frontend)
+
+## Modules
+
+| Module | Routes | Who can access |
+|---|---|---|
+| **Repairs** | `/repairs-dashboard`, `/requests`, `/new-request`, `/view/:id`, `/edit/:id`, `/analytics` | admin, secretary, academy |
+| **Technician** | `/technician-dashboard`, `/technician-analytics`, `/payment-analytics` | admin, secretary, technician |
+| **Sales & Inventory** | `/sales-dashboard`, `/goods`, `/purchases`, `/orders`, `/expenses`, `/credits`, `/sales-analytics` | sales, admin |
+| **Academy** | `/academy-dashboard`, `/academy`, `/academy/analytics` | academy, admin |
+| **Attendance** | `/attendance-dashboard`, `/attendance/manage`, `/attendance/reports` | secretary, admin |
+| **Admin** | `/admin`, `/admin/analytics`, `/admin/tickets`, `/admin/users`, `/admin/activity` | admin |
+
+Sidebar items are dynamically filtered by the current user's roles, and role chips + department badges are shown under the user's name.
+
 ## Project Structure
 
 ```
 service-hub-pro/
 ├── src/                                # Frontend
-│   ├── pages/                          # Login, Dashboard, Form, View, NotFound
-│   ├── components/                     # UI components
-│   ├── contexts/AuthContext.tsx        # Local dev auth context
-│   ├── lib/api.ts                      # REST API client (fetch)
+│   ├── pages/
+│   │   ├── DashboardPage.tsx           # Role-aware landing dashboard
+│   │   ├── ServiceRequestForm.tsx      # 8-section single-page form
+│   │   ├── ServiceRequestViewPage.tsx
+│   │   ├── RequestsList.tsx
+│   │   ├── RepairsDashboard.tsx        # Repairs module dashboard
+│   │   ├── TechnicianDashboard.tsx     # Personal job overview
+│   │   ├── TechnicianAnalyticsPage.tsx # Personal performance analytics
+│   │   ├── AnalyticsDashboard.tsx      # Cross-module utility analytics
+│   │   ├── admin/                      # AdminDashboardPage, AdminAnalyticsPage, TicketManagementPage, UserManagementPage, ActivityLogPage
+│   │   ├── sales/                      # SalesDashboard, SalesAnalyticsPage, GoodsList, PurchasesList, OrdersList, ExpensesList, CreditsList
+│   │   ├── academy/                    # AcademyDashboard, AcademyPage, AcademyAnalyticsPage
+│   │   └── attendance/                 # AttendanceDashboard, StaffAttendancePage, AttendanceReportsPage, MyAttendancePage
+│   ├── components/                     # UI + layout (Sidebar, MainLayout, ProfileMenu, modals…)
+│   ├── contexts/AuthContext.tsx        # JWT auth + role/department context
+│   ├── lib/api.ts                      # REST API client per domain (requests, admin, sales, attendance, technician, academy…)
 │   ├── types/database.ts               # TypeScript types
 │   └── main.tsx                        # Entry point
 ├── server/                             # Backend
@@ -87,16 +146,14 @@ service-hub-pro/
 │   │   ├── app.ts                      # Express app, middleware, routes
 │   │   ├── config/env.ts               # Env parsing & validation
 │   │   ├── db/mongo.ts                 # Mongoose connection & pooling
-│   │   ├── models/request.model.ts     # Mongoose schema & indexes
-│   │   ├── services/requests.service.ts# CRUD with MongoDB
-│   │   ├── controllers/requests.controller.ts
-│   │   ├── routes/requests.routes.ts   # REST endpoints
-│   │   ├── middlewares/*               # logger, rateLimit, error
+│   │   ├── models/                     # request, user, goods, order, purchase, expense, credit, academy, attendance
+│   │   ├── services/
+│   │   ├── controllers/                # requests, admin, sales, academy, attendance, auth
+│   │   ├── routes/                     # requests, admin, sales, academy, attendance, auth
+│   │   ├── middlewares/                # auth (JWT/RBAC), logger, rateLimit, error, validate
+│   │   ├── utils/                      # crypto (AES-256-GCM), auth (scrypt)
 │   │   └── docs/swagger.ts             # Swagger spec
 │   ├── tests/                          # Vitest + supertest
-│   │   ├── requests.int.test.ts        # Integration tests
-│   │   ├── requests.unit.test.ts       # Unit tests
-│   │   └── setup.ts                    # mongodb-memory-server
 │   ├── .env.example                    # Backend env template
 │   └── package.json                    # Backend scripts & deps
 ├── vite.config.ts                      # Frontend config
@@ -155,11 +212,44 @@ service-hub-pro/
 
 ## Routes (Frontend)
 
-- `/login` - Authentication page (login/signup)
-- `/` - Create new service request (protected)
-- `/edit/:id` - Edit existing service request (protected)
-- `/view/:id` - View request details (protected)
-- `/dashboard` - Dashboard with all requests and statistics (protected)
+### Auth
+- `/login` - Login page
+- `/signup` - Signup page
+
+### Repairs & Technician
+- `/dashboard` - Role-aware landing dashboard (protected)
+- `/repairs-dashboard` - Repairs module dashboard
+- `/requests` - List of all service requests
+- `/new-request` - Create a new service request
+- `/edit/:id` - Edit existing service request
+- `/view/:id` - View request details
+- `/confirmation/:id` - Final confirmation after delivery
+- `/analytics` - Cross-module analytics view
+- `/technician-dashboard` - Personal job overview for technicians
+- `/technician-analytics` - Personal performance analytics
+- `/payment-analytics` - Technician payment analytics
+
+### Sales & Inventory
+- `/sales-dashboard` - Sales module dashboard
+- `/goods`, `/purchases`, `/orders`, `/expenses`, `/credits` - module management
+- `/sales-analytics` - Sales analytics
+
+### Academy
+- `/academy-dashboard` - Academy module dashboard
+- `/academy` - Course management
+- `/academy/analytics` - Course analytics
+
+### Attendance
+- `/attendance-dashboard` - Attendance overview
+- `/attendance/manage` - Staff attendance management (secretary/admin)
+- `/attendance/reports` - Attendance analytics
+
+### Admin
+- `/admin` - Cross-module admin overview
+- `/admin/analytics` - Expanded admin analytics
+- `/admin/tickets` - Ticket management
+- `/admin/users` - User & role management (with editable department)
+- `/admin/activity` - Activity log
 
 ## Usage Examples
 
@@ -339,7 +429,20 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Changelog
 
-### v3.1.0 (Current)
+### v3.2.0 (Current)
+- ✅ **Role-Based Dashboards** for every module: Repairs, Sales, Academy, Attendance, Admin, and a dedicated Technician workflow.
+- ✅ **Admin split**: `/admin` for the cross-module overview dashboard and `/admin/analytics` for deep-dive charts (revenue over time, status pie, monthly tickets, department distribution, attendance breakdown, users-by-role).
+- ✅ **Technician Dashboard & Analytics**: personal assignment list, status doughnut, monthly volume, top device brands worked on, average resolution time, monthly revenue trend.
+- ✅ **Academy module expanded**: `/academy-dashboard`, dedicated course management (`/academy`) and `/academy/analytics` (status, category, level, monthly creation).
+- ✅ **User Management**: editable role and department (engineering, sales, it_academy) with secretary/technician default mapping.
+- ✅ **Sidebar reorganized into accordion groups** (Repairs, Sales & Inventory, Academy, Attendance, Admin) with role-aware filtering.
+- ✅ **Skeleton loaders** across all dashboard and analytics pages for snappier perceived loading.
+- ✅ **Send to WhatsApp** action for sharing user details directly to a phone number.
+- ✅ **Sales UI bug fixes** and refactor of staff attendance logic.
+- ✅ **Auth page polish** and bug fixes.
+- ✅ Removed legacy modal components (`InternetUserModal`, `SelectRequestTypeModal`, `StudentRegistrationModal`, `WebDevelopmentProjectModal`) — flows consolidated into the proper module pages.
+
+### v3.1.0
 - ✅ **Responsive UI Improvements**: 
   - Optimized navbar text sizes for mobile devices across Dashboard, Admin, and Form pages.
   - Enhanced button responsiveness in headers (icon-only mode on mobile) to reduce clutter.

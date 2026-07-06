@@ -58,7 +58,8 @@ const corsOptions = {
 
 router.use(cors(corsOptions));
 
-router.post("/signup", ctrl.signup);
+// Signup disabled — endpoint commented out to prevent self-registration.
+// router.post("/signup", ctrl.signup);
 router.post("/login", ctrl.login);
 router.post("/logout", ctrl.logout);
 

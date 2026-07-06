@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
-import { serviceRequestAPI } from '@/lib/api';
+import { serviceRequestAPI, technicianAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { Wrench, CheckCircle, Clock, AlertCircle, TrendingUp, Eye, BarChart3 } from 'lucide-react';
+import { Wrench, CheckCircle, Clock, AlertCircle, TrendingUp, Eye, BarChart3, Loader2 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const COLORS = ['#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#8b5cf6'];
@@ -34,6 +35,9 @@ export default function TechnicianDashboard() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  // Track which job currently has an in-flight action so the spinner is scoped
+  // to that single row instead of blocking the whole dashboard.
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -49,6 +53,47 @@ export default function TechnicianDashboard() {
       console.error('Failed to load technician data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAccept = async (jobId: string) => {
+    setActionLoading(jobId);
+    try {
+      await technicianAPI.acceptJob(jobId);
+      toast({ title: 'Job accepted', description: 'Status updated to In-Progress' });
+      await loadData();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Failed to accept job', variant: 'destructive' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleMarkComplete = async (jobId: string) => {
+    setActionLoading(jobId);
+    try {
+      await technicianAPI.markDelivered(jobId);
+      toast({ title: 'Job completed', description: 'Marked as completed and delivered' });
+      await loadData();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Failed to complete job', variant: 'destructive' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleMarkUnsuccessful = async (jobId: string) => {
+    const confirm = window.confirm('Mark this job as unsuccessful? This will close out the work order.');
+    if (!confirm) return;
+    setActionLoading(jobId);
+    try {
+      await technicianAPI.updateProgress(jobId, { status: 'Unsuccessful' });
+      toast({ title: 'Marked unsuccessful', description: 'Job has been flagged as unsuccessful' });
+      await loadData();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err?.message || 'Failed to update status', variant: 'destructive' });
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -197,22 +242,77 @@ export default function TechnicianDashboard() {
           ) : (
             <div className="space-y-3">
               {myJobs.sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()).map((job) => (
-                <div key={job.id} className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-semibold">{job.customer_name}</span>
-                      <Badge className={getStatusColor(job.status)} variant="outline">{job.status}</Badge>
+                <div key={job.id} className="p-4 rounded-lg border hover:bg-accent/50 transition-colors space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-semibold">{job.customer_name}</span>
+                        <Badge className={getStatusColor(job.status)} variant="outline">{job.status}</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {job.device_brand} {job.device_model} • ID: {job.id.slice(-8).toUpperCase()}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {job.device_brand} {job.device_model} — ID: {job.id.slice(-8).toUpperCase()}
-                    </p>
+                    <span className="text-sm font-semibold text-muted-foreground shrink-0">₦{formatCurrencyCompact(job.total_cost || 0)}</span>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 ml-4">
-                    <span className="text-sm font-semibold text-muted-foreground">₦{formatCurrencyCompact(job.total_cost || 0)}</span>
+
+                  {/* Action row — scoped per-job loading state */}
+                  <div className="flex gap-2 flex-wrap items-center">
                     <Button variant="outline" size="sm" onClick={() => navigate(`/view/${job.id}`)}>
                       <Eye className="w-4 h-4 mr-1" />
-                      View
+                      View Details
                     </Button>
+
+                    {job.status === 'Pending' && !job.accepted_at && (
+                      <Button
+                        size="sm"
+                        disabled={actionLoading === job.id}
+                        onClick={() => handleAccept(job.id)}
+                      >
+                        {actionLoading === job.id ? (
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                        ) : (
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                        )}
+                        Accept Job
+                      </Button>
+                    )}
+
+                    {job.status === 'In-Progress' && (
+                      <>
+                        <Button
+                          size="sm"
+                          disabled={actionLoading === job.id}
+                          onClick={() => handleMarkComplete(job.id)}
+                        >
+                          {actionLoading === job.id ? (
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          ) : (
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                          )}
+                          Mark Complete
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={actionLoading === job.id}
+                          onClick={() => handleMarkUnsuccessful(job.id)}
+                        >
+                          Mark Unsuccessful
+                        </Button>
+                      </>
+                    )}
+
+                    {job.status === 'Completed' && (
+                      <span className="text-xs text-muted-foreground italic inline-flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3 text-green-600" /> Job completed
+                      </span>
+                    )}
+                    {job.status === 'Unsuccessful' && (
+                      <span className="text-xs text-muted-foreground italic inline-flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3 text-red-600" /> Marked unsuccessful
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}

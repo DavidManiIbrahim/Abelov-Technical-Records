@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -115,11 +115,13 @@ export default function LoginPage() {
           </Button>
         </form>
 
+        {/* Signup disabled — link commented out to prevent self-registration.
         <div className="mt-6 text-center">
           <Link to="/signup" className="text-sm text-primary hover:underline">
             Don't have an account? Sign up
           </Link>
         </div>
+        */}
       </Card>
     </div>
   );

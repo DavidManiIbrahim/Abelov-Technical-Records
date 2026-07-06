@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +31,7 @@ export default function StaffAttendancePage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const isPastDate = searchDate < todayStr;
 
-  const loadRecords = async () => {
+  const loadRecords = useCallback(async () => {
     setLoading(true);
     try {
       const result = await attendanceAPI.getAllAttendance(searchDate, searchDate);
@@ -41,11 +41,13 @@ export default function StaffAttendancePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchDate]);
 
+  // Re-fetch whenever the selected date changes so the table reflects what was
+  // recorded (or "Not marked" for staff without a record) on that chosen day.
   useEffect(() => {
     loadRecords();
-  }, []);
+  }, [loadRecords]);
 
   const handleSearch = () => {
     loadRecords();
