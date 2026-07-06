@@ -21,6 +21,7 @@ import ConfirmationPage from "@/pages/ConfirmationPage";
 
 // Dashboard & Analytics
 import DashboardPage from "@/pages/DashboardPage";
+import RepairsDashboard from "@/pages/RepairsDashboard";
 import AnalyticsDashboard from "@/pages/AnalyticsDashboard";
 import AdminAnalyticsPage from "@/pages/admin/AdminAnalyticsPage";
 import TicketManagementPage from "@/pages/admin/TicketManagementPage";
@@ -28,6 +29,7 @@ import UserManagementPage from "@/pages/admin/UserManagementPage";
 import ActivityLogPage from "@/pages/admin/ActivityLogPage";
 
 // Sales & Inventory Module Pages
+import SalesDashboard from "@/pages/sales/SalesDashboard";
 import GoodsList from "@/pages/sales/GoodsList";
 import PurchasesList from "@/pages/sales/PurchasesList";
 import OrdersList from "@/pages/sales/OrdersList";
@@ -35,12 +37,14 @@ import ExpensesList from "@/pages/sales/ExpensesList";
 import CreditsList from "@/pages/sales/CreditsList";
 
 // Academy Pages
+import AcademyDashboard from "@/pages/academy/AcademyDashboard";
 import AcademyPage from "@/pages/academy/AcademyPage";
 import StudentRegistrationsPage from "@/pages/academy/StudentRegistrationsPage";
 import InternetUsersPage from "@/pages/academy/InternetUsersPage";
 import WebDevProjectsPage from "@/pages/academy/WebDevProjectsPage";
 
 // Attendance Pages
+import AttendanceDashboard from "@/pages/attendance/AttendanceDashboard";
 import StaffAttendancePage from "@/pages/attendance/StaffAttendancePage";
 import AttendanceReportsPage from "@/pages/attendance/AttendanceReportsPage";
 
@@ -87,6 +91,16 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <DashboardPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/repairs-dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <RepairsDashboard />
                     </MainLayout>
                   </ProtectedRoute>
                 }
@@ -157,6 +171,16 @@ const App = () => (
               />
 
               {/* Sales & Inventory Module Routes */}
+              <Route
+                path="/sales-dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <SalesDashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/goods"
                 element={
@@ -252,6 +276,16 @@ const App = () => (
 
               {/* Attendance Routes */}
               <Route
+                path="/attendance-dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <AttendanceDashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/attendance/manage"
                 element={
                   <ProtectedRoute>
@@ -285,6 +319,16 @@ const App = () => (
               />
 
               {/* Academy Routes */}
+              <Route
+                path="/academy-dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <AcademyDashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/academy"
                 element={

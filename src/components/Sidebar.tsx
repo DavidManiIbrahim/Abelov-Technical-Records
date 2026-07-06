@@ -28,6 +28,7 @@ import {
   User,
   Activity,
   Users,
+  Clock,
 } from 'lucide-react';
 
 interface NavItem {
@@ -39,12 +40,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  // Main Section
-  { label: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} />, section: 'main' },
-  { label: 'Service Requests', path: '/requests', icon: <FileText size={20} />, section: 'main' },
-  // { label: 'New Request', path: '/new-request', icon: <FileText size={20} />, section: 'main' },
+  // Repairs Section
+  { label: 'Repairs Dashboard', path: '/repairs-dashboard', icon: <LayoutDashboard size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'technician', 'academy'] },
+  { label: 'Service Requests', path: '/requests', icon: <FileText size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'technician', 'academy'] },
 
   // Sales & Inventory Section
+  { label: 'Sales Dashboard', path: '/sales-dashboard', icon: <LayoutDashboard size={20} />, section: 'sales', roles: ['sales', 'admin'] },
   { label: 'Goods Inventory', path: '/goods', icon: <Package size={20} />, section: 'sales', roles: ['sales', 'admin'] },
   { label: 'Purchases', path: '/purchases', icon: <ShoppingCart size={20} />, section: 'sales', roles: ['sales', 'admin'] },
   { label: 'Orders', path: '/orders', icon: <Truck size={20} />, section: 'sales', roles: ['sales', 'admin'] },
@@ -52,13 +53,15 @@ const navItems: NavItem[] = [
   { label: 'Credits', path: '/credits', icon: <CreditCard size={20} />, section: 'sales', roles: ['sales', 'admin'] },
 
   // Academy Section
+  { label: 'Academy Dashboard', path: '/academy-dashboard', icon: <LayoutDashboard size={20} />, section: 'academy', roles: ['academy', 'admin'] },
   { label: 'Academy', path: '/academy', icon: <BookOpen size={20} />, section: 'academy', roles: ['academy', 'admin'] },
-  { label: 'Students', path: '/academy/students', icon: <BookOpen size={20} />, section: 'academy', roles: ['academy', 'admin'] },
+  { label: 'Students', path: '/academy/students', icon: <Users size={20} />, section: 'academy', roles: ['academy', 'admin'] },
   { label: 'Internet Users', path: '/academy/internet', icon: <Wifi size={20} />, section: 'academy', roles: ['academy', 'admin'] },
   { label: 'Web Projects', path: '/academy/webdev', icon: <Code2 size={20} />, section: 'academy', roles: ['academy', 'admin'] },
 
   // Attendance Section
-  { label: 'Staff Attendance', path: '/attendance/manage', icon: <Users size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
+  { label: 'Attendance Dashboard', path: '/attendance-dashboard', icon: <LayoutDashboard size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
+  { label: 'Staff Attendance', path: '/attendance/manage', icon: <Clock size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
   { label: 'Attendance Reports', path: '/attendance/reports', icon: <BarChart3 size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
 
   // Analytics Section
@@ -168,16 +171,18 @@ export default function Sidebar() {
 
         <nav className="flex-1 overflow-y-auto py-4 min-h-0 px-4">
           <Accordion type="multiple" defaultValue={[]} className="space-y-1">
-            <AccordionItem value="main" className="border-0">
+            {hasVisible('repairs') && (
+            <AccordionItem value="repairs" className="border-0">
               <AccordionTrigger className="py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:no-underline">
                 Repairs
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-1 pt-1">
-                  {renderItems('main')}
+                  {renderItems('repairs')}
                 </div>
               </AccordionContent>
             </AccordionItem>
+            )}
 
             {hasVisible('attendance') && (
               <AccordionItem value="attendance" className="border-0">
@@ -231,6 +236,12 @@ export default function Sidebar() {
               </AccordionItem>
             )}
           </Accordion>
+
+          {hasVisible('main') && (
+            <div className="space-y-1 pt-2 mt-2 border-t">
+              {renderItems('main')}
+            </div>
+          )}
         </nav>
 
         <div className="p-4 border-t border-border space-y-2 shrink-0">
