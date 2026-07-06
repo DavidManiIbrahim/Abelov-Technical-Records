@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { academyAPI } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BookOpen, Users, Wifi, Code2 } from 'lucide-react';
+import { BookOpen, BarChart3 } from 'lucide-react';
 
 export default function AcademyDashboard() {
   const navigate = useNavigate();
@@ -121,17 +121,9 @@ export default function AcademyDashboard() {
                 <BookOpen size={20} />
                 <span className="text-xs">Courses</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate('/academy/students')}>
-                <Users size={20} />
-                <span className="text-xs">Students</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate('/academy/internet')}>
-                <Wifi size={20} />
-                <span className="text-xs">Internet Users</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate('/academy/webdev')}>
-                <Code2 size={20} />
-                <span className="text-xs">Web Projects</span>
+              <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => navigate('/academy/analytics')}>
+                <BarChart3 size={20} />
+                <span className="text-xs">Analytics</span>
               </Button>
             </div>
           </Card>
