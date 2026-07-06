@@ -11,7 +11,6 @@ import {
   Search,
   Edit,
   BarChart3,
-  ArrowLeft,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -80,12 +79,6 @@ export default function CreditsList() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="mb-4">
-        <Button variant="ghost" onClick={() => navigate('/dashboard')} size="sm">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
-        </Button>
-      </div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Credits</h1>
         

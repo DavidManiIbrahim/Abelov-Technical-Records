@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { serviceRequestAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { TrendingUp, DollarSign, Clock, CheckCircle, Loader2 } from 'lucide-react';
+import { TrendingUp, DollarSign, Clock, CheckCircle } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 const formatCurrencyCompact = (value: number): string => {
   const abs = Math.abs(value);
@@ -186,9 +187,31 @@ export default function AnalyticsDashboard() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        <p className="text-muted-foreground">Loading analytics...</p>
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
+            {[...Array(5)].map((_, i) => (
+              <Card key={i} className="p-6">
+                <Skeleton className="h-4 w-24 mb-2" />
+                <Skeleton className="h-8 w-28" />
+              </Card>
+            ))}
+          </div>
+          <Card className="p-6 mb-8">
+            <Skeleton className="h-6 w-48 mb-4" />
+            <Skeleton className="h-[300px] w-full" />
+          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <Card className="p-6">
+              <Skeleton className="h-6 w-48 mb-4" />
+              <Skeleton className="h-[300px] w-full" />
+            </Card>
+            <Card className="p-6">
+              <Skeleton className="h-6 w-48 mb-4" />
+              <Skeleton className="h-[300px] w-full" />
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }

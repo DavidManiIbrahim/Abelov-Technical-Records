@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Order } from "@/types/database";
 import { ordersAPI } from "@/lib/api";
-import { Plus, Truck, Search, Edit, BarChart3, ArrowLeft } from "lucide-react";
+import { Plus, Truck, Search, Edit, BarChart3 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -73,12 +73,6 @@ export default function OrdersList() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="mb-4">
-        <Button variant="ghost" onClick={() => navigate('/dashboard')} size="sm">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
-        </Button>
-      </div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Orders</h1>
         <div className="flex gap-2">

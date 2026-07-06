@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
@@ -60,8 +61,25 @@ export default function ActivityLogPage() {
 
       <Card className="p-6">
         {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <div className="border rounded-lg overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  {[...Array(5)].map((_, i) => (
+                    <TableHead key={i}><Skeleton className="h-4 w-16" /></TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...Array(5)].map((_, i) => (
+                  <TableRow key={i}>
+                    {[...Array(5)].map((_, j) => (
+                      <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <div className="border rounded-lg overflow-x-auto">

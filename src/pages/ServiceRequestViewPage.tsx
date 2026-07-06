@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { serviceRequestAPI, technicianAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { ArrowLeft, Loader2, Printer, Edit, Wrench, CheckCircle, Clock } from 'lucide-react';
+import { ArrowLeft, Loader2, Printer, Edit, Wrench, CheckCircle, Clock, MessageCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import QRCode from 'react-qr-code';
 import abelovLogo from '@/assets/abelov-logo.png';
@@ -34,11 +35,42 @@ export default function ServiceRequestViewPage() {
     repair_action: '',
   });
 
-  const isTechnician = userRoles.includes('technician');
-  const isAssignedToMe = request?.assigned_to === user?.id;
-  const canAccept = isTechnician && isAssignedToMe && !request?.accepted_at && request?.status === 'Pending';
-  const canUpdateProgress = isTechnician && isAssignedToMe && !!request?.accepted_at;
-  const canDeliver = isTechnician && isAssignedToMe && request?.status === 'In-Progress';
+const isTechnician = userRoles.includes('technician');
+const isAssignedToMe = request?.assigned_to === user?.id;
+const canAccept = isTechnician && isAssignedToMe && !request?.accepted_at && request?.status === 'Pending';
+const canUpdateProgress = isTechnician && isAssignedToMe && !!request?.accepted_at;
+const canDeliver = isTechnician && isAssignedToMe && request?.status === 'In-Progress';
+
+const formatPhoneForWhatsApp = (phone: string) => {
+  let cleaned = phone.replace(/[^0-9]/g, '');
+  if (cleaned.startsWith('0')) {
+    cleaned = '234' + cleaned.slice(1);
+  } else if (cleaned.startsWith('234')) {
+    // already in international format
+  }
+  return cleaned;
+};
+
+const handleSendWhatsApp = () => {
+  if (!request) return;
+  const phone = formatPhoneForWhatsApp(request.customer_phone);
+  const message = encodeURIComponent(
+    `*Abelov Technical Records - Service Request Update*\n\n` +
+    `ID: ${request.id}\n` +
+    `Customer: ${request.customer_name}\n` +
+    `Device: ${request.device_brand} ${request.device_model}\n` +
+    `Status: ${request.status}\n` +
+    `Problem: ${request.problem_description}\n` +
+    `Service Charge: ₦${(request.service_charge || 0).toLocaleString()}\n` +
+    `Parts Cost: ₦${(request.parts_cost || 0).toLocaleString()}\n` +
+    `Total: ₦${(request.total_cost || 0).toLocaleString()}\n` +
+    `Deposit Paid: ₦${(request.deposit_paid || 0).toLocaleString()}\n` +
+    `Balance: ₦${(request.balance || 0).toLocaleString()}\n` +
+    `Payment: ${request.payment_status}\n\n` +
+    `Track: ${window.location.origin}/#/view/${request.id}`
+  );
+  window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+};
 
   const loadRequest = useCallback(async (requestId: string) => {
     try {
@@ -107,8 +139,70 @@ export default function ServiceRequestViewPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background p-4 md:p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8 flex items-center justify-between bg-card p-6 rounded-xl border shadow-sm">
+            <div className="flex items-center gap-4">
+              <Skeleton className="w-16 h-16 rounded" />
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Skeleton className="h-9 w-20" />
+              <Skeleton className="h-9 w-16" />
+              <Skeleton className="h-9 w-16" />
+            </div>
+          </div>
+          <div className="flex gap-2 mb-6">
+            <Skeleton className="h-6 w-24 rounded-full" />
+            <Skeleton className="h-6 w-28 rounded-full" />
+            <Skeleton className="h-6 w-32 rounded-full" />
+          </div>
+          <Card className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 pb-6 border-b">
+              {[...Array(4)].map((_, i) => (
+                <div key={i}>
+                  <Skeleton className="h-3 w-16 mb-1" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+              ))}
+            </div>
+            <div className="mb-6 pb-6 border-b">
+              <Skeleton className="h-5 w-24 mb-3" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i}>
+                    <Skeleton className="h-3 w-12 mb-1" />
+                    <Skeleton className="h-4 w-36" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="mb-6 pb-6 border-b">
+              <Skeleton className="h-5 w-20 mb-3" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i}>
+                    <Skeleton className="h-3 w-12 mb-1" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <Skeleton className="h-5 w-24 mb-3" />
+            <Skeleton className="h-20 w-full mb-6" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-6 border-b mb-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i}>
+                  <Skeleton className="h-3 w-16 mb-1" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -312,7 +406,20 @@ export default function ServiceRequestViewPage() {
                 <h3 className="text-lg font-semibold mb-3 text-primary">Customer</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div><DetailRow label="Name" value={request.customer_name} /></div>
-                  <div><DetailRow label="Phone" value={request.customer_phone} /></div>
+                  <div>
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1"><DetailRow label="Phone" value={request.customer_phone} /></div>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="mt-5 h-8 w-8 shrink-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        onClick={handleSendWhatsApp}
+                        title="Send repair details via WhatsApp"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                   <div><DetailRow label="Address" value={request.customer_address} /></div>
                 </div>
               </div>

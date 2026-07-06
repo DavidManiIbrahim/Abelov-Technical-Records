@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -279,8 +280,38 @@ export default function AdminDashboard() {
 
   if (loading && !globalStats) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background p-4 md:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[...Array(7)].map((_, i) => (
+              <Card key={i} className="p-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-5 w-5" />
+                  </div>
+                  <Skeleton className="h-8 w-20" />
+                  <Skeleton className="h-3 w-32" />
+                </div>
+              </Card>
+            ))}
+          </div>
+          <Card className="p-6">
+            <div className="flex gap-2 mb-4">
+              <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-9 w-24" />
+            </div>
+            <Skeleton className="h-10 w-full mb-4" />
+            <div className="border rounded-lg overflow-x-auto">
+              <div className="space-y-2 p-4">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -474,8 +505,26 @@ export default function AdminDashboard() {
                 </div>
 
                 {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <div className="border rounded-lg overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          {[...Array(10)].map((_, i) => (
+                            <TableHead key={i}><Skeleton className="h-4 w-16" /></TableHead>
+                          ))}
+                          <TableHead className="text-xs font-semibold text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {[...Array(5)].map((_, i) => (
+                          <TableRow key={i}>
+                            {[...Array(11)].map((_, j) => (
+                              <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 ) : (
                   <>
@@ -679,9 +728,25 @@ export default function AdminDashboard() {
                 </Dialog>
 
                 {loading && !users.length ? (
-
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <div className="border rounded-lg overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          {[...Array(8)].map((_, i) => (
+                            <TableHead key={i}><Skeleton className="h-4 w-16" /></TableHead>
+                          ))}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {[...Array(5)].map((_, i) => (
+                          <TableRow key={i}>
+                            {[...Array(8)].map((_, j) => (
+                              <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 ) : (
                   <div className="border rounded-lg overflow-x-auto">
@@ -767,8 +832,25 @@ export default function AdminDashboard() {
                 </div>
 
                 {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <div className="border rounded-lg overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          {[...Array(5)].map((_, i) => (
+                            <TableHead key={i}><Skeleton className="h-4 w-16" /></TableHead>
+                          ))}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {[...Array(5)].map((_, i) => (
+                          <TableRow key={i}>
+                            {[...Array(5)].map((_, j) => (
+                              <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 ) : (
                   <div className="border rounded-lg overflow-x-auto">

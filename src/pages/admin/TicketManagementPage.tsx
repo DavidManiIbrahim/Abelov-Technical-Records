@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Loader2, Search, Eye } from 'lucide-react';
+import { Search, Eye } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
@@ -162,8 +163,26 @@ export default function TicketManagementPage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <div className="border rounded-lg overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  {[...Array(10)].map((_, i) => (
+                    <TableHead key={i}><Skeleton className="h-4 w-16" /></TableHead>
+                  ))}
+                  <TableHead className="text-xs font-semibold text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...Array(5)].map((_, i) => (
+                  <TableRow key={i}>
+                    {[...Array(11)].map((_, j) => (
+                      <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <>

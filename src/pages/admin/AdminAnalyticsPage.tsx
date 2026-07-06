@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Ticket, TrendingUp, Activity, Package, ShoppingCart, Truck, DollarSign, CreditCard, BookOpen, CheckCircle, Wrench, BarChart3, Users, Clock } from 'lucide-react';
 import { adminAPI, serviceRequestAPI } from '@/lib/api';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -112,8 +113,41 @@ export default function AdminAnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="container mx-auto p-6 space-y-8">
+        <Skeleton className="h-9 w-48" />
+        {[...Array(4)].map((_, sectionIdx) => (
+          <section key={sectionIdx}>
+            <div className="flex items-center gap-2 mb-4">
+              <Skeleton className="h-5 w-5 rounded" />
+              <Skeleton className="h-6 w-32" />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-5 w-5" />
+                  </div>
+                  <Skeleton className="h-7 w-16" />
+                </Card>
+              ))}
+            </div>
+          </section>
+        ))}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-5 w-5 rounded" />
+            <Skeleton className="h-6 w-40" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {[...Array(2)].map((_, i) => (
+              <Card key={i} className="p-5">
+                <Skeleton className="h-4 w-40 mb-4" />
+                <Skeleton className="h-[300px] w-full rounded" />
+              </Card>
+            ))}
+          </div>
+        </section>
       </div>
     );
   }

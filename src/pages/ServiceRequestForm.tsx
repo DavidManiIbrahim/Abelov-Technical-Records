@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { serviceRequestAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
 import { Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { FaStore, FaUser, FaLaptop, FaExclamationTriangle, FaTools, FaMoneyBill, FaCheckCircle } from 'react-icons/fa';
 
 
@@ -210,8 +211,33 @@ export default function ServiceRequestForm() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background flex flex-col">
+        <div className="flex-1 p-4 md:p-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-2">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <Skeleton className="h-2 w-full rounded-full" />
+            </div>
+            <Card className="p-6">
+              <Skeleton className="h-6 w-48 mb-4" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i}>
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                ))}
+              </div>
+            </Card>
+            <div className="flex justify-between mt-4">
+              <Skeleton className="h-10 w-20" />
+              <Skeleton className="h-10 w-28" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
