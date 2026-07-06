@@ -10,7 +10,7 @@ import { CreditModel } from "../models/credit.model";
 import { AcademyModel } from "../models/academy.model";
 import { AttendanceModel } from "../models/attendance.model";
 import { hashPassword } from "../utils/auth";
-import { SignupSchema } from "../types/auth";
+import { AdminCreateUserSchema } from "../types/auth";
 import { env } from "../config/env";
 
 
@@ -202,9 +202,7 @@ export const getAllUsers = async (_req: Request, res: Response, next: NextFuncti
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password, roles, department } = req.body;
-
-    SignupSchema.parse({ email, password });
+    const { email, password, roles, department } = AdminCreateUserSchema.parse(req.body);
 
     const exists = await UserModel.findOne({ email });
     if (exists) throw new ApiError(409, "User with this email already exists");
@@ -214,8 +212,8 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
       email,
       password_hash: hash,
       password_salt: salt,
-      roles: roles || ["secretary"],
-      department: department || "",
+      roles,
+      department,
       is_active: true
     } as any);
 
