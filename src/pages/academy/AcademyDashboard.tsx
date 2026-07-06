@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { academyAPI } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 import { BookOpen, Users, Wifi, Code2 } from 'lucide-react';
 
 export default function AcademyDashboard() {
@@ -50,8 +51,22 @@ export default function AcademyDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Loading dashboard...</p>
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+          <div className="mb-8">
+            <Skeleton className="h-9 w-56 mb-2" />
+            <Skeleton className="h-5 w-64" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-32 rounded-xl" />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Skeleton className="h-64 rounded-xl" />
+            <Skeleton className="h-64 rounded-xl md:col-span-2" />
+          </div>
+        </div>
       </div>
     );
   }

@@ -50,10 +50,21 @@ export default function StaffAttendancePage() {
 
   const handleMark = async (record: StaffRecord, status: string) => {
     try {
+      const now = new Date().toISOString();
+      const clockInStatuses = ['present', 'late'];
+
       if (record.id) {
-        await attendanceAPI.updateAttendance(record.id, { status });
+        const updates: any = { status };
+        if (clockInStatuses.includes(status) && !record.clock_in) {
+          updates.clock_in = now;
+        }
+        if (record.clock_in && !record.clock_out && status === 'absent') {
+          updates.clock_out = now;
+        }
+        await attendanceAPI.updateAttendance(record.id, updates);
       } else {
-        await attendanceAPI.markAttendance(record.user_id, searchDate, status);
+        const clock_in = clockInStatuses.includes(status) ? now : undefined;
+        await attendanceAPI.markAttendance(record.user_id, searchDate, status, clock_in);
       }
       toast({ title: 'Success', description: `Marked ${record.user_name} as ${status}` });
       loadRecords();

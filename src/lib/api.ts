@@ -577,17 +577,25 @@ export const attendanceAPI = {
   },
 
   async markAttendance(userId: string, date: string, status: string, clockIn?: string, clockOut?: string) {
+    const body: any = { user_id: userId, date, status };
+    if (clockIn) body.clock_in = clockIn;
+    if (clockOut) body.clock_out = clockOut;
     const res = await apiFetch('/attendance/mark', {
       method: 'POST',
-      body: JSON.stringify({ user_id: userId, date, status, clock_in: clockIn, clock_out: clockOut }),
+      body: JSON.stringify(body),
     });
     return res?.data || res;
   },
 
   async updateAttendance(id: string, updates: Partial<{ status: string; notes: string; clock_in: string; clock_out: string }>) {
+    const body: any = {};
+    if (updates.status !== undefined) body.status = updates.status;
+    if (updates.notes !== undefined) body.notes = updates.notes;
+    if (updates.clock_in !== undefined) body.clock_in = updates.clock_in;
+    if (updates.clock_out !== undefined) body.clock_out = updates.clock_out;
     const res = await apiFetch(`/attendance/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(updates),
+      body: JSON.stringify(body),
     });
     return res?.data || res;
   },

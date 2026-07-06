@@ -15,6 +15,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { serviceRequestAPI, adminAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Search, Edit, Eye, Trash2 } from 'lucide-react';
 
 const formatCurrencyCompact = (value: number): string => {
@@ -260,8 +261,22 @@ export default function RepairsDashboard() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Loading requests...</p>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 mb-8">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <Skeleton key={i} className="h-28 rounded-xl" />
+              ))}
+            </div>
+            <div className="flex gap-4 mb-6">
+              <Skeleton className="h-10 flex-1 rounded-lg" />
+              <Skeleton className="h-10 w-[200px] rounded-lg" />
+              <Skeleton className="h-10 w-[140px] rounded-lg" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-64 rounded-xl" />
+              ))}
+            </div>
           </div>
         ) : filteredRequests.length === 0 ? (
           <Card className="p-12 text-center">

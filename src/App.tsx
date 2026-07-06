@@ -30,6 +30,7 @@ import ActivityLogPage from "@/pages/admin/ActivityLogPage";
 
 // Sales & Inventory Module Pages
 import SalesDashboard from "@/pages/sales/SalesDashboard";
+import SalesAnalyticsPage from "@/pages/sales/SalesAnalyticsPage";
 import GoodsList from "@/pages/sales/GoodsList";
 import PurchasesList from "@/pages/sales/PurchasesList";
 import OrdersList from "@/pages/sales/OrdersList";
@@ -177,6 +178,16 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <SalesDashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/sales-analytics"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <SalesAnalyticsPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

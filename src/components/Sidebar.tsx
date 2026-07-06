@@ -29,6 +29,7 @@ import {
   Activity,
   Users,
   Clock,
+  TrendingUp,
 } from 'lucide-react';
 
 interface NavItem {
@@ -51,6 +52,7 @@ const navItems: NavItem[] = [
   { label: 'Orders', path: '/orders', icon: <Truck size={20} />, section: 'sales', roles: ['sales', 'admin'] },
   { label: 'Expenses', path: '/expenses', icon: <DollarSign size={20} />, section: 'sales', roles: ['sales', 'admin'] },
   { label: 'Credits', path: '/credits', icon: <CreditCard size={20} />, section: 'sales', roles: ['sales', 'admin'] },
+  { label: 'Sales Analytics', path: '/sales-analytics', icon: <TrendingUp size={20} />, section: 'sales', roles: ['sales', 'admin'] },
 
   // Academy Section
   { label: 'Academy Dashboard', path: '/academy-dashboard', icon: <LayoutDashboard size={20} />, section: 'academy', roles: ['academy', 'admin'] },
