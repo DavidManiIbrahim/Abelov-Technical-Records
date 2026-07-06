@@ -20,14 +20,11 @@ import {
   CreditCard,
   BarChart3,
   BookOpen,
-  Wifi,
-  Code2,
   Menu,
   X,
   LogOut,
   User,
   Activity,
-  Users,
   Clock,
   TrendingUp,
   Wrench,
@@ -60,9 +57,7 @@ const navItems: NavItem[] = [
   // Academy Section
   { label: 'Academy Dashboard', path: '/academy-dashboard', icon: <LayoutDashboard size={20} />, section: 'academy', roles: ['academy', 'admin'] },
   { label: 'Academy', path: '/academy', icon: <BookOpen size={20} />, section: 'academy', roles: ['academy', 'admin'] },
-  { label: 'Students', path: '/academy/students', icon: <Users size={20} />, section: 'academy', roles: ['academy', 'admin'] },
-  { label: 'Internet Users', path: '/academy/internet', icon: <Wifi size={20} />, section: 'academy', roles: ['academy', 'admin'] },
-  { label: 'Web Projects', path: '/academy/webdev', icon: <Code2 size={20} />, section: 'academy', roles: ['academy', 'admin'] },
+  { label: 'Academy Analytics', path: '/academy/analytics', icon: <BarChart3 size={20} />, section: 'academy', roles: ['academy', 'admin'] },
 
   // Attendance Section
   { label: 'Attendance Dashboard', path: '/attendance-dashboard', icon: <LayoutDashboard size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },

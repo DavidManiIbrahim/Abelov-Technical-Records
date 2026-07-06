@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, BookOpen, Search, Edit, Trash2, Eye, DollarSign, User, Calendar } from 'lucide-react';
+import { Plus, BookOpen, Search, Edit, Trash2, Eye, DollarSign, User, Calendar, Users, Wifi, Code2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { academyAPI } from '@/lib/api';
@@ -139,33 +139,48 @@ export default function AcademyPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card className="p-5 border-l-4 border-l-blue-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Courses</p>
-                <p className="text-3xl font-bold text-blue-700 mt-1">{courses.length}</p>
-              </div>
-              <BookOpen className="w-10 h-10 text-blue-500/30" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">Courses</p>
+              <BookOpen className="w-5 h-5 text-blue-500" />
             </div>
+            <p className="text-2xl font-bold text-blue-700">{courses.length}</p>
           </Card>
-          <Card className="p-5 border-l-4 border-l-green-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Published</p>
-                <p className="text-3xl font-bold text-green-700 mt-1">{totalPublished}</p>
-              </div>
-              <BookOpen className="w-10 h-10 text-green-500/30" />
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">Published</p>
+              <BookOpen className="w-5 h-5 text-green-500" />
             </div>
+            <p className="text-2xl font-bold text-green-700">{totalPublished}</p>
           </Card>
-          <Card className="p-5 border-l-4 border-l-emerald-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Revenue</p>
-                <p className="text-3xl font-bold text-emerald-700 mt-1">₦{totalRevenue.toLocaleString()}</p>
-              </div>
-              <DollarSign className="w-10 h-10 text-emerald-500/30" />
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">Revenue</p>
+              <DollarSign className="w-5 h-5 text-emerald-500" />
             </div>
+            <p className="text-2xl font-bold text-emerald-700">₦{totalRevenue.toLocaleString()}</p>
+          </Card>
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">Students</p>
+              <Users className="w-5 h-5 text-purple-500" />
+            </div>
+            <p className="text-2xl font-bold text-purple-700">0</p>
+          </Card>
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">Internet Users</p>
+              <Wifi className="w-5 h-5 text-cyan-500" />
+            </div>
+            <p className="text-2xl font-bold text-cyan-700">0</p>
+          </Card>
+          <Card className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-muted-foreground">Web Projects</p>
+              <Code2 className="w-5 h-5 text-orange-500" />
+            </div>
+            <p className="text-2xl font-bold text-orange-700">0</p>
           </Card>
         </div>
 

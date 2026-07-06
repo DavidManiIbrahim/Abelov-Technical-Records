@@ -41,9 +41,7 @@ import CreditsList from "@/pages/sales/CreditsList";
 // Academy Pages
 import AcademyDashboard from "@/pages/academy/AcademyDashboard";
 import AcademyPage from "@/pages/academy/AcademyPage";
-import StudentRegistrationsPage from "@/pages/academy/StudentRegistrationsPage";
-import InternetUsersPage from "@/pages/academy/InternetUsersPage";
-import WebDevProjectsPage from "@/pages/academy/WebDevProjectsPage";
+import AcademyAnalyticsPage from "@/pages/academy/AcademyAnalyticsPage";
 
 // Attendance Pages
 import AttendanceDashboard from "@/pages/attendance/AttendanceDashboard";
@@ -362,31 +360,11 @@ const App = () => (
                 }
               />
               <Route
-                path="/academy/students"
+                path="/academy/analytics"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <StudentRegistrationsPage />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/academy/internet"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <InternetUsersPage />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/academy/webdev"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <WebDevProjectsPage />
+                      <AcademyAnalyticsPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }
