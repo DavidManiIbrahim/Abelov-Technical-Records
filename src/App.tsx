@@ -27,6 +27,7 @@ import AdminAnalyticsPage from "@/pages/admin/AdminAnalyticsPage";
 import TicketManagementPage from "@/pages/admin/TicketManagementPage";
 import UserManagementPage from "@/pages/admin/UserManagementPage";
 import ActivityLogPage from "@/pages/admin/ActivityLogPage";
+import TechnicianDashboard from "@/pages/TechnicianDashboard";
 
 // Sales & Inventory Module Pages
 import SalesDashboard from "@/pages/sales/SalesDashboard";
@@ -102,6 +103,16 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <RepairsDashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/technician-dashboard"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <TechnicianDashboard />
                     </MainLayout>
                   </ProtectedRoute>
                 }
