@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Ticket, TrendingUp, Activity, Package, ShoppingCart, Truck, DollarSign, CreditCard, BookOpen, CheckCircle, Wrench, BarChart3, Users, Clock } from 'lucide-react';
-import { adminAPI, serviceRequestAPI } from '@/lib/api';
+import { adminAPI, serviceRequestAPI, attendanceAPI } from '@/lib/api';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface ModuleStats {
@@ -11,6 +11,14 @@ interface ModuleStats {
   academy: { totalCourses: number; publishedCourses: number };
   attendance: { totalToday: number; totalMonth: number };
   users: { total: number; byRole: Record<string, number> };
+}
+
+interface AttendanceStats {
+  present: number;
+  late: number;
+  absent: number;
+  halfDay: number;
+  total: number;
 }
 
 interface ServiceRequest {
@@ -47,6 +55,7 @@ export default function AdminAnalyticsPage() {
   const [stats, setStats] = useState<ModuleStats | null>(null);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [attendanceStats, setAttendanceStats] = useState<AttendanceStats | null>(null);
 
   useEffect(() => {
     loadData();
@@ -61,6 +70,17 @@ export default function AdminAnalyticsPage() {
       ]);
       setStats(moduleStats as ModuleStats);
       setRequests(allRequests.data || []);
+
+      const today = new Date().toISOString().slice(0, 10);
+      const allAttendance = await attendanceAPI.getAllAttendance(today, today);
+      const records = allAttendance.data || [];
+      setAttendanceStats({
+        present: records.filter((r: any) => r.status === 'present').length,
+        late: records.filter((r: any) => r.status === 'late').length,
+        absent: records.filter((r: any) => r.status === 'absent').length,
+        halfDay: records.filter((r: any) => r.status === 'half_day').length,
+        total: records.length,
+      });
     } catch (error) {
       console.error('Failed to load analytics:', error);
     } finally {
@@ -265,8 +285,34 @@ export default function AdminAnalyticsPage() {
           <Clock className="w-5 h-5 text-cyan-600" />
           <h2 className="text-xl font-semibold">Attendance</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard label="Today's Records" value={stats.attendance.totalToday} icon={Clock} color="cyan" subtitle={`out of ${stats.users.total} users`} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+          <StatCard label="Present" value={attendanceStats?.present ?? '-'} icon={Users} color="green" />
+          <StatCard label="Late" value={attendanceStats?.late ?? '-'} icon={Clock} color="yellow" />
+          <StatCard label="Absent" value={attendanceStats?.absent ?? '-'} icon={Users} color="red" />
+          <StatCard label="Half Day" value={attendanceStats?.halfDay ?? '-'} icon={Clock} color="orange" />
+          <StatCard label="Total Today" value={stats.attendance.totalToday} icon={Activity} color="cyan" subtitle={`out of ${stats.users.total} users`} />
+        </div>
+        {attendanceStats && attendanceStats.total > 0 && (
+          <Card className="p-5">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-muted-foreground">Today's Breakdown</span>
+              <span className="text-xs text-muted-foreground">{attendanceStats.total} records</span>
+            </div>
+            <div className="w-full bg-secondary rounded-full h-4 flex overflow-hidden">
+              <div className="bg-green-600 h-4 transition-all" style={{ width: `${(attendanceStats.present / attendanceStats.total) * 100}%` }} title={`Present: ${attendanceStats.present}`} />
+              <div className="bg-yellow-500 h-4 transition-all" style={{ width: `${(attendanceStats.late / attendanceStats.total) * 100}%` }} title={`Late: ${attendanceStats.late}`} />
+              <div className="bg-red-600 h-4 transition-all" style={{ width: `${(attendanceStats.absent / attendanceStats.total) * 100}%` }} title={`Absent: ${attendanceStats.absent}`} />
+              <div className="bg-gray-400 h-4 transition-all" style={{ width: `${(attendanceStats.halfDay / attendanceStats.total) * 100}%` }} title={`Half Day: ${attendanceStats.halfDay}`} />
+            </div>
+            <div className="flex flex-wrap gap-4 mt-2 text-xs">
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-green-600 inline-block" /> Present ({attendanceStats.present})</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-yellow-500 inline-block" /> Late ({attendanceStats.late})</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-600 inline-block" /> Absent ({attendanceStats.absent})</span>
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-gray-400 inline-block" /> Half Day ({attendanceStats.halfDay})</span>
+            </div>
+          </Card>
+        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <StatCard label="This Month" value={stats.attendance.totalMonth} icon={Activity} color="blue" />
           <StatCard label="Active Users" value={stats.users.total} icon={Users} color="indigo" />
         </div>

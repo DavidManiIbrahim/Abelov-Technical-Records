@@ -387,17 +387,43 @@ export const getActivityLogs = async (req: Request, res: Response, next: NextFun
 
     const total = await RequestModel.countDocuments();
 
-    res.json({
-      data: logs.map((log: any) => ({
-        id: log._id,
-        user: log.user_id,
-        action: "request_update",
-        resource: `Request: ${log.customer_name}`,
-        status: log.status,
-        timestamp: log.updated_at,
-      })),
-      total,
-    });
+      res.json({
+        data: logs.map((log: any) => ({
+          id: log._id,
+          user: log.user_id,
+          action: "request_update",
+          resource: `Request: ${log.customer_name}`,
+          status: log.status,
+          timestamp: log.updated_at,
+        })),
+        total,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+export const assignDepartment = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { department } = req.body;
+
+    if (!department) {
+      throw new ApiError(400, "Department is required");
+    }
+
+    const validDepts = ["engineering", "sales", "it_academy", ""];
+    if (!validDepts.includes(department)) {
+      throw new ApiError(400, "Invalid department");
+    }
+
+    const user = await UserModel.findById(id);
+    if (!user) throw new ApiError(404, "User not found");
+
+    user.department = department;
+    await user.save();
+
+    res.json({ message: `Department updated to '${department || 'none'}'`, user: user.toJSON() });
   } catch (err) {
     next(err);
   }

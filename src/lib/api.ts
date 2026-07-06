@@ -308,6 +308,14 @@ export const adminAPI = {
     return res?.data || res;
   },
 
+  async assignDepartment(userId: string, department: string) {
+    const res = await apiFetch(`/admin/users/${userId}/department`, {
+      method: 'PUT',
+      body: JSON.stringify({ department }),
+    });
+    return res?.data || res;
+  },
+
   async createUser(data: any) {
     const res = await apiFetch('/admin/users', {
       method: 'POST',

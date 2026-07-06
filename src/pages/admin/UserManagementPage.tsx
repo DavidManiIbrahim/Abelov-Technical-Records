@@ -112,10 +112,17 @@ export default function UserManagementPage() {
     }
   };
 
-  const deptLabel = (val: string) => {
-    const lookup = val || 'none';
-    const d = DEPARTMENTS.find(d => d.value === lookup);
-    return d ? d.label : val || '-';
+  const handleDepartmentChange = async (userId: string, department: string) => {
+    setLoading(true);
+    try {
+      await adminAPI.assignDepartment(userId, department === 'none' ? '' : department);
+      toast({ title: 'Success', description: `Department updated` });
+      loadUsers();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Failed to update department', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -190,7 +197,18 @@ export default function UserManagementPage() {
                             </SelectContent>
                           </Select>
                         </TableCell>
-                        <TableCell className="text-sm">{deptLabel(u.department || '')}</TableCell>
+                        <TableCell className="text-sm">
+                          <Select value={u.department || 'none'} onValueChange={(val) => handleDepartmentChange(u.id, val)} disabled={loading}>
+                            <SelectTrigger className="w-36 h-8 text-xs">
+                              <SelectValue placeholder="Department" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {DEPARTMENTS.map(d => (
+                                <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
                         <TableCell className="text-sm font-semibold">{u.ticketCount}</TableCell>
                         <TableCell className="text-sm font-semibold">₦{u.totalRevenue?.toLocaleString()}</TableCell>
                         <TableCell>

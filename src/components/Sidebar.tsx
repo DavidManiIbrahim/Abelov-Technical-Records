@@ -44,6 +44,7 @@ const navItems: NavItem[] = [
   // Repairs Section
   { label: 'Repairs Dashboard', path: '/repairs-dashboard', icon: <LayoutDashboard size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'technician', 'academy'] },
   { label: 'Service Requests', path: '/requests', icon: <FileText size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'technician', 'academy'] },
+  { label: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, section: 'repairs', roles: ['admin', 'secretary'] },
 
   // Sales & Inventory Section
   { label: 'Sales Dashboard', path: '/sales-dashboard', icon: <LayoutDashboard size={20} />, section: 'sales', roles: ['sales', 'admin'] },
@@ -65,10 +66,6 @@ const navItems: NavItem[] = [
   { label: 'Attendance Dashboard', path: '/attendance-dashboard', icon: <LayoutDashboard size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
   { label: 'Staff Attendance', path: '/attendance/manage', icon: <Clock size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
   { label: 'Attendance Analytics', path: '/attendance/reports', icon: <BarChart3 size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
-
-  // Analytics Section
-  { label: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, section: 'main', roles: ['admin', 'secretary'] },
-
 
   // Admin Section
   { label: 'Analytics', path: '/admin', icon: <BarChart3 size={20} />, section: 'admin', roles: ['admin'] },
@@ -157,24 +154,28 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {user && (
-          <div className="px-6 py-4 border-b border-border shrink-0">
-            <p className="text-sm font-medium">{user.name || user.email?.split('@')[0] || 'User'}</p>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
-            <div className="flex gap-1 mt-1.5 flex-wrap items-center">
-              {userRoles.map((role) => (
-                <span key={role} className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">
-                  {role}
-                </span>
-              ))}
-              {user.department ? (
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground">
-                  {user.department}
-                </span>
-              ) : null}
+          {user && (
+            <div className="px-6 py-4 border-b border-border shrink-0">
+              <p className="text-sm font-medium">{user.name || user.email?.split('@')[0] || 'User'}</p>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
+              <div className="flex gap-1 mt-1.5 flex-wrap items-center">
+                {userRoles.map((role) => (
+                  <span key={role} className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                    {role}
+                  </span>
+                ))}
+                {(() => {
+                  const dept = user.department ||
+                    (userRoles.some(r => ['secretary', 'technician'].includes(r)) ? 'engineering' : '');
+                  return dept ? (
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground">
+                      {dept}
+                    </span>
+                  ) : null;
+                })()}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         <nav className="flex-1 overflow-y-auto py-4 min-h-0 px-4">
           <Accordion type="multiple" defaultValue={[]} className="space-y-1">
@@ -243,12 +244,6 @@ export default function Sidebar() {
               </AccordionItem>
             )}
           </Accordion>
-
-          {hasVisible('main') && (
-            <div className="space-y-1 pt-2 mt-2 border-t">
-              {renderItems('main')}
-            </div>
-          )}
         </nav>
 
         <div className="p-4 border-t border-border space-y-2 shrink-0">

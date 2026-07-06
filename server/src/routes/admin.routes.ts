@@ -20,6 +20,7 @@ router.get("/requests", ctrl.getAllRequests);
 router.post("/users/:id/roles", ctrl.assignRole);
 router.delete("/users/:id/roles/:role", ctrl.removeRole);
 router.put("/users/:id/status", ctrl.toggleUserStatus);
+router.put("/users/:id/department", ctrl.assignDepartment);
 
 
 export default router;
