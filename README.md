@@ -423,52 +423,7 @@ npm test
 
 MIT
 
-## Contributing
+## screenshot
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+<img width="952" height="432" alt="{D6566098-03F8-4744-B73C-AB5B93661000}" src="https://github.com/user-attachments/assets/0b0f4534-5a42-479a-9cdf-7974327641cf" />
 
-## Changelog
-
-### v3.2.0 (Current)
-- ✅ **Role-Based Dashboards** for every module: Repairs, Sales, Academy, Attendance, Admin, and a dedicated Technician workflow.
-- ✅ **Admin split**: `/admin` for the cross-module overview dashboard and `/admin/analytics` for deep-dive charts (revenue over time, status pie, monthly tickets, department distribution, attendance breakdown, users-by-role).
-- ✅ **Technician Dashboard & Analytics**: personal assignment list, status doughnut, monthly volume, top device brands worked on, average resolution time, monthly revenue trend.
-- ✅ **Academy module expanded**: `/academy-dashboard`, dedicated course management (`/academy`) and `/academy/analytics` (status, category, level, monthly creation).
-- ✅ **User Management**: editable role and department (engineering, sales, it_academy) with secretary/technician default mapping.
-- ✅ **Sidebar reorganized into accordion groups** (Repairs, Sales & Inventory, Academy, Attendance, Admin) with role-aware filtering.
-- ✅ **Skeleton loaders** across all dashboard and analytics pages for snappier perceived loading.
-- ✅ **Send to WhatsApp** action for sharing user details directly to a phone number.
-- ✅ **Sales UI bug fixes** and refactor of staff attendance logic.
-- ✅ **Auth page polish** and bug fixes.
-- ✅ Removed legacy modal components (`InternetUserModal`, `SelectRequestTypeModal`, `StudentRegistrationModal`, `WebDevelopmentProjectModal`) — flows consolidated into the proper module pages.
-
-### v3.1.0
-- ✅ **Responsive UI Improvements**: 
-  - Optimized navbar text sizes for mobile devices across Dashboard, Admin, and Form pages.
-  - Enhanced button responsiveness in headers (icon-only mode on mobile) to reduce clutter.
-  - Improved layout for Login and Signup pages on smaller screens.
-
-### v3.0.0
-- ✅ Migrated backend to Node.js + Express + MongoDB
-- ✅ Added RESTful API with controllers/services/routes
-- ✅ Implemented security: helmet, cors, compression, rate limiting
-- ✅ Added structured logging with pino
-- ✅ Added Swagger docs at `/docs`
-- ✅ Added health endpoint with DB status
-- ✅ Frontend now calls REST API (`VITE_API_BASE_URL`)
-- ✅ Simplified dev auth with local storage
-- ✅ Unit & integration tests for backend
-- ✅ **Security Hardening**: 
-  - Applied JWT authentication middleware to all service request and admin endpoints.
-  - **NoSQL Injection**: Added `express-mongo-sanitize` and strict Zod validation to prevent exploitation via MongoDB operators.
-  - **Mass Assignment**: Disabled schema passthrough and whitelisted fields in controllers (e.g., `role` removed from public signup).
-  - **Race Conditions**: Implemented MongoDB unique indexes and handle duplicate key errors (11000) gracefully.
-  - **Password Policy**: Increased password complexity requirements (8+ chars, upper, lower, number, special).
-  - **Role Management**: Protected admin routes with RBAC middleware; public signup forced to `user` role.
-
-### v2.0.0
-- ✅ Supabase backend integration and authentication
-- ✅ Dashboard statistics and single-page form layout
-
-### v1.0.0
-- ✅ Initial release with local storage
