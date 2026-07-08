@@ -6,9 +6,11 @@ import { RequestModel } from "../models/request.model";
 export const getAll = async (req: Request, res: Response) => {
   const user = (req as any).user;
   const isAdmin = user.roles.includes("admin");
+  const isTechnician = user.roles.includes("technician");
 
-  // Made global: any authenticated user can see all requests
-  const data = await RequestModel.find({})
+  const filter = isTechnician && !isAdmin ? { assigned_to: user.id } : {};
+
+  const data = await RequestModel.find(filter)
     .sort({ created_at: -1 });
 
   res.json({ data: data.map(d => (d as any).toJSON()) });
@@ -18,23 +20,35 @@ export const getById = async (req: Request, res: Response, next: NextFunction) =
   const { id } = req.params;
   const user = (req as any).user;
   const isAdmin = user.roles.includes("admin");
+  const isTechnician = user.roles.includes("technician");
 
   const entity = await RequestModel.findById(id);
   if (!entity) return next(new ApiError(404, "Request not found"));
 
-  // Made global: no ownership check needed for fetching by ID
+  if (isTechnician && !isAdmin && entity.assigned_to !== user.id.toString()) {
+    return next(new ApiError(403, "Forbidden - This request is not assigned to you"));
+  }
+
   res.json({ data: (entity as any).toJSON() });
 };
 
 export const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = (req as any).user;
+    const isTechnician = user.roles.includes("technician");
     const parsed = RequestSchema.parse(req.body);
 
     // Force user_id to be the authenticated user
     const entity = new RequestModel({
       ...parsed,
-      user_id: user.id
+      user_id: user.id,
+      // Auto-assign to technician when they create a request
+      ...(isTechnician && {
+        assigned_to: user.id,
+        assigned_by: user.id,
+        assigned_at: new Date().toISOString(),
+        status: parsed.status || "Pending",
+      }),
     });
     await entity.save();
 
@@ -49,11 +63,16 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
     const { id } = req.params;
     const user = (req as any).user;
     const isAdmin = user.roles.includes("admin");
+    const isTechnician = user.roles.includes("technician");
 
     const existing = await RequestModel.findById(id);
     if (!existing) return next(new ApiError(404, "Request not found"));
 
-    // Made global: allow any authenticated user to update
+    // Technicians can only update requests assigned to them
+    if (isTechnician && !isAdmin && existing.assigned_to !== user.id.toString()) {
+      return next(new ApiError(403, "Forbidden - This request is not assigned to you"));
+    }
+
     const parsed = RequestUpdateSchema.parse(req.body);
 
     // Prevent changing user_id through update

@@ -42,7 +42,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   // Repairs Section
   { label: 'Repairs Dashboard', path: '/repairs-dashboard', icon: <LayoutDashboard size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'academy'] },
-  { label: 'Service Requests', path: '/requests', icon: <FileText size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'academy'] },
+  { label: 'Service Requests', path: '/requests', icon: <FileText size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'academy', 'technician'] },
   { label: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, section: 'repairs', roles: ['admin', 'secretary'] },
 
   // Technicians Section

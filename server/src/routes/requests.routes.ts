@@ -24,10 +24,10 @@ router.patch("/:id/assign", authorize(["admin", "secretary"]), ctrl.assignTechni
 
 // General CRUD
 router.get("/", authorize(["admin", "secretary", "technician"]), ctrl.getAll);
-router.post("/", authorize(["admin", "secretary"]), ctrl.create);
+router.post("/", authorize(["admin", "secretary", "technician"]), ctrl.create);
 router.get("/stats/:userId", authorize(["admin", "secretary", "technician"]), ctrl.getStats);
 router.get("/:id", authorize(["admin", "secretary", "technician"]), ctrl.getById);
-router.put("/:id", authorize(["admin", "secretary"]), ctrl.update);
+router.put("/:id", authorize(["admin", "secretary", "technician"]), ctrl.update);
 router.post("/:id/payment", authorize(["admin", "secretary", "technician"]), ctrl.recordPayment);
 router.delete("/:id", ctrl.remove); // remove handles admin check internally
 

@@ -22,7 +22,7 @@ export default function JobsPage() {
   const [showAnonymousModal, setShowAnonymousModal] = useState(false);
 
   const isTechnician = userRoles.includes('technician');
-  const canCreate = userRoles.some(r => ['admin', 'secretary'].includes(r));
+  const canCreate = userRoles.some(r => ['admin', 'secretary', 'technician'].includes(r));
 
   useEffect(() => {
     const fetchRequests = async () => {

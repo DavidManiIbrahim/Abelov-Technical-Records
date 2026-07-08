@@ -37,12 +37,6 @@ export default function ServiceRequestForm() {
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (isTechnician && !isEditMode) {
-      navigate('/requests', { replace: true });
-    }
-  }, [isTechnician, isEditMode, navigate]);
-
   // Persistent state for form progress (only for new forms, not edits)
   const [currentStep, setCurrentStep] = usePersistentFormState(
     isEditMode ? `edit_step_${id}` : 'new_request_step',
