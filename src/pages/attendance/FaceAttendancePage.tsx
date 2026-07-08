@@ -85,7 +85,7 @@ export default function FaceAttendancePage() {
   }, [webcamRef]);
 
   const handleClockIn = async () => {
-    if (!capture()) return;
+    if (!capturedImage) return;
     setClocking(true);
     try {
       await attendanceAPI.clockIn();
@@ -101,7 +101,7 @@ export default function FaceAttendancePage() {
   };
 
   const handleClockOut = async () => {
-    if (!capture()) return;
+    if (!capturedImage) return;
     setClocking(true);
     try {
       await attendanceAPI.clockOut();
