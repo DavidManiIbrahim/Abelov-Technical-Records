@@ -17,6 +17,7 @@ import ServiceRequestForm from "@/pages/ServiceRequestForm";
 import ServiceRequestViewPage from "@/pages/ServiceRequestViewPage";
 import RequestsList from "@/pages/RequestsList";
 import ConfirmationPage from "@/pages/ConfirmationPage";
+import JobsPage from "@/pages/JobsPage";
 
 // Dashboard & Analytics
 import DashboardPage from "@/pages/DashboardPage";
@@ -177,6 +178,16 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <RequestsList />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/jobs"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <JobsPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

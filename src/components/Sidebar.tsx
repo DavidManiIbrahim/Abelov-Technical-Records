@@ -46,7 +46,7 @@ const navItems: NavItem[] = [
   { label: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, section: 'repairs', roles: ['admin', 'secretary'] },
 
   // Technicians Section
-  { label: 'Jobs', path: '/requests', icon: <FileText size={20} />, section: 'technicians', roles: ['admin', 'technician'] },
+  { label: 'Jobs', path: '/jobs', icon: <FileText size={20} />, section: 'technicians', roles: ['admin', 'technician'] },
   { label: 'Assigned Jobs', path: '/technician-dashboard', icon: <Wrench size={20} />, section: 'technicians', roles: ['admin', 'technician'] },
   { label: 'Technician Analytics', path: '/technician-analytics', icon: <TrendingUp size={20} />, section: 'technicians', roles: ['admin', 'technician'] },
 
@@ -102,6 +102,7 @@ export default function Sidebar() {
 
   const isActive = (path: string) => {
     if (path === '/requests' && location.pathname.includes('/view')) return true;
+    if (path === '/jobs' && location.pathname.includes('/view')) return true;
     return location.pathname === path;
   };
 
