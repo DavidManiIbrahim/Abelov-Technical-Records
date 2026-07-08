@@ -34,7 +34,7 @@ interface NavItem {
   label: string;
   path: string;
   icon: React.ReactNode;
-  section: 'main' | 'sales' | 'admin' | 'academy' | 'attendance';
+  section: 'main' | 'sales' | 'admin' | 'academy' | 'attendance' | 'technician';
   roles?: string[];
 }
 
@@ -42,8 +42,8 @@ const navItems: NavItem[] = [
   // Repairs Section
   { label: 'Repairs Dashboard', path: '/repairs-dashboard', icon: <LayoutDashboard size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'academy'] },
   { label: 'Service Requests', path: '/requests', icon: <FileText size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'academy'] },
-  { label: 'Technician Dashboard', path: '/technician-dashboard', icon: <Wrench size={20} />, section: 'repairs', roles: ['admin', 'technician'] },
-  { label: 'Technician Analytics', path: '/technician-analytics', icon: <TrendingUp size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'technician'] },
+  { label: 'Technician Dashboard', path: '/technician-dashboard', icon: <Wrench size={20} />, section: 'technician', roles: ['admin', 'technician'] },
+  { label: 'Technician Analytics', path: '/technician-analytics', icon: <TrendingUp size={20} />, section: 'technician', roles: ['admin', 'secretary', 'technician'] },
   { label: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, section: 'repairs', roles: ['admin', 'secretary'] },
 
   // Sales & Inventory Section
@@ -81,7 +81,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const { user, userRoles, signOut } = useAuth();
 
-  if (location.pathname === '/login' || location.pathname === '/signup') {
+  if (location.pathname === '/login') {
     return null;
   }
 
@@ -187,6 +187,19 @@ export default function Sidebar() {
               <AccordionContent>
                 <div className="space-y-1 pt-1">
                   {renderItems('repairs')}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+            )}
+
+            {hasVisible('technician') && (
+            <AccordionItem value="technician" className="border-0">
+              <AccordionTrigger className="py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:no-underline">
+                Technician
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-1 pt-1">
+                  {renderItems('technician')}
                 </div>
               </AccordionContent>
             </AccordionItem>

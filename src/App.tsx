@@ -11,8 +11,6 @@ import MainLayout from "@/components/MainLayout";
 
 // Auth Pages
 import LoginPage from "@/pages/LoginPage";
-// Signup disabled — import commented out to prevent self-registration.
-// import SignupPage from "@/pages/SignupPage";
 
 // Service Request Pages
 import ServiceRequestForm from "@/pages/ServiceRequestForm";
@@ -78,9 +76,6 @@ const App = () => (
             <Routes>
               {/* Auth Routes - No Sidebar */}
               <Route path="/login" element={<LoginPage />} />
-              {/* Signup disabled — route commented out to prevent self-registration.
-              <Route path="/signup" element={<SignupPage />} />
-              */}
 
               {/* Home Route */}
               <Route
