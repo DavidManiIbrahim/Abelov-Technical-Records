@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { ServiceRequest } from "@/types/database";
 import { serviceRequestAPI } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, FileText, Calendar, User, Phone, Search, Edit } from "lucide-react";
+import { Plus, FileText, Calendar, User, Phone, Search, Edit, UserPlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AddAnonymousJobModal from "@/components/AddAnonymousJobModal";
 
 export default function RequestsList() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function RequestsList() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showAnonymousModal, setShowAnonymousModal] = useState(false);
 
   const isTechnician = userRoles.includes('technician');
 
@@ -87,10 +89,16 @@ export default function RequestsList() {
               </p>
             </div>
             {!isTechnician && (
-              <Button onClick={() => navigate("/new-request")}>
-                <Plus className="w-4 h-4 mr-2" />
-                New Request
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={() => navigate("/new-request")}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Request
+                </Button>
+                <Button variant="outline" onClick={() => setShowAnonymousModal(true)}>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Anonymous Job
+                </Button>
+              </div>
             )}
           </div>
           <div className="flex gap-4">
@@ -210,6 +218,15 @@ export default function RequestsList() {
           </div>
         )}
       </div>
+
+      <AddAnonymousJobModal
+        open={showAnonymousModal}
+        onOpenChange={setShowAnonymousModal}
+        onSuccess={async () => {
+          const data = await serviceRequestAPI.getAll(true);
+          setRequests(data.reverse());
+        }}
+      />
     </div>
   );
 }

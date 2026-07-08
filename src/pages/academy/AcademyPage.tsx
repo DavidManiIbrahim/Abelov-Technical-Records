@@ -41,6 +41,19 @@ export default function AcademyPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this course?')) return;
+    try {
+      await academyAPI.delete(id);
+      toast({ title: 'Deleted', description: 'Course deleted successfully.' });
+      await loadCourses();
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to delete course',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const filtered = courses.filter((c) => {
     const q = searchQuery.toLowerCase();
@@ -200,7 +213,7 @@ export default function AcademyPage() {
             <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Courses Yet</h3>
             <p className="text-muted-foreground mb-4">Add your first course to the catalog.</p>
-            <Button onClick={handleAddClick}>
+            <Button onClick={() => setShowAddModal(true)}>
               <Plus className="w-4 h-4 mr-2" /> Add Request
             </Button>
           </Card>

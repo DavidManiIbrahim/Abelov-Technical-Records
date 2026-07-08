@@ -18,9 +18,14 @@ interface AddAcademyModalProps {
 
 export default function AddAcademyModal({ open, onOpenChange, editItem, onSuccess }: AddAcademyModalProps) {
   const [loading, setLoading] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<string>(editItem?.title || '');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedCourse) {
+      toast({ title: 'Course required', description: 'Please select a course', variant: 'destructive' });
+      return;
+    }
     setLoading(true);
     const form = e.target as HTMLFormElement;
     const data = {
@@ -69,8 +74,16 @@ export default function AddAcademyModal({ open, onOpenChange, editItem, onSucces
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Course Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <Label htmlFor="title">Course Title *</Label>
-                <Input id="title" placeholder="Enter course title" defaultValue={editItem?.title || ''} required />
+                <Label htmlFor="title">Course *</Label>
+                <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                  <SelectTrigger id="title"><SelectValue placeholder="Select a course" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Web Development">Web Development</SelectItem>
+                    <SelectItem value="Prompt Engineering">Prompt Engineering</SelectItem>
+                    <SelectItem value="Computer Maintenance">Computer Maintenance</SelectItem>
+                  </SelectContent>
+                </Select>
+                <input type="hidden" name="title" value={selectedCourse} />
               </div>
               <div className="md:col-span-2">
                 <Label htmlFor="description">Description</Label>
