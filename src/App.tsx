@@ -51,6 +51,9 @@ import AttendanceDashboard from "@/pages/attendance/AttendanceDashboard";
 import StaffAttendancePage from "@/pages/attendance/StaffAttendancePage";
 import AttendanceReportsPage from "@/pages/attendance/AttendanceReportsPage";
 
+// Secretary Pages
+import ManageTechniciansPage from "@/pages/secretary/ManageTechniciansPage";
+
 // Payment Analytics
 import PaymentAnalyticsPage from "@/pages/PaymentAnalyticsPage";
 
@@ -316,6 +319,18 @@ const App = () => (
                       <ActivityLogPage />
                     </MainLayout>
                   </AdminProtectedRoute>
+                }
+              />
+
+              {/* Secretary Routes */}
+              <Route
+                path="/manage-technicians"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ManageTechniciansPage />
+                    </MainLayout>
+                  </ProtectedRoute>
                 }
               />
 

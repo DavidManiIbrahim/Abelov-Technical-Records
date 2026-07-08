@@ -643,6 +643,22 @@ export const technicianAPI = {
   },
 };
 
+// Secretary API - Manage technician roles
+export const secretaryAPI = {
+  async getUsers() {
+    const res = await apiFetch('/secretary/users');
+    return (res?.data || res) as unknown[];
+  },
+
+  async assignRole(userId: string, role: string) {
+    const res = await apiFetch(`/secretary/users/${userId}/role`, {
+      method: 'POST',
+      body: JSON.stringify({ role }),
+    });
+    return res?.data || res;
+  },
+};
+
 // Academy API
 export const academyAPI = {
   async getAll(userId: string) {

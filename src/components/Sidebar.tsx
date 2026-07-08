@@ -42,7 +42,7 @@ const navItems: NavItem[] = [
   // Repairs Section
   { label: 'Repairs Dashboard', path: '/repairs-dashboard', icon: <LayoutDashboard size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'academy'] },
   { label: 'Service Requests', path: '/requests', icon: <FileText size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'academy'] },
-  { label: 'Technician Dashboard', path: '/technician-dashboard', icon: <Wrench size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'technician'] },
+  { label: 'Technician Dashboard', path: '/technician-dashboard', icon: <Wrench size={20} />, section: 'repairs', roles: ['admin', 'technician'] },
   { label: 'Technician Analytics', path: '/technician-analytics', icon: <TrendingUp size={20} />, section: 'repairs', roles: ['admin', 'secretary', 'technician'] },
   { label: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, section: 'repairs', roles: ['admin', 'secretary'] },
 
@@ -64,6 +64,7 @@ const navItems: NavItem[] = [
   { label: 'Attendance Dashboard', path: '/attendance-dashboard', icon: <LayoutDashboard size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
   { label: 'Staff Attendance', path: '/attendance/manage', icon: <Clock size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
   { label: 'Attendance Analytics', path: '/attendance/reports', icon: <BarChart3 size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
+  { label: 'Manage Technicians', path: '/manage-technicians', icon: <Wrench size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
 
   // Admin Section
   { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} />, section: 'admin', roles: ['admin'] },
