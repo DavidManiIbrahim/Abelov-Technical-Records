@@ -48,6 +48,7 @@ import AcademyAnalyticsPage from "@/pages/academy/AcademyAnalyticsPage";
 import AttendanceDashboard from "@/pages/attendance/AttendanceDashboard";
 import StaffAttendancePage from "@/pages/attendance/StaffAttendancePage";
 import AttendanceReportsPage from "@/pages/attendance/AttendanceReportsPage";
+import FaceAttendancePage from "@/pages/attendance/FaceAttendancePage";
 
 // Secretary Pages
 import ManageTechniciansPage from "@/pages/secretary/ManageTechniciansPage";
@@ -356,6 +357,16 @@ const App = () => (
                   <ProtectedRoute>
                     <MainLayout>
                       <AttendanceReportsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/attendance/face"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <FaceAttendancePage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

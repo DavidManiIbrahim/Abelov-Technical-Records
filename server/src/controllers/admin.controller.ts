@@ -378,30 +378,41 @@ export const getActivityLogs = async (req: Request, res: Response, next: NextFun
     const limitNum = Math.min(parseInt(limit as string) || 50, 1000);
     const offsetNum = parseInt(offset as string) || 0;
 
-    // Return recent requests as activity logs
     const logs = await RequestModel.find()
       .sort({ updated_at: -1 })
       .limit(limitNum)
       .skip(offsetNum)
-      .select("user_id customer_name status created_at updated_at");
+      .select("user_id customer_name status created_at updated_at")
+      .lean();
 
     const total = await RequestModel.countDocuments();
 
-      res.json({
-        data: logs.map((log: any) => ({
-          id: log._id,
-          user: log.user_id,
-          action: "request_update",
-          resource: `Request: ${log.customer_name}`,
-          status: log.status,
-          timestamp: log.updated_at,
-        })),
-        total,
-      });
-    } catch (err) {
-      next(err);
-    }
-  };
+    const userIds = [...new Set(logs.map((l: any) => l.user_id).filter(Boolean))];
+    const users = await UserModel.find({ _id: { $in: userIds } }).select("email username").lean();
+    const userMap = new Map(users.map((u: any) => [u._id.toString(), u.email || u.username]));
+
+    const actionMap: Record<string, string> = {
+      Pending: "created",
+      "In-Progress": "in_progress",
+      Completed: "completed",
+      Unsuccessful: "closed",
+    };
+
+    res.json({
+      data: logs.map((log: any) => ({
+        id: log._id,
+        user: userMap.get(log.user_id?.toString()) || log.user_id || "System",
+        action: log.created_at === log.updated_at ? "created" : (actionMap[log.status] || "updated"),
+        resource: `Request: ${log.customer_name || "Unknown"}`,
+        status: log.status,
+        timestamp: log.updated_at,
+      })),
+      total,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const assignDepartment = async (req: Request, res: Response, next: NextFunction) => {
   try {

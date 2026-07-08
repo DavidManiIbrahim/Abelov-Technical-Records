@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Loader2, Trash2, Plus, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Trash2, Plus, Eye, EyeOff, Users } from 'lucide-react';
 import { adminAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
@@ -40,9 +40,19 @@ const ROLES = [
   { value: 'admin', label: 'Administrator' },
 ];
 
+const colorClasses: Record<string, { bg: string; text: string }> = {
+  blue: { bg: 'bg-blue-50 border-blue-200', text: 'text-blue-700' },
+  purple: { bg: 'bg-purple-50 border-purple-200', text: 'text-purple-700' },
+  green: { bg: 'bg-green-50 border-green-200', text: 'text-green-700' },
+  yellow: { bg: 'bg-yellow-50 border-yellow-200', text: 'text-yellow-700' },
+  red: { bg: 'bg-red-50 border-red-200', text: 'text-red-700' },
+  cyan: { bg: 'bg-cyan-50 border-cyan-200', text: 'text-cyan-700' },
+};
+
 export default function UserManagementPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [roleStats, setRoleStats] = useState<Record<string, number>>({});
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
@@ -57,8 +67,12 @@ export default function UserManagementPage() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const usersData = await adminAPI.getAllUsersWithStats();
+      const [usersData, moduleStats] = await Promise.all([
+        adminAPI.getAllUsersWithStats(),
+        adminAPI.getModuleStats(true),
+      ]);
       setUsers((usersData as any[]).map((u) => ({ ...u } as UserData)));
+      setRoleStats((moduleStats as any)?.users?.byRole || {});
     } catch {
       toast({ title: 'Error', description: 'Failed to load users', variant: 'destructive' });
     } finally {
@@ -134,6 +148,26 @@ export default function UserManagementPage() {
           Add New User
         </Button>
       </div>
+
+      {/* Users by Role Stats */}
+      {Object.keys(roleStats).length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {Object.entries(roleStats).map(([role, count], i) => {
+            const colors = ['blue', 'purple', 'green', 'yellow', 'red', 'cyan'];
+            const color = colors[i % colors.length];
+            const c = colorClasses[color] || colorClasses.blue;
+            return (
+              <Card key={role} className={`p-5 ${c.bg}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-gray-600">{role.charAt(0).toUpperCase() + role.slice(1)}</p>
+                  <Users className={`w-5 h-5 ${c.text}`} />
+                </div>
+                <p className={`text-2xl font-bold ${c.text}`}>{count}</p>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       <Card className="p-6">
         {loading && !users.length ? (

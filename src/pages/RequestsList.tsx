@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { ServiceRequest } from "@/types/database";
 import { serviceRequestAPI } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, FileText, Calendar, User, Phone, Search, Edit, UserPlus } from "lucide-react";
+import { Plus, FileText, Calendar, User, Phone, Search, Edit, UserPlus, UserRound } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AddAnonymousJobModal from "@/components/AddAnonymousJobModal";
 
 export default function RequestsList() {
@@ -17,6 +18,7 @@ export default function RequestsList() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [showChoiceModal, setShowChoiceModal] = useState(false);
   const [showAnonymousModal, setShowAnonymousModal] = useState(false);
 
   const isTechnician = userRoles.includes('technician');
@@ -89,16 +91,10 @@ export default function RequestsList() {
               </p>
             </div>
             {!isTechnician && (
-              <div className="flex gap-2">
-                <Button onClick={() => navigate("/new-request")}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Request
-                </Button>
-                <Button variant="outline" onClick={() => setShowAnonymousModal(true)}>
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Anonymous Job
-                </Button>
-              </div>
+              <Button onClick={() => setShowChoiceModal(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                New Request
+              </Button>
             )}
           </div>
           <div className="flex gap-4">
@@ -218,6 +214,38 @@ export default function RequestsList() {
           </div>
         )}
       </div>
+
+      <Dialog open={showChoiceModal} onOpenChange={setShowChoiceModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New Service Request</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <button
+              onClick={() => {
+                setShowChoiceModal(false);
+                setShowAnonymousModal(true);
+              }}
+              className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-accent transition-all"
+            >
+              <UserPlus className="w-10 h-10 text-muted-foreground" />
+              <span className="font-semibold">Anonymous Customer</span>
+              <span className="text-xs text-muted-foreground text-center">Quick entry with just description & price</span>
+            </button>
+            <button
+              onClick={() => {
+                setShowChoiceModal(false);
+                navigate("/new-request");
+              }}
+              className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-accent transition-all"
+            >
+              <UserRound className="w-10 h-10 text-muted-foreground" />
+              <span className="font-semibold">Register Customer</span>
+              <span className="text-xs text-muted-foreground text-center">Full form with customer & device details</span>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <AddAnonymousJobModal
         open={showAnonymousModal}

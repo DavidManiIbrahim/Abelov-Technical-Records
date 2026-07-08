@@ -318,23 +318,6 @@ export default function AdminAnalyticsPage() {
         </div>
       </section>
 
-      {/* Users by Role Section */}
-      <section>
-        <div className="flex items-center gap-2 mb-4">
-          <Users className="w-5 h-5 text-indigo-600" />
-          <h2 className="text-xl font-semibold">Users by Role</h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {Object.entries(stats.users.byRole).map(([role, count], i) => {
-            const colors = ['blue', 'purple', 'green', 'yellow', 'red', 'cyan'];
-            const color = colors[i % colors.length];
-            return (
-              <StatCard key={role} label={role.charAt(0).toUpperCase() + role.slice(1)} value={count} icon={Users} color={color} />
-            );
-          })}
-        </div>
-      </section>
-
       {/* Charts Section */}
       <section>
         <div className="flex items-center gap-2 mb-4">

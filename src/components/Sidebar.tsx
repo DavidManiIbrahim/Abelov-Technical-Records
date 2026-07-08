@@ -28,6 +28,7 @@ import {
   Clock,
   TrendingUp,
   Wrench,
+  Camera,
 } from 'lucide-react';
 
 interface NavItem {
@@ -67,6 +68,7 @@ const navItems: NavItem[] = [
   { label: 'Attendance Dashboard', path: '/attendance-dashboard', icon: <LayoutDashboard size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
   { label: 'Staff Attendance', path: '/attendance/manage', icon: <Clock size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
   { label: 'Attendance Analytics', path: '/attendance/reports', icon: <BarChart3 size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
+  { label: 'Face Attendance', path: '/attendance/face', icon: <Camera size={20} />, section: 'attendance', roles: ['secretary', 'admin', 'technician', 'academy', 'sales'] },
   { label: 'Manage Technicians', path: '/manage-technicians', icon: <Wrench size={20} />, section: 'attendance', roles: ['secretary', 'admin'] },
 
   // Admin Section
