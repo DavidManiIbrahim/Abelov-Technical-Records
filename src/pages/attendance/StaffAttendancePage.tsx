@@ -5,9 +5,18 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { attendanceAPI } from '@/lib/api';
-import { Search, LogIn, LogOut } from 'lucide-react';
+import { Search, LogIn, LogOut, UserX } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
+
+function formatDuration(minutes: number | null): string {
+  if (minutes === null || minutes === undefined) return '-';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
 
 interface StaffRecord {
   id: string | null;
@@ -19,6 +28,7 @@ interface StaffRecord {
   date: string;
   clock_in: string | null;
   clock_out: string | null;
+  duration_minutes: number | null;
   status: string | null;
   notes: string;
 }
@@ -43,28 +53,19 @@ export default function StaffAttendancePage() {
     }
   }, [searchDate]);
 
-  // Re-fetch whenever the selected date changes so the table reflects what was
-  // recorded (or "Not marked" for staff without a record) on that chosen day.
   useEffect(() => {
     loadRecords();
   }, [loadRecords]);
 
-  const handleSearch = () => {
-    loadRecords();
-  };
-
   const handleClockIn = async (record: StaffRecord) => {
     try {
       const now = new Date().toISOString();
-      const hour = new Date().getHours();
-      const status = hour >= 9 ? 'late' : 'present';
-
       if (record.id) {
-        await attendanceAPI.updateAttendance(record.id, { status, clock_in: now });
+        await attendanceAPI.updateAttendance(record.id, { clock_in: now });
       } else {
-        await attendanceAPI.markAttendance(record.user_id, searchDate, status, now);
+        await attendanceAPI.markAttendance(record.user_id, searchDate, 'present', now);
       }
-      toast({ title: 'Success', description: `${record.user_name} clocked in as ${status}` });
+      toast({ title: 'Success', description: `${record.user_name} clocked in` });
       loadRecords();
     } catch (err: any) {
       toast({ title: 'Error', description: err.message || 'Failed to clock in', variant: 'destructive' });
@@ -86,10 +87,22 @@ export default function StaffAttendancePage() {
     }
   };
 
+  const handleMarkAbsent = async () => {
+    try {
+      await attendanceAPI.markAbsent(searchDate);
+      toast({ title: 'Success', description: 'Absent records created for users without attendance' });
+      loadRecords();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Failed to mark absent', variant: 'destructive' });
+    }
+  };
+
   const filteredRecords = records.filter(r => {
     if (statusFilter === 'all') return true;
     return r.status === statusFilter;
   });
+
+  const totalDuration = filteredRecords.reduce((sum, r) => sum + (r.duration_minutes || 0), 0);
 
   const getStatusBadge = (status: string | null) => {
     const variants: Record<string, string> = {
@@ -128,20 +141,37 @@ export default function StaffAttendancePage() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleSearch}>
+          <Button onClick={loadRecords}>
             <Search className="w-4 h-4 mr-2" />
             Load
           </Button>
+          {!isPastDate && (
+            <Button onClick={handleMarkAbsent} variant="outline">
+              <UserX className="w-4 h-4 mr-2" />
+              Mark Absent
+            </Button>
+          )}
         </div>
       </Card>
+
+      {totalDuration > 0 && (
+        <Card className="p-4">
+          <div className="flex items-center gap-4 text-sm">
+            <span className="text-muted-foreground">Total Working Hours:</span>
+            <span className="font-bold text-lg text-primary">{formatDuration(totalDuration)}</span>
+            <span className="text-muted-foreground">({filteredRecords.filter(r => r.duration_minutes).length} staff with records)</span>
+          </div>
+        </Card>
+      )}
 
       <Card className="p-6">
         {loading ? (
           <div className="space-y-3">
             <div className="border rounded-lg overflow-hidden">
-              <div className="bg-muted/50 p-3 grid grid-cols-7 gap-4"><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /></div>
+              <div className="bg-muted/50 p-3 grid grid-cols-8 gap-4"><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /><Skeleton className="h-4 w-full col-span-1" /></div>
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="border-t p-3 grid grid-cols-7 gap-4">
+                <div key={i} className="border-t p-3 grid grid-cols-8 gap-4">
+                  <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-full" />
@@ -165,6 +195,7 @@ export default function StaffAttendancePage() {
                   <th className="text-left p-3 text-xs font-semibold">Role</th>
                   <th className="text-left p-3 text-xs font-semibold">Clock In</th>
                   <th className="text-left p-3 text-xs font-semibold">Clock Out</th>
+                  <th className="text-left p-3 text-xs font-semibold">Working Hours</th>
                   <th className="text-left p-3 text-xs font-semibold">Status</th>
                   <th className="text-left p-3 text-xs font-semibold">Actions</th>
                 </tr>
@@ -177,6 +208,7 @@ export default function StaffAttendancePage() {
                     <td className="p-3 text-sm">{(r.user_roles || []).join(', ')}</td>
                     <td className="p-3 text-sm">{r.clock_in ? new Date(r.clock_in).toLocaleTimeString() : '-'}</td>
                     <td className="p-3 text-sm">{r.clock_out ? new Date(r.clock_out).toLocaleTimeString() : '-'}</td>
+                    <td className="p-3 text-sm font-medium">{formatDuration(r.duration_minutes)}</td>
                     <td className="p-3">
                       {r.status ? (
                         <Badge className={getStatusBadge(r.status)}>{r.status}</Badge>

@@ -546,13 +546,31 @@ export const ordersAPI = {
 
 // Attendance API
 export const attendanceAPI = {
-  async clockIn() {
-    const res = await apiFetch('/attendance/clock-in', { method: 'POST' });
+  async clockIn(faceImage?: string) {
+    const body: any = {};
+    if (faceImage) body.face_image = faceImage;
+    const res = await apiFetch('/attendance/clock-in', {
+      method: 'POST',
+      body: Object.keys(body).length ? JSON.stringify(body) : undefined,
+    });
     return res?.data || res;
   },
 
-  async clockOut() {
-    const res = await apiFetch('/attendance/clock-out', { method: 'POST' });
+  async clockOut(faceImage?: string) {
+    const body: any = {};
+    if (faceImage) body.face_image = faceImage;
+    const res = await apiFetch('/attendance/clock-out', {
+      method: 'POST',
+      body: Object.keys(body).length ? JSON.stringify(body) : undefined,
+    });
+    return res?.data || res;
+  },
+
+  async verifyFace(faceImage: string) {
+    const res = await apiFetch('/attendance/verify-face', {
+      method: 'POST',
+      body: JSON.stringify({ face_image: faceImage }),
+    });
     return res?.data || res;
   },
 
@@ -593,6 +611,16 @@ export const attendanceAPI = {
       body: JSON.stringify(body),
     });
     return res?.data || res;
+  },
+
+  async markAbsent(date?: string) {
+    const body: any = {};
+    if (date) body.date = date;
+    const res = await apiFetch('/attendance/mark-absent', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+    return res;
   },
 
   async updateAttendance(id: string, updates: Partial<{ status: string; notes: string; clock_in: string; clock_out: string }>) {

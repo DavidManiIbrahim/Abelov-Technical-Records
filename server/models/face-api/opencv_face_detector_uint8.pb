@@ -1,0 +1,1 @@
+Couldn't find the requested file /model/opencv_face_detector_uint8.pb in @vladmandic/face-api.

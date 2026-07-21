@@ -7,7 +7,7 @@ import { attendanceAPI } from '@/lib/api';
 import { Camera, Clock, Loader2, ScanFace, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
-type FaceStatus = 'idle' | 'detecting' | 'detected' | 'not-detected' | 'unsupported';
+type FaceStatus = 'idle' | 'detecting' | 'detected' | 'not-detected' | 'server-verifying' | 'unsupported';
 
 export default function FaceAttendancePage() {
   const webcamRef = useRef<Webcam>(null);
@@ -20,21 +20,10 @@ export default function FaceAttendancePage() {
     clockInTime?: string;
     clockOutTime?: string;
     status?: string;
+    duration_minutes?: number | null;
   }>({ clockedIn: false, clockedOut: false });
-  const [faceDetector, setFaceDetector] = useState<any>(null);
 
   useEffect(() => {
-    if (typeof FaceDetector !== 'undefined') {
-      try {
-        const detector = new (FaceDetector as any)({ fastMode: true });
-        setFaceDetector(detector);
-      } catch {
-        setFaceStatus('unsupported');
-      }
-    } else {
-      setFaceStatus('unsupported');
-    }
-
     loadTodayStatus();
   }, []);
 
@@ -51,29 +40,31 @@ export default function FaceAttendancePage() {
           clockInTime: todayRecord.clock_in,
           clockOutTime: todayRecord.clock_out,
           status: todayRecord.status,
+          duration_minutes: todayRecord.duration_minutes,
         });
       }
     } catch {}
   };
 
   const detectFace = useCallback(async () => {
-    if (!faceDetector || !webcamRef.current?.video) {
+    if (!capturedImage) {
       setFaceStatus('unsupported');
       return;
     }
 
-    setFaceStatus('detecting');
+    setFaceStatus('server-verifying');
     try {
-      const faces = await faceDetector.detect(webcamRef.current.video);
-      if (faces.length > 0) {
+      const result = await attendanceAPI.verifyFace(capturedImage);
+      if (result?.is_valid) {
         setFaceStatus('detected');
+        toast({ title: 'Face Detected', description: `Confidence: ${result.confidence}%` });
       } else {
         setFaceStatus('not-detected');
       }
     } catch {
       setFaceStatus('not-detected');
     }
-  }, [faceDetector]);
+  }, [capturedImage]);
 
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current?.getScreenshot();
@@ -88,7 +79,7 @@ export default function FaceAttendancePage() {
     if (!capturedImage) return;
     setClocking(true);
     try {
-      await attendanceAPI.clockIn();
+      await attendanceAPI.clockIn(capturedImage);
       toast({ title: 'Success', description: 'Face verified. Clocked in successfully.' });
       await loadTodayStatus();
       setCapturedImage(null);
@@ -104,7 +95,7 @@ export default function FaceAttendancePage() {
     if (!capturedImage) return;
     setClocking(true);
     try {
-      await attendanceAPI.clockOut();
+      await attendanceAPI.clockOut(capturedImage);
       toast({ title: 'Success', description: 'Face verified. Clocked out successfully.' });
       await loadTodayStatus();
       setCapturedImage(null);
@@ -121,20 +112,29 @@ export default function FaceAttendancePage() {
     setFaceStatus('idle');
   };
 
-  const statusColor = {
+  const statusColor: Record<string, string> = {
     idle: 'text-muted-foreground',
     detecting: 'text-yellow-500',
     detected: 'text-green-500',
     'not-detected': 'text-red-500',
+    'server-verifying': 'text-blue-500',
     unsupported: 'text-orange-500',
   };
 
-  const statusIcon = {
+  const statusIcon: Record<string, React.ReactNode> = {
     idle: null,
     detecting: <Loader2 className="w-5 h-5 animate-spin" />,
     detected: <CheckCircle2 className="w-5 h-5" />,
     'not-detected': <XCircle className="w-5 h-5" />,
+    'server-verifying': <Loader2 className="w-5 h-5 animate-spin" />,
     unsupported: <XCircle className="w-5 h-5" />,
+  };
+
+  const formatDuration = (minutes: number | null | undefined): string => {
+    if (!minutes) return '0h 0m';
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${h}h ${m}m`;
   };
 
   return (
@@ -163,6 +163,11 @@ export default function FaceAttendancePage() {
                   Clock Out: <strong>{new Date(attendanceData.clockOutTime).toLocaleTimeString()}</strong>
                 </span>
               )}
+              {attendanceData.duration_minutes != null && (
+                <span className="text-muted-foreground">
+                  Working Hours: <strong>{formatDuration(attendanceData.duration_minutes)}</strong>
+                </span>
+              )}
               {attendanceData.status && (
                 <span className="text-muted-foreground">
                   Status: <Badge className={attendanceData.status === 'present' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>{attendanceData.status}</Badge>
@@ -179,16 +184,10 @@ export default function FaceAttendancePage() {
                 <Camera className="w-5 h-5" />
                 Camera Preview
               </h2>
-              {faceStatus !== 'idle' && faceStatus !== 'unsupported' && (
+              {faceStatus !== 'idle' && (
                 <div className={`flex items-center gap-2 text-sm ${statusColor[faceStatus]}`}>
                   {statusIcon[faceStatus]}
                   <span className="capitalize">{faceStatus.replace('-', ' ')}</span>
-                </div>
-              )}
-              {faceStatus === 'unsupported' && (
-                <div className="flex items-center gap-2 text-sm text-orange-500">
-                  <XCircle className="w-5 h-5" />
-                  <span>Face detection unavailable - camera capture only</span>
                 </div>
               )}
             </div>
@@ -218,9 +217,9 @@ export default function FaceAttendancePage() {
               </div>
             )}
 
-            {faceStatus !== 'idle' && faceStatus !== 'detected' && faceStatus !== 'unsupported' && (
+            {faceStatus === 'not-detected' && (
               <p className="text-xs text-muted-foreground text-center">
-                {faceStatus === 'detecting' ? 'Checking for face...' : 'No face detected. Please position your face in the camera.'}
+                No face detected. Please position your face in the camera and try again.
               </p>
             )}
           </div>
@@ -241,10 +240,6 @@ export default function FaceAttendancePage() {
                     </div>
                   ) : (
                     <div className="flex gap-2 w-full">
-                      <Button variant="outline" onClick={detectFace} className="flex-1">
-                        <ScanFace className="w-4 h-4 mr-2" />
-                        Detect Face
-                      </Button>
                       <Button onClick={() => capture()} className="flex-1">
                         <Camera className="w-4 h-4 mr-2" />
                         Capture & Clock In
@@ -264,10 +259,6 @@ export default function FaceAttendancePage() {
                     </div>
                   ) : (
                     <div className="flex gap-2 w-full">
-                      <Button variant="outline" onClick={detectFace} className="flex-1">
-                        <ScanFace className="w-4 h-4 mr-2" />
-                        Detect Face
-                      </Button>
                       <Button onClick={() => capture()} variant="destructive" className="flex-1">
                         <Camera className="w-4 h-4 mr-2" />
                         Capture & Clock Out
@@ -284,11 +275,9 @@ export default function FaceAttendancePage() {
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">How it works</h3>
           <ol className="space-y-2 text-sm text-muted-foreground list-decimal list-inside">
             <li>Position your face in the camera frame</li>
-            <li>Click <strong>Detect Face</strong> to verify your face is visible</li>
-            <li>Click <strong>Capture & Clock In</strong> to take a photo and sign attendance</li>
-            {faceStatus === 'unsupported' && (
-              <li className="text-orange-500">Note: Face detection is not available in your browser. Capture still works.</li>
-            )}
+            <li>Click <strong>Capture & Clock In/Out</strong> to take a photo</li>
+            <li>Review the captured photo and click <strong>Confirm</strong> to submit</li>
+            <li>The server verifies your face and records your attendance</li>
           </ol>
         </Card>
       </div>
