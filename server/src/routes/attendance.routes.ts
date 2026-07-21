@@ -9,12 +9,14 @@ router.use(authenticate);
 // Self-service (all authenticated users)
 router.post("/clock-in", ctrl.clockIn);
 router.post("/clock-out", ctrl.clockOut);
+router.post("/verify-face", ctrl.verifyFace);
 router.get("/me", ctrl.getMyAttendance);
 
 // Secretary/Admin management
 router.get("/all", authorize(["secretary", "admin"]), ctrl.getAllAttendance);
 router.get("/stats", authorize(["secretary", "admin"]), ctrl.getAttendanceStats);
 router.post("/mark", authorize(["secretary", "admin"]), ctrl.markAttendance);
+router.post("/mark-absent", authorize(["secretary", "admin"]), ctrl.markAbsent);
 router.put("/:id", authorize(["secretary", "admin"]), ctrl.updateAttendance);
 
 export default router;

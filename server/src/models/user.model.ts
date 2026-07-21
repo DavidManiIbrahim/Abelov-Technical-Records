@@ -7,6 +7,7 @@ const UserSchema = new Schema(
     profile_image: { type: String, default: null },
     roles: { type: [String], default: [] },
     department: { type: String, enum: ["engineering", "sales", "it_academy", ""], default: "" },
+    timezone: { type: String, default: "Africa/Lagos" },
     is_active: { type: Boolean, default: true },
     password_hash: { type: String },
     password_salt: { type: String },

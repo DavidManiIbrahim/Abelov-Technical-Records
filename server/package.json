@@ -11,7 +11,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@vladmandic/face-api": "^1.7.15",
     "bcryptjs": "^2.4.3",
+    "canvas": "^3.2.3",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -32,7 +34,8 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild",
-      "mongodb-memory-server"
+      "mongodb-memory-server",
+      "canvas"
     ]
   },
   "devDependencies": {

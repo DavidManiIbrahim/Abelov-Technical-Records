@@ -5,7 +5,14 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { attendanceAPI } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Clock, Users, BarChart3 } from 'lucide-react';
+import { Clock, Users, BarChart3, Timer } from 'lucide-react';
+
+function formatDuration(minutes: number | null | undefined): string {
+  if (!minutes) return '0h 0m';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}h ${m}m`;
+}
 
 export default function AttendanceDashboard() {
   const navigate = useNavigate();
@@ -17,8 +24,10 @@ export default function AttendanceDashboard() {
     todayAbsent: 0,
     todayHalfDay: 0,
     totalToday: 0,
+    todayTotalDuration: 0,
   });
   const [clockedIn, setClockedIn] = useState(false);
+  const [myDuration, setMyDuration] = useState<number | null>(null);
 
   useEffect(() => {
     loadStats();
@@ -31,16 +40,20 @@ export default function AttendanceDashboard() {
       const allAttendance = await attendanceAPI.getAllAttendance(today, today);
       const records = allAttendance.data || [];
 
+      const totalDuration = records.reduce((sum: number, r: any) => sum + (r.duration_minutes || 0), 0);
+
       setStats({
         todayPresent: records.filter((r: any) => r.status === 'present').length,
         todayLate: records.filter((r: any) => r.status === 'late').length,
         todayAbsent: records.filter((r: any) => r.status === 'absent').length,
         todayHalfDay: records.filter((r: any) => r.status === 'half_day').length,
         totalToday: records.length,
+        todayTotalDuration: totalDuration,
       });
 
       const myRecord = records.find((r: any) => r.user_id === user?.id);
       setClockedIn(!!myRecord?.clock_in && !myRecord?.clock_out);
+      setMyDuration(myRecord?.duration_minutes || null);
     } catch (error) {
       console.error('Error loading attendance stats:', error);
     } finally {
@@ -88,8 +101,8 @@ export default function AttendanceDashboard() {
             <Skeleton className="h-10 w-32 rounded-lg" />
             <Skeleton className="h-10 w-44 rounded-lg" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {Array.from({ length: 4 }).map((_, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            {Array.from({ length: 5 }).map((_, i) => (
               <Skeleton key={i} className="h-32 rounded-xl" />
             ))}
           </div>
@@ -128,11 +141,12 @@ export default function AttendanceDashboard() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <StatCard title="Today - Present" value={stats.todayPresent} icon={<Users size={24} />} />
           <StatCard title="Today - Late" value={stats.todayLate} icon={<Clock size={24} />} />
           <StatCard title="Today - Absent" value={stats.todayAbsent} icon={<Users size={24} />} />
           <StatCard title="Today - Half Day" value={stats.todayHalfDay} icon={<Clock size={24} />} />
+          <StatCard title="Total Working Hours" value={formatDuration(stats.todayTotalDuration)} icon={<Timer size={24} />} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -143,6 +157,16 @@ export default function AttendanceDashboard() {
                 <span className="text-muted-foreground">Total Records Today</span>
                 <span className="font-bold text-xl">{stats.totalToday}</span>
               </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Total Working Hours</span>
+                <span className="font-bold text-xl text-primary">{formatDuration(stats.todayTotalDuration)}</span>
+              </div>
+              {myDuration != null && (
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Your Working Hours</span>
+                  <span className="font-bold text-xl text-primary">{formatDuration(myDuration)}</span>
+                </div>
+              )}
               <div className="w-full bg-secondary rounded-full h-3 flex overflow-hidden">
                 <div className="bg-green-600 h-3" style={{ width: `${stats.totalToday ? (stats.todayPresent / stats.totalToday) * 100 : 0}%` }} title="Present" />
                 <div className="bg-yellow-500 h-3" style={{ width: `${stats.totalToday ? (stats.todayLate / stats.totalToday) * 100 : 0}%` }} title="Late" />

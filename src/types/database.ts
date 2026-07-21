@@ -135,8 +135,10 @@ export interface Attendance {
   date: string;
   clock_in: string | null;
   clock_out: string | null;
+  duration_minutes: number | null;
   status: "present" | "late" | "absent" | "half_day";
   notes: string;
+  face_image?: string | null;
   created_at: string;
   updated_at: string;
   user_email?: string;

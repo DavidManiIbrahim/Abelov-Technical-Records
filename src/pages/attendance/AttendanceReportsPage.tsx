@@ -6,17 +6,17 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { attendanceAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
-import { Users, Clock, TrendingUp, BarChart3, Activity } from 'lucide-react';
+import { Users, Clock, TrendingUp, BarChart3, Activity, Timer } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#9ca3af'];
 
-const formatCurrencyCompact = (value: number): string => {
-  const abs = Math.abs(value);
-  if (abs >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (abs >= 1_000) return `${(value / 1_000).toFixed(1)}k`;
-  return value.toLocaleString();
-};
+function formatDuration(minutes: number | null | undefined): string {
+  if (!minutes) return '0h 0m';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}h ${m}m`;
+}
 
 export default function AttendanceReportsPage() {
   const [stats, setStats] = useState<any>(null);
@@ -60,12 +60,14 @@ export default function AttendanceReportsPage() {
         const present = recs.filter((r: any) => r.status === 'present').length;
         const late = recs.filter((r: any) => r.status === 'late').length;
         const absent = recs.filter((r: any) => r.status === 'absent').length;
+        const totalDuration = recs.reduce((sum: number, r: any) => sum + (r.duration_minutes || 0), 0);
         dailyData.push({
           date: dateStr.slice(5),
           present,
           late,
           absent,
           total: recs.length,
+          avgHours: recs.length > 0 ? Math.round(totalDuration / recs.length) : 0,
         });
         current.setDate(current.getDate() + 1);
       }
@@ -94,12 +96,14 @@ export default function AttendanceReportsPage() {
           const present = recs.filter((r: any) => r.status === 'present').length;
           const late = recs.filter((r: any) => r.status === 'late').length;
           const absent = recs.filter((r: any) => r.status === 'absent').length;
+          const totalDuration = recs.reduce((sum: number, r: any) => sum + (r.duration_minutes || 0), 0);
           dailyData.push({
             date: dateStr.slice(5),
             present,
             late,
             absent,
             total: recs.length,
+            avgHours: recs.length > 0 ? Math.round(totalDuration / recs.length) : 0,
           });
           current.setDate(current.getDate() + 1);
         }
@@ -117,6 +121,8 @@ export default function AttendanceReportsPage() {
   const todayAbsent = allRecords.filter((r: any) => r.status === 'absent').length;
   const todayHalfDay = allRecords.filter((r: any) => r.status === 'half_day').length;
   const todayTotal = allRecords.length;
+  const todayTotalDuration = allRecords.reduce((sum: number, r: any) => sum + (r.duration_minutes || 0), 0);
+  const todayAvgDuration = todayTotal > 0 ? Math.round(todayTotalDuration / todayTotal) : 0;
 
   const statusPieData = [
     { name: 'Present', value: todayPresent },
@@ -124,6 +130,21 @@ export default function AttendanceReportsPage() {
     { name: 'Absent', value: todayAbsent },
     { name: 'Half Day', value: todayHalfDay },
   ].filter(d => d.value > 0);
+
+  const userWorkingHours = allRecords
+    .filter((r: any) => r.duration_minutes)
+    .map((r: any) => ({
+      name: r.user_name || r.user_email,
+      department: r.user_department || 'N/A',
+      hours: r.duration_minutes,
+      status: r.status,
+    }))
+    .sort((a, b) => b.hours - a.hours);
+
+  const durationChartData = userWorkingHours.map(u => ({
+    name: u.name.length > 12 ? u.name.slice(0, 12) + '...' : u.name,
+    hours: parseFloat((u.hours / 60).toFixed(1)),
+  }));
 
   const colorClasses: Record<string, { bg: string; text: string; icon: string; border: string }> = {
     green: { bg: 'from-green-50 to-green-50', text: 'text-green-700', icon: 'text-green-600', border: 'border-green-200' },
@@ -174,12 +195,11 @@ export default function AttendanceReportsPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Attendance Analytics</h1>
-          <p className="text-muted-foreground mt-1">Detailed attendance insights and trends.</p>
+          <p className="text-muted-foreground mt-1">Detailed attendance insights, working hours, and trends.</p>
         </div>
         <Badge variant="outline" className="text-sm w-fit">{stats?.totalUsers || 0} Active Staff</Badge>
       </div>
 
-      {/* Date Range Filter */}
       <Card className="p-4">
         <div className="flex flex-col sm:flex-row items-end gap-3">
           <div className="space-y-1 flex-1">
@@ -197,16 +217,15 @@ export default function AttendanceReportsPage() {
         </div>
       </Card>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         <StatCard label="Total Today" value={todayTotal} icon={Users} color="blue" subtitle={`out of ${stats?.totalUsers || 0} staff`} />
         <StatCard label="Present" value={todayPresent} icon={Clock} color="green" subtitle={todayTotal > 0 ? `${Math.round((todayPresent / todayTotal) * 100)}%` : undefined} />
         <StatCard label="Late" value={todayLate} icon={Activity} color="yellow" subtitle={todayTotal > 0 ? `${Math.round((todayLate / todayTotal) * 100)}%` : undefined} />
         <StatCard label="Absent" value={todayAbsent} icon={Users} color="red" subtitle={todayTotal > 0 ? `${Math.round((todayAbsent / todayTotal) * 100)}%` : undefined} />
-        <StatCard label="This Month" value={stats?.month?.total || 0} icon={TrendingUp} color="purple" />
+        <StatCard label="Avg Hours Today" value={formatDuration(todayAvgDuration)} icon={Timer} color="purple" />
+        <StatCard label="This Month" value={stats?.month?.total || 0} icon={TrendingUp} color="cyan" />
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="p-5">
           <h3 className="text-sm font-medium text-gray-600 mb-4">Status Distribution (Today)</h3>
@@ -248,7 +267,21 @@ export default function AttendanceReportsPage() {
         </Card>
       </div>
 
-      {/* Month Overview */}
+      {durationChartData.length > 0 && (
+        <Card className="p-5">
+          <h3 className="text-sm font-medium text-gray-600 mb-4">Working Hours by Staff (Today)</h3>
+          <ResponsiveContainer width="100%" height={Math.max(300, durationChartData.length * 40)}>
+            <BarChart data={durationChartData} layout="vertical" margin={{ left: 80 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" tick={{ fontSize: 12 }} label={{ value: 'Hours', position: 'bottom', offset: -5 }} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} width={80} />
+              <Tooltip formatter={(value: number) => [`${value}h`, 'Working Hours']} />
+              <Bar dataKey="hours" fill="#6366f1" radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      )}
+
       {stats?.month && (
         <section>
           <div className="flex items-center gap-2 mb-4">
@@ -257,7 +290,7 @@ export default function AttendanceReportsPage() {
           </div>
           <div className="grid grid-cols-1 gap-4">
             <Card className="p-5">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                 <div className="text-center p-3 bg-blue-50 rounded-lg">
                   <p className="text-2xl font-bold text-blue-600">{stats.month.total}</p>
                   <p className="text-xs text-muted-foreground">Total Records</p>
@@ -273,6 +306,10 @@ export default function AttendanceReportsPage() {
                 <div className="text-center p-3 bg-red-50 rounded-lg">
                   <p className="text-2xl font-bold text-red-600">{stats.month.absent}</p>
                   <p className="text-xs text-muted-foreground">Absent</p>
+                </div>
+                <div className="text-center p-3 bg-purple-50 rounded-lg">
+                  <p className="text-2xl font-bold text-purple-600">{formatDuration(stats.month.avgDurationMinutes)}</p>
+                  <p className="text-xs text-muted-foreground">Avg Daily Hours</p>
                 </div>
               </div>
               {stats.month.total > 0 && (
@@ -294,20 +331,22 @@ export default function AttendanceReportsPage() {
         </section>
       )}
 
-      {/* Staff Breakdown */}
       {allRecords.length > 0 && (
         <section>
           <div className="flex items-center gap-2 mb-4">
             <Users className="w-5 h-5 text-indigo-600" />
-            <h2 className="text-xl font-semibold">Staff Status</h2>
+            <h2 className="text-xl font-semibold">Staff Status & Working Hours</h2>
           </div>
           <Card className="p-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {allRecords.map((rec: any) => (
                 <div key={rec.user_id} className="flex items-center justify-between p-3 rounded-lg border">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{rec.user_name}</p>
                     <p className="text-xs text-muted-foreground truncate">{rec.user_department || 'No dept'}</p>
+                    {rec.duration_minutes ? (
+                      <p className="text-xs text-primary font-medium mt-1">{formatDuration(rec.duration_minutes)}</p>
+                    ) : null}
                   </div>
                   <Badge variant={rec.status === 'present' ? 'default' : rec.status === 'late' ? 'secondary' : 'destructive'} className="shrink-0 ml-2">
                     {rec.status || 'No record'}

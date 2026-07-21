@@ -6,8 +6,10 @@ const AttendanceSchema = new Schema(
     date: { type: String, required: true, index: true },
     clock_in: { type: String, default: null },
     clock_out: { type: String, default: null },
+    duration_minutes: { type: Number, default: null },
     status: { type: String, enum: ["present", "late", "absent", "half_day"], default: "present" },
     notes: { type: String, default: "" },
+    face_image: { type: String, default: null },
   },
   { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
