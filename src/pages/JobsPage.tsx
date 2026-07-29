@@ -6,11 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { ServiceRequest } from "@/types/database";
 import { serviceRequestAPI } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, FileText, Calendar, User, Phone, Search, Edit, UserPlus, UserRound } from "lucide-react";
+import { Plus, FileText, Calendar, User, Phone, Search, Edit, UserRound } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import AddAnonymousJobModal from "@/components/AddAnonymousJobModal";
+import AddWalkinModal from "@/components/AddWalkinModal";
 
 export default function JobsPage() {
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ export default function JobsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showChoiceModal, setShowChoiceModal] = useState(false);
-  const [showAnonymousModal, setShowAnonymousModal] = useState(false);
+  const [showWalkinModal, setShowWalkinModal] = useState(false);
 
   const isTechnician = userRoles.includes('technician');
   const canCreate = userRoles.some(r => ['admin', 'secretary', 'technician'].includes(r));
@@ -225,13 +225,13 @@ export default function JobsPage() {
             <button
               onClick={() => {
                 setShowChoiceModal(false);
-                setShowAnonymousModal(true);
+                setShowWalkinModal(true);
               }}
               className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-accent transition-all"
             >
-              <UserPlus className="w-10 h-10 text-muted-foreground" />
-              <span className="font-semibold">Anonymous Customer</span>
-              <span className="text-xs text-muted-foreground text-center">Quick entry with just description & price</span>
+              <UserRound className="w-10 h-10 text-muted-foreground" />
+              <span className="font-semibold">Walk-in Customer</span>
+              <span className="text-xs text-muted-foreground text-center">Quick entry with amount & problem of laptop</span>
             </button>
             <button
               onClick={() => {
@@ -240,17 +240,17 @@ export default function JobsPage() {
               }}
               className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-accent transition-all"
             >
-              <UserRound className="w-10 h-10 text-muted-foreground" />
-              <span className="font-semibold">Register Customer</span>
+              <User className="w-10 h-10 text-muted-foreground" />
+              <span className="font-semibold">Known Customer</span>
               <span className="text-xs text-muted-foreground text-center">Full form with customer & device details</span>
             </button>
           </div>
         </DialogContent>
       </Dialog>
 
-      <AddAnonymousJobModal
-        open={showAnonymousModal}
-        onOpenChange={setShowAnonymousModal}
+      <AddWalkinModal
+        open={showWalkinModal}
+        onOpenChange={setShowWalkinModal}
         onSuccess={async () => {
           const data = await serviceRequestAPI.getAll(true);
           setRequests(data.reverse());
