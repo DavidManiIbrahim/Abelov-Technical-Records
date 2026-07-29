@@ -15,7 +15,9 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { serviceRequestAPI, adminAPI } from '@/lib/api';
 import { ServiceRequest } from '@/types/database';
-import { Plus, Search, Edit, Eye, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Eye, Trash2, UserRound, User } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import AddWalkinModal from '@/components/AddWalkinModal';
 
 
 const formatCurrencyCompact = (value: number): string => {
@@ -44,6 +46,8 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = usePersistentState('dashboard_search', '');
   const [statusFilter, setStatusFilter] = usePersistentState('dashboard_status_filter', 'All');
   const [loading, setLoading] = useState(true);
+  const [showChoiceModal, setShowChoiceModal] = useState(false);
+  const [showWalkinModal, setShowWalkinModal] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     completed: 0,
@@ -74,16 +78,18 @@ export default function DashboardPage() {
     ? revenueOverTimeSorted[revenueOverTimeSorted.length - 1]
     : null;
 
+  const isCurrentMonth = (dateStr: string) => {
+    const d = new Date(dateStr);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  };
+
   const loadRequests = useCallback(async () => {
     setLoading(true);
     try {
-      // Logic for fetching global requests for everyone
-      const [data, globalStatsData] = await Promise.allSettled([
-        serviceRequestAPI.getAll(true),
-        adminAPI.getGlobalStats(true),
-      ]);
+      const data = await serviceRequestAPI.getAll(true);
 
-      const requestsData = data.status === 'fulfilled' ? data.value : [];
+      const requestsData = data || [];
       setRequests(requestsData);
 
       let filtered = requestsData;
@@ -92,34 +98,22 @@ export default function DashboardPage() {
       }
       setFilteredRequests(filtered);
 
-      if (globalStatsData.status === 'fulfilled') {
-        const gs = globalStatsData.value;
-        setStats({
-          total: gs.totalTickets || 0,
-          completed: gs.completedTickets || 0,
-          pending: gs.pendingTickets || 0,
-          inProgress: gs.inProgressTickets || 0,
-          unsuccessful: gs.unsuccessfulTickets || 0,
-          totalRevenue: gs.totalRevenue || 0,
-        });
-      } else {
-        // Fallback to local calculation from global requests
-        const calculatedStats = requestsData.reduce(
-          (acc, request) => {
-            acc.total++;
-            acc.totalRevenue += request.total_cost || 0;
-            switch (request.status) {
-              case 'Completed': acc.completed++; break;
-              case 'Pending': acc.pending++; break;
-              case 'In-Progress': acc.inProgress++; break;
-              case 'Unsuccessful': acc.unsuccessful++; break;
-            }
-            return acc;
-          },
-          { total: 0, completed: 0, pending: 0, inProgress: 0, unsuccessful: 0, totalRevenue: 0 }
-        );
-        setStats(calculatedStats);
-      }
+      const currentMonthRequests = requestsData.filter(r => isCurrentMonth(r.created_at));
+      const calculatedStats = currentMonthRequests.reduce(
+        (acc, request) => {
+          acc.total++;
+          acc.totalRevenue += request.total_cost || 0;
+          switch (request.status) {
+            case 'Completed': acc.completed++; break;
+            case 'Pending': acc.pending++; break;
+            case 'In-Progress': acc.inProgress++; break;
+            case 'Unsuccessful': acc.unsuccessful++; break;
+          }
+          return acc;
+        },
+        { total: 0, completed: 0, pending: 0, inProgress: 0, unsuccessful: 0, totalRevenue: 0 }
+      );
+      setStats(calculatedStats);
     } catch (error) {
       console.error('Fatal error loading dashboard data:', error);
       setRequests([]);
@@ -315,11 +309,11 @@ export default function DashboardPage() {
             </Select>
           </div>
 
-          <Button onClick={() => navigate('/new-request')} size="lg" className="md:flex hidden">
+          <Button onClick={() => setShowChoiceModal(true)} size="lg" className="md:flex hidden">
             <Plus className="w-4 h-4 mr-2" />
             New Request
           </Button>
-          <Button onClick={() => navigate('/new-request')} size="lg" className="md:hidden">
+          <Button onClick={() => setShowChoiceModal(true)} size="lg" className="md:hidden">
             <Plus className="w-4 h-4" />
           </Button>
         </div>
@@ -337,7 +331,7 @@ export default function DashboardPage() {
             <p className="text-muted-foreground mb-6">
               {searchQuery || statusFilter !== 'All' ? 'Try adjusting your search or filter.' : 'Create your first service request to get started.'}
             </p>
-            <Button onClick={() => navigate('/new-request')}>
+            <Button onClick={() => setShowChoiceModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Create Service Request
             </Button>
@@ -436,6 +430,48 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
+
+      <Dialog open={showChoiceModal} onOpenChange={setShowChoiceModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New Service Request</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <button
+              onClick={() => {
+                setShowChoiceModal(false);
+                setShowWalkinModal(true);
+              }}
+              className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-accent transition-all"
+            >
+              <UserRound className="w-10 h-10 text-muted-foreground" />
+              <span className="font-semibold">Walk-in Customer</span>
+              <span className="text-xs text-muted-foreground text-center">Quick entry with amount & problem of laptop</span>
+            </button>
+            <button
+              onClick={() => {
+                setShowChoiceModal(false);
+                navigate("/new-request");
+              }}
+              className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed border-border hover:border-primary hover:bg-accent transition-all"
+            >
+              <User className="w-10 h-10 text-muted-foreground" />
+              <span className="font-semibold">Known Customer</span>
+              <span className="text-xs text-muted-foreground text-center">Full form with customer & device details</span>
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AddWalkinModal
+        open={showWalkinModal}
+        onOpenChange={setShowWalkinModal}
+        onSuccess={async () => {
+          const data = await serviceRequestAPI.getAll(true);
+          setRequests(data.reverse());
+          setFilteredRequests(data.reverse());
+        }}
+      />
       </div>
     </div>
   );

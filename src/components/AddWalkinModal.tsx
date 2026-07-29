@@ -7,19 +7,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { serviceRequestAPI } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
-interface AddAnonymousJobModalProps {
+interface AddWalkinModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 }
 
-export default function AddAnonymousJobModal({
+export default function AddWalkinModal({
   open,
   onOpenChange,
   onSuccess,
-}: AddAnonymousJobModalProps) {
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
+}: AddWalkinModalProps) {
+  const [amount, setAmount] = useState('');
+  const [problem, setProblem] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,12 +27,12 @@ export default function AddAnonymousJobModal({
     setLoading(true);
     try {
       await serviceRequestAPI.create({
-        problem_description: description,
-        total_cost: parseFloat(price) || 0,
-        customer_name: 'Anonymous',
+        problem_description: problem,
+        total_cost: parseFloat(amount) || 0,
+        customer_name: 'Walk-in Customer',
         customer_phone: '',
         customer_address: '',
-        device_model: 'Other',
+        device_model: 'Laptop',
         device_brand: '',
         serial_number: '',
         operating_system: '',
@@ -47,10 +47,10 @@ export default function AddAnonymousJobModal({
         parts_used: '',
         repair_action: '',
         status: 'Pending',
-        service_charge: parseFloat(price) || 0,
+        service_charge: parseFloat(amount) || 0,
         parts_cost: 0,
         deposit_paid: 0,
-        balance: parseFloat(price) || 0,
+        balance: parseFloat(amount) || 0,
         payment_completed: false,
         payment_status: 'unpaid',
         department: '',
@@ -63,10 +63,10 @@ export default function AddAnonymousJobModal({
         technician_notes: '',
         user_id: '',
       });
-      toast({ title: 'Success', description: 'Anonymous job created successfully' });
+      toast({ title: 'Success', description: 'Walk-in job created successfully' });
       onOpenChange(false);
-      setDescription('');
-      setPrice('');
+      setAmount('');
+      setProblem('');
       onSuccess();
     } catch {
       toast({ title: 'Error', description: 'Failed to create job', variant: 'destructive' });
@@ -79,27 +79,27 @@ export default function AddAnonymousJobModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New Anonymous Job</DialogTitle>
+          <DialogTitle>Walk-in Customer</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="problem">Problem of Laptop</Label>
             <Textarea
-              id="description"
+              id="problem"
               placeholder="Describe the issue..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={problem}
+              onChange={(e) => setProblem(e.target.value)}
               required
             />
           </div>
           <div>
-            <Label htmlFor="price">Price (₦)</Label>
+            <Label htmlFor="amount">Amount (₦)</Label>
             <Input
-              id="price"
+              id="amount"
               type="number"
-              placeholder="Enter price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              placeholder="Enter amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
               required
             />
           </div>

@@ -9,8 +9,6 @@ beforeAll(async () => {
   process.env.NODE_ENV = "test";
   process.env.RATE_LIMIT_WINDOW_MS = "60000";
   process.env.RATE_LIMIT_MAX = "1000";
-  process.env.AUTH_RATE_LIMIT_WINDOW_MS = "60000";
-  process.env.AUTH_RATE_LIMIT_MAX = "1000";
   process.env.AUTH_SECRET = "test-secret-at-least-thirty-two-chars!!";
 
   mongod = await MongoMemoryServer.create();
